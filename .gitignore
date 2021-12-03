@@ -30,3 +30,8 @@
 *.exe
 *.out
 *.app
+
+[Dd]ebug/
+.vs/Titan_Souls/ipch/
+.vs/Titan_Souls/Browse.VC
+

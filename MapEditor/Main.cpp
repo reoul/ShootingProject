@@ -1,0 +1,2261 @@
+#define _CRT_SECURE_NO_WARNINGS
+#define WIN32_LEAN_AND_MEAN
+
+#pragma comment(lib,"dxguid.lib")
+#pragma comment(lib,"ddraw.lib")
+#pragma comment(lib,"winmm.lib")
+#pragma comment(lib,"dinput8.lib")
+#pragma comment(lib,"dsound.lib")
+
+#include <Windows.h>
+#include <windowsx.h>
+#include <ddraw.h>
+#include <dinput.h>
+#include <math.h>
+#include <vector>
+
+#include "bmp.h"
+#include "timer.h"
+#include "sprite.h"
+#include "define.h"
+#include "block.h"
+#include "mapeditor.h"
+#include "myplayer.h"
+#include "camera.h"
+#include "worldmapBmp.h"
+#include "introsprite.h"
+#include "sprite8.h"
+#include "arrow.h"
+#include "boss.h"
+#include "Vector2.h"
+#include "snowball.h"
+#include "choicewindow.h"
+#include "gui.h"
+#include "gameEnum.h"
+#include "map.h"
+#include <string>
+#include "fireblock.h"
+#include "enemy.h"
+
+using namespace std;
+
+LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+BOOL DirectInputKeyboardDown(LPDIRECTINPUTDEVICE8 lpKeyboard, int dikcode);
+bool InitializeDirectX(void);
+void IntroMain(void);
+void GameMain(void);
+void EditorMain(void);
+void InitGame();
+bool LoadBMPandInitSurface();
+bool LoadWorldMapBlock();
+
+
+HWND g_hwnd;
+HINSTANCE g_hInstance;
+
+HDC hdc;
+
+LPDIRECTDRAW7 g_lpDirectDrawObject = NULL;
+LPDIRECTDRAWSURFACE7 g_lpPrimarySurface = NULL;
+LPDIRECTDRAWSURFACE7 g_lpSecondarySurface = NULL;
+
+LPDIRECTINPUT8 g_lpDirectInputObject = NULL;
+LPDIRECTINPUTDEVICE8 g_lpDirectInputKeyboard = NULL;
+
+CBLOCK Block[BLOCK_Y][BLOCK_X];
+CSprite blockSprite[4][TOTAL_BLOCK_SPRITE];
+CSprite blockSprite2[TOTAL_BLOCK_SPRITE_Y][TOTAL_BLOCK_SPRITE_X];
+CSprite fireSprite;
+CPlayer player;
+CBoss boss;
+FireBlock fireBlock;
+
+CCamera camera;
+
+CBLOCK curBlock;
+CSprite grassSprite;
+
+CSprite player_walk_left;		//플레이어 걷기
+CSprite player_walk_leftup;
+CSprite player_walk_leftdown;
+CSprite player_walk_right;
+CSprite player_walk_rightup;
+CSprite player_walk_rightdown;
+CSprite player_walk_up;
+CSprite player_walk_down;
+
+CSprite player_roll_left;		//플레이어 구르기
+CSprite player_roll_leftup;
+CSprite player_roll_leftdown;
+CSprite player_roll_right;
+CSprite player_roll_rightup;
+CSprite player_roll_rightdown;
+CSprite player_roll_up;
+CSprite player_roll_down;
+
+CSprite player_skill;
+
+CSprite enemy_idle_left;
+CSprite enemy_idle_right;
+CSprite enemy_up_left;
+CSprite enemy_up_right;
+CSprite enemy_hide_left;
+CSprite enemy_hide_right;
+CSprite enemy_attack_left;
+CSprite enemy_attack_right;
+
+CSprite8 player_dead;
+CSprite8 bow_walk;
+CSprite8 bow_roll;
+CSprite8 bow_attack;
+CSprite8 arrowSprite;
+CSprite8 boss_idle;
+CSprite8 boss_roll;
+CSprite8 boss_attack;
+CSprite8 boss_dead;
+
+CSprite boss_sleep;
+CSprite boss_snowball;
+
+CSprite boss_hp_window;
+CSprite boss_hp;
+
+CSprite player_hp;
+
+CArrow arrow[TOTAL_ARROW];
+CSnowBall snowball[TOTAL_SNOWBALL];
+Enemy enemy[TOTAL_ENEMY];
+
+CIntroSprite introSprite;
+CIntroSprite introButton;
+CWorldMap bossMap;
+CWorldMap bossMapRoof;
+CWorldMap baseMap;
+CWorldMap* curEditMap;
+Map	map;
+
+Vector2 attackDirection;
+Vector2 firstPosition;
+Vector2 curMousePosition;
+
+Gui bossHpBarBack;
+Gui bossHpBar;
+Gui playerHp1;
+Gui playerHp2;
+Gui playerHp3;
+Gui playerHp4;
+
+MOD curMod;			//현재 모드
+
+DISTANCE_STATE curPlayerDistanceState;
+DISTANCE_STATE curBossDistanceState;
+
+ACTION_STATE curPlayerActionState;
+ACTION_STATE curBossActionState;
+
+EDIT_STATE curEditState;
+
+EDIT_WINDOW curEditWindow;		//현재 에디터 창
+
+MAPEDITOR g_editor;		//맵에디터 변수
+
+CTimer g_Timer;
+bool g_bActiveApp = false;
+bool g_bIsFirst;
+bool g_bIsGame = true;
+bool g_bIsQuit = false;
+
+int mouseX = 0, mouseY = 0;
+int cameraPositionX;
+int cameraPositionY;
+
+int arrow_distance;
+float x, y;
+int StartTime = 0;
+CBLOCK *wallBlock;
+
+extern BOOL _InitDirectSound(void);
+BOOL m_bEditorFirst = TRUE;
+BOOL m_bGameFirst = TRUE;
+BOOL m_bIntroFirst = TRUE;
+extern bool isSound;
+
+
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+{
+	WNDCLASSEX wndclass;
+	wndclass.cbSize = sizeof(WNDCLASSEX);
+	wndclass.style = CS_HREDRAW | CS_VREDRAW;
+	wndclass.lpfnWndProc = WinProc;
+	wndclass.cbClsExtra = wndclass.cbWndExtra = 0;
+	wndclass.hInstance = hInstance;
+	wndclass.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_APPLICATION));
+	wndclass.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wndclass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
+	wndclass.lpszMenuName = NULL;
+	wndclass.lpszClassName = CLASS_NAME;
+	wndclass.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_APPLICATION));
+
+	if (RegisterClassEx(&wndclass) == 0)
+		return 0;
+	g_hwnd = CreateWindowEx(WS_EX_TOPMOST, CLASS_NAME, CLASS_NAME, WS_POPUP | WS_VISIBLE,
+		GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN),
+		SCREEN_WIDTH, SCREEN_HEIGHT, NULL,NULL,hInstance, NULL);
+
+	if (g_hwnd == NULL) return 0;
+	g_hInstance = hInstance;
+	cameraPositionX = 0;
+	cameraPositionY = 0;
+	attackDirection.SetRect(0, 0);
+
+	SetFocus(g_hwnd);
+
+	if (!InitializeDirectX())
+		return 0;
+
+	if (!_InitDirectSound())
+		return 0;
+
+	g_Timer.start();
+
+	srand(g_Timer.GetTime());
+
+	if (!LoadBMPandInitSurface())
+		return 0;
+
+	if (!LoadWorldMapBlock())
+		return 0;
+
+	hdc = GetDC(g_hwnd);
+
+	MSG msg;
+	while (true)
+	{
+		if (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
+		{
+			if (!GetMessage(&msg, NULL, 0, 0))
+				return (int)msg.wParam;
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+		else if (g_bActiveApp)
+		{
+			switch (curMod)
+			{
+			case MOD_INTRO:
+				IntroMain();
+				break;
+			case MOD_GAME:
+				GameMain();
+				break;
+			case MOD_EDITOR:
+				EditorMain();
+				break;
+			}
+		}
+		else WaitMessage();
+	}
+}
+
+LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
+	if (curMod == MOD_QUIT && !g_bIsQuit)
+	{
+		g_bIsQuit = true;
+		DestroyWindow(hwnd);
+	}
+	switch (message)
+	{
+	case WM_ACTIVATEAPP:
+		if (wParam)
+		{
+			if (g_bActiveApp == false)
+			{
+				if (StartTime > 0)
+				{
+					introSprite.CopyBufferToSurface(g_lpDirectDrawObject);
+					introButton.RestoreAll(g_lpDirectDrawObject);
+					baseMap.CopyBufferToSurface4(g_lpDirectDrawObject);
+					bossMap.CopyBufferToSurface2(g_lpDirectDrawObject);
+					bossMapRoof.CopyBufferToSurface3(g_lpDirectDrawObject);
+
+					grassSprite.Restore();
+					player_walk_left.Restore();		//플레이어 걷기
+					player_walk_leftup.Restore();
+					player_walk_leftdown.Restore();
+					player_walk_right.Restore();
+					player_walk_rightup.Restore();
+					player_walk_rightdown.Restore();
+					player_walk_up.Restore();
+					player_walk_down.Restore();
+					player_roll_left.Restore();		//플레이어 구르기
+					player_roll_leftup.Restore();
+					player_roll_leftdown.Restore();
+					player_roll_right.Restore();
+					player_roll_rightup.Restore();
+					player_roll_rightdown.Restore();
+					player_roll_up.Restore();
+					player_roll_down.Restore();
+					bow_walk.ReStoreAll();
+					bow_roll.ReStoreAll();
+					bow_attack.ReStoreAll();
+					arrowSprite.ReStoreAll();
+					boss_idle.ReStoreAll();
+					boss_roll.ReStoreAll();
+					boss_attack.ReStoreAll();
+					boss_sleep.Restore();
+					boss_snowball.Restore();
+				}
+				StartTime++;
+			}
+			g_bActiveApp = true;
+		}
+		else
+			g_bActiveApp = false;
+		break;
+	case WM_KEYDOWN:
+		//if (wParam == 'G') curMod = MOD_GAME;
+		if (wParam == 'Y') curMod = MOD_INTRO;
+		//if (wParam == 'M') curMod = MOD_EDITOR;
+		if (wParam == VK_ESCAPE) DestroyWindow(hwnd);
+		break;
+	case WM_LBUTTONDOWN:
+		switch (curMod)
+		{
+		case MOD_INTRO:
+			break;
+		case MOD_GAME:
+			if (!(curPlayerActionState == ACTION_STATE::ROLL))
+				if (!player.IsArrowNull() && !(curPlayerActionState == ACTION_STATE::DEAD) && !camera.GetIsFirstAlpha())
+				{
+					firstPosition.SetRect(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1), HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
+					curMousePosition.SetRect(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1), HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
+					camera.SetIsExpansion(true);
+					player.GetCurArrow()->SetCharging(true);
+					x = curMousePosition.x - player.GetPos().x;
+					y = curMousePosition.y - player.GetPos().y;
+					arrow_distance = (int)sqrtf(pow(x, 2) + pow(y, 2));
+					attackDirection.SetRect(x / arrow_distance, y / arrow_distance);
+				}
+			break;
+		case MOD_EDITOR:
+			g_editor.CheckChoiceWindow(LOWORD(lParam), HIWORD(lParam));
+			if (!g_editor.IsChoiceWindow())
+				g_editor.SetStartXY(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1), HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
+			else
+				g_editor.GetChoiceWindow()->CheckBlockClick(LOWORD(lParam), HIWORD(lParam));
+			break;
+		case MOD_QUIT:
+			break;
+		}
+		break;
+	case WM_LBUTTONUP:
+		switch (curMod)
+		{
+		case MOD_INTRO:
+			break;
+		case MOD_GAME:
+			if (!camera.GetIsFirstAlpha())
+			{
+				isSound = false;
+				curMousePosition.SetRect(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1), HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
+				camera.SetIsExpansion(false);
+				x = curMousePosition.x - player.GetPos().x;
+				y = curMousePosition.y - player.GetPos().y;
+				arrow_distance = (int)sqrtf(pow(x, 2) + pow(y, 2));
+				attackDirection.SetRect(x / arrow_distance, y / arrow_distance);
+			}
+			break;
+		case MOD_EDITOR:
+			if (!g_editor.IsChoiceWindow())
+			{
+				g_editor.SetEndXY(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1), HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
+				g_editor.SetBlock(Block, curBlock.GetSprite(), &g_Timer);
+				//curEditMap->CopyBufferToSurface4(g_lpDirectDrawObject);
+				g_editor.SaveWallData();
+			}
+			else
+			{
+				g_editor.GetChoiceWindow()->SetCanMove(false);
+			}
+			break;
+		case MOD_QUIT:
+			break;
+		}
+		break;
+	case WM_MOUSEMOVE:
+		switch (curMod)
+		{
+		case MOD_INTRO:
+			break;
+		case MOD_GAME:
+			if (camera.GetIsExpansion() && !camera.GetIsFirstAlpha())
+			{
+				curMousePosition.SetRect(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1), HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
+				x = curMousePosition.x - player.GetPos().x;
+				y = curMousePosition.y - player.GetPos().y;
+				arrow_distance = (int)sqrtf(pow(x, 2) + pow(y, 2));
+				attackDirection.SetRect(x / arrow_distance, y / arrow_distance);
+			}
+			break;
+		case MOD_EDITOR:
+			if (g_editor.GetChoiceWindow()->GetCanMove())
+				g_editor.GetChoiceWindow()->SetXY(LOWORD(lParam), HIWORD(lParam));
+			break;
+		case MOD_QUIT:
+			break;
+		}
+		break;
+	case WM_DESTROY:
+		if (g_lpDirectDrawObject)
+		{
+			if (g_lpSecondarySurface)
+				g_lpSecondarySurface->Release();
+			if (g_lpPrimarySurface)
+				g_lpPrimarySurface->Release();
+
+			grassSprite.ReleaseAll();
+			player_walk_left.ReleaseAll();		//플레이어 걷기
+			player_walk_leftup.ReleaseAll();
+			player_walk_leftdown.ReleaseAll();
+			player_walk_right.ReleaseAll();
+			player_walk_rightup.ReleaseAll();
+			player_walk_rightdown.ReleaseAll();
+			player_walk_up.ReleaseAll();
+			player_walk_down.ReleaseAll();
+
+			player_roll_left.ReleaseAll();		//플레이어 구르기
+			player_roll_leftup.ReleaseAll();
+			player_roll_leftdown.ReleaseAll();
+			player_roll_right.ReleaseAll();
+			player_roll_rightup.ReleaseAll();
+			player_roll_rightdown.ReleaseAll();
+			player_roll_up.ReleaseAll();
+			player_roll_down.ReleaseAll();
+
+			bow_walk.ReleaseAll();
+			bow_roll.ReleaseAll();
+			bow_attack.ReleaseAll();
+			arrowSprite.ReleaseAll();
+			boss_idle.ReleaseAll();
+			boss_roll.ReleaseAll();
+			boss_attack.ReleaseAll();
+
+			boss_sleep.ReleaseAll();
+			boss_snowball.ReleaseAll();
+
+			baseMap.ReleaseAll();
+			bossMap.ReleaseAll();
+			bossMapRoof.ReleaseAll();
+			introSprite.ReleaseAll();
+			introButton.ReleaseAll();
+
+			/*for (int i = 0; i < TOTAL_BLOCK_SPRITE; i++)
+			{
+
+			}*/
+
+			g_lpDirectDrawObject->Release();
+		}
+		if (g_lpDirectInputObject)
+		{
+			if (g_lpDirectInputKeyboard)
+			{
+				g_lpDirectInputKeyboard->Unacquire();
+				g_lpDirectInputKeyboard->Release();
+			}
+			g_lpDirectInputObject->Release();
+		}
+		PostQuitMessage(0);
+		break;
+	default:
+		return DefWindowProc(hwnd, message, wParam, lParam);
+	}
+	return 0;
+
+}
+
+BOOL DirectInputKeyboardDown(LPDIRECTINPUTDEVICE8 lpKeyboard, int dikcode)
+{
+	char KeyBuffer[256];
+	HRESULT hResult;
+
+	if (lpKeyboard->GetDeviceState(256, (LPVOID)KeyBuffer) == DIERR_INPUTLOST)
+	{
+		while (hResult = lpKeyboard->Acquire() == DIERR_INPUTLOST)
+			hResult = lpKeyboard->Acquire();
+		lpKeyboard->GetDeviceState(256, (LPVOID)KeyBuffer);
+	}
+
+	return (KeyBuffer[dikcode] & 0x80);
+}
+
+bool LoadWorldMapBlock()
+{
+	HANDLE hfile;
+	DWORD actualRead;
+
+	hfile = CreateFile(TEXT("data\\blockData.txt"), GENERIC_READ, FILE_SHARE_READ, (LPSECURITY_ATTRIBUTES)NULL, OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL, (HANDLE)NULL);
+
+	if (hfile == INVALID_HANDLE_VALUE)
+	{
+		DWORD ab = GetLastError();
+		return false;
+	}
+
+	unsigned char *MapData;
+
+	MapData = new unsigned char[BLOCK_X*BLOCK_Y*2];
+
+	if (!ReadFile(hfile, MapData, BLOCK_X*BLOCK_Y * 2, &actualRead, NULL))		//비트맵파일 자체의 정보를 읽을수 없다면
+	{
+		CloseHandle(hfile);		//핸들을 반납해주고
+		return false;			//false를 반환해준다
+	}
+
+	char tmp[2];
+	int tmp2;
+	for (int i = 0; i < BLOCK_Y; i++)
+	{
+		for (int j = 0; j < BLOCK_X; j++)
+		{
+			memcpy(tmp, MapData + (i*BLOCK_X * 2) + j * 2, 2);
+			tmp2 = atoi(tmp);
+			Block[i][j].SetBlockNumber(tmp2);
+		}
+	}
+	memcpy(g_editor.GetBlockData(), MapData, BLOCK_X*BLOCK_Y * 2);
+
+	delete[] MapData;
+
+	CloseHandle(hfile);
+
+	hfile = CreateFile(TEXT("data\\blockData2.txt"), GENERIC_READ, FILE_SHARE_READ, (LPSECURITY_ATTRIBUTES)NULL, OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL, (HANDLE)NULL);
+
+	if (hfile == INVALID_HANDLE_VALUE)
+	{
+		DWORD ab = GetLastError();
+		return false;
+	}
+
+	MapData = new unsigned char[BLOCK_X*BLOCK_Y * 2];
+
+	if (!ReadFile(hfile, MapData, BLOCK_X*BLOCK_Y * 2, &actualRead, NULL))		//비트맵파일 자체의 정보를 읽을수 없다면
+	{
+		CloseHandle(hfile);		//핸들을 반납해주고
+		return false;			//false를 반환해준다
+	}
+	for (int i = 0; i < BLOCK_Y; i++)
+	{
+		for (int j = 0; j < BLOCK_X; j++)
+		{
+			memcpy(tmp, MapData + (i*BLOCK_X * 2) + j * 2, 2);
+			tmp2 = atoi(tmp);
+			Block[i][j].SetBlockNumber(tmp2);
+		}
+	}
+	memcpy(g_editor.GetBlockData2(), MapData, BLOCK_X*BLOCK_Y * 2);
+
+	delete[] MapData;
+
+	CloseHandle(hfile);
+
+	return true;
+}
+
+bool LoadBMPandInitSurface()
+{
+	for (int j = 0; j < 4; j++)
+	{
+		for (int i = 0; i < TOTAL_BLOCK_SPRITE; i++)
+			blockSprite[j][i].SetNumber(-1);
+	}
+
+	g_bIsFirst = true;
+#pragma region intro
+	if (!introSprite.LoadBMPFile("image\\intro\\background4.bmp"))
+		return false;
+	if (!introSprite.CopyBufferToSurface(g_lpDirectDrawObject))
+		return false;
+
+	if (!introButton.InitSprite(3, 156, 18, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!introButton.LoadFrame(0, "image\\intro\\active_start.bmp"))
+		return false;
+	if (!introButton.LoadFrame(1, "image\\intro\\active_option.bmp"))
+		return false;
+	if (!introButton.LoadFrame(2, "image\\intro\\active_quit.bmp"))
+		return false;
+#pragma endregion
+
+#pragma region map_editor_block
+	if (!blockSprite[0][0].InitSprite(1, 200, 200, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][0].LoadFrame(0, "image\\mapblock\\windowsprite.bmp"))
+		return false;
+	blockSprite[0][0].SetNumber(0);
+	for (int i = 0; i < 4; i++)
+	{
+		if (!blockSprite[i][1].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+			return false;
+		if (!blockSprite[i][1].LoadFrame(0, "1.bmp"))
+			return false;
+		if (!blockSprite[i][10].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+			return false;
+		if (!blockSprite[i][10].LoadFrame(0, "image\\mapblock\\backgroundblock.bmp"))
+			return false;
+		blockSprite[i][10].SetNumber(10);
+		if (!blockSprite[i][30].InitSprite(1, 16, 16, COLOR_KEY, g_lpDirectDrawObject))
+			return false;
+		if (!blockSprite[i][30].LoadFrame(0, "image\\mapblock\\boss_button.bmp"))
+			return false;
+		blockSprite[i][30].SetNumber(30);
+		if (!blockSprite[i][40].InitSprite(1, 16, 16, COLOR_KEY, g_lpDirectDrawObject))
+			return false;
+		if (!blockSprite[i][40].LoadFrame(0, "image\\mapblock\\forest_button.bmp"))
+			return false;
+		blockSprite[i][40].SetNumber(40);
+		if (!blockSprite[i][50].InitSprite(1, 16, 16, COLOR_KEY, g_lpDirectDrawObject))
+			return false;
+		if (!blockSprite[i][50].LoadFrame(0, "image\\mapblock\\edit_button.bmp"))
+			return false;
+		blockSprite[i][50].SetNumber(50);
+	}
+
+	if (!blockSprite[2][11].InitSprite(1, 16, 16, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[2][11].LoadFrame(0, "image\\mapblock\\edit_button.bmp"))
+		return false;
+	blockSprite[2][11].SetNumber(11);
+	if (!blockSprite[3][11].InitSprite(1, 16, 16, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[3][11].LoadFrame(0, "image\\mapblock\\edit_button.bmp"))
+		return false;
+	blockSprite[3][11].SetNumber(11);
+	if (!blockSprite[0][11].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][11].LoadFrame(0, "image\\mapblock\\ice\\00.bmp"))
+		return false;
+	blockSprite[0][11].SetNumber(11);
+	if (!blockSprite[0][12].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][12].LoadFrame(0, "image\\mapblock\\ice\\01.bmp"))
+		return false;
+	blockSprite[0][12].SetNumber(12);
+	if (!blockSprite[0][13].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][13].LoadFrame(0, "image\\mapblock\\ice\\02.bmp"))
+		return false;
+	blockSprite[0][13].SetNumber(13);
+	if (!blockSprite[0][14].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][14].LoadFrame(0, "image\\mapblock\\ice\\03.bmp"))
+		return false;
+	blockSprite[0][14].SetNumber(14);
+	if (!blockSprite[0][21].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][21].LoadFrame(0, "image\\mapblock\\ice\\04.bmp"))
+		return false;
+	blockSprite[0][21].SetNumber(21);
+	if (!blockSprite[0][22].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][22].LoadFrame(0, "image\\mapblock\\ice\\05.bmp"))
+		return false;
+	blockSprite[0][22].SetNumber(22);
+	if (!blockSprite[0][23].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][23].LoadFrame(0, "image\\mapblock\\ice\\06.bmp"))
+		return false;
+	blockSprite[0][23].SetNumber(23);
+	if (!blockSprite[0][24].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][24].LoadFrame(0, "image\\mapblock\\ice\\07.bmp"))
+		return false;
+	blockSprite[0][24].SetNumber(24);
+	if (!blockSprite[0][31].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][31].LoadFrame(0, "image\\mapblock\\ice\\08.bmp"))
+		return false;
+	blockSprite[0][31].SetNumber(31);
+	if (!blockSprite[0][20].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][20].LoadFrame(0, "image\\mapblock\\block00.bmp"))
+		return false;
+	blockSprite[0][20].SetNumber(20);
+	if (!blockSprite[0][32].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][32].LoadFrame(0, "image\\mapblock\\ice\\09.bmp"))
+		return false;
+	blockSprite[0][32].SetNumber(32);
+	if (!blockSprite[0][33].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][33].LoadFrame(0, "image\\mapblock\\ice\\10.bmp"))
+		return false;
+	blockSprite[0][33].SetNumber(33);
+	if (!blockSprite[0][34].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][34].LoadFrame(0, "image\\mapblock\\ice\\11.bmp"))
+		return false;
+	blockSprite[0][34].SetNumber(34);
+	if (!blockSprite[0][15].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][15].LoadFrame(0, "image\\mapblock\\ice_walltop\\00.bmp"))
+		return false;
+	blockSprite[0][15].SetNumber(15);
+	if (!blockSprite[0][16].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][16].LoadFrame(0, "image\\mapblock\\ice_walltop\\01.bmp"))
+		return false;
+	blockSprite[0][16].SetNumber(16);
+	if (!blockSprite[0][17].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][17].LoadFrame(0, "image\\mapblock\\ice_walltop\\02.bmp"))
+		return false;
+	blockSprite[0][17].SetNumber(17);
+	if (!blockSprite[0][25].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][25].LoadFrame(0, "image\\mapblock\\ice_walltop\\03.bmp"))
+		return false;
+	blockSprite[0][25].SetNumber(25);
+	if (!blockSprite[0][26].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][26].LoadFrame(0, "image\\mapblock\\ice_walltop\\04.bmp"))
+		return false;
+	blockSprite[0][26].SetNumber(26);
+	if (!blockSprite[0][27].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][27].LoadFrame(0, "image\\mapblock\\ice_walltop\\05.bmp"))
+		return false;
+	blockSprite[0][27].SetNumber(27);
+	if (!blockSprite[0][35].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][35].LoadFrame(0, "image\\mapblock\\ice_walltop\\06.bmp"))
+		return false;
+	blockSprite[0][35].SetNumber(35);
+	if (!blockSprite[0][36].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][36].LoadFrame(0, "image\\mapblock\\ice_walltop\\07.bmp"))
+		return false;
+	blockSprite[0][36].SetNumber(36);
+	if (!blockSprite[0][37].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][37].LoadFrame(0, "image\\mapblock\\ice_walltop\\08.bmp"))
+		return false;
+	blockSprite[0][37].SetNumber(37);
+	if (!blockSprite[0][18].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][18].LoadFrame(0, "image\\mapblock\\ice_walltop\\09.bmp"))
+		return false;
+	blockSprite[0][18].SetNumber(18);
+	if (!blockSprite[0][19].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][19].LoadFrame(0, "image\\mapblock\\ice_walltop\\10.bmp"))
+		return false;
+	blockSprite[0][19].SetNumber(19);
+	if (!blockSprite[0][28].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][28].LoadFrame(0, "image\\mapblock\\ice_walltop\\11.bmp"))
+		return false;
+	blockSprite[0][28].SetNumber(28);
+	if (!blockSprite[0][29].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][29].LoadFrame(0, "image\\mapblock\\ice_walltop\\12.bmp"))
+		return false;
+	blockSprite[0][29].SetNumber(29);
+	if (!blockSprite[0][41].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][41].LoadFrame(0, "image\\mapblock\\block2\\00.bmp"))
+		return false;
+	blockSprite[0][41].SetNumber(41);
+	if (!blockSprite[0][42].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][42].LoadFrame(0, "image\\mapblock\\block2\\01.bmp"))
+		return false;
+	blockSprite[0][42].SetNumber(42);
+	if (!blockSprite[0][43].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][43].LoadFrame(0, "image\\mapblock\\block2\\02.bmp"))
+		return false;
+	blockSprite[0][43].SetNumber(43);
+	if (!blockSprite[0][44].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][44].LoadFrame(0, "image\\mapblock\\block2\\03.bmp"))
+		return false;
+	blockSprite[0][44].SetNumber(44);
+	if (!blockSprite[0][51].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][51].LoadFrame(0, "image\\mapblock\\block2\\04.bmp"))
+		return false;
+	blockSprite[0][51].SetNumber(51);
+	if (!blockSprite[0][52].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][52].LoadFrame(0, "image\\mapblock\\block2\\05.bmp"))
+		return false;
+	blockSprite[0][52].SetNumber(52);
+	if (!blockSprite[0][53].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][53].LoadFrame(0, "image\\mapblock\\block2\\06.bmp"))
+		return false;
+	blockSprite[0][53].SetNumber(53);
+	if (!blockSprite[0][54].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][54].LoadFrame(0, "image\\mapblock\\block2\\07.bmp"))
+		return false;
+	blockSprite[0][54].SetNumber(54);
+	if (!blockSprite[0][61].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][61].LoadFrame(0, "image\\mapblock\\block2\\08.bmp"))
+		return false;
+	blockSprite[0][61].SetNumber(61);
+	if (!blockSprite[0][62].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][62].LoadFrame(0, "image\\mapblock\\block2\\09.bmp"))
+		return false;
+	blockSprite[0][62].SetNumber(62);
+	if (!blockSprite[0][63].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][63].LoadFrame(0, "image\\mapblock\\block2\\10.bmp"))
+		return false;
+	blockSprite[0][63].SetNumber(63);
+	if (!blockSprite[0][64].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][64].LoadFrame(0, "image\\mapblock\\block2\\11.bmp"))
+		return false;
+	blockSprite[0][64].SetNumber(64);
+	if (!blockSprite[0][71].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][71].LoadFrame(0, "image\\mapblock\\block2\\12.bmp"))
+		return false;
+	blockSprite[0][71].SetNumber(71);
+	if (!blockSprite[0][72].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][72].LoadFrame(0, "image\\mapblock\\block2\\13.bmp"))
+		return false;
+	blockSprite[0][72].SetNumber(72);
+	if (!blockSprite[0][73].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][73].LoadFrame(0, "image\\mapblock\\block2\\14.bmp"))
+		return false;
+	blockSprite[0][73].SetNumber(73);
+	if (!blockSprite[0][74].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][74].LoadFrame(0, "image\\mapblock\\block2\\15.bmp"))
+		return false;
+	blockSprite[0][74].SetNumber(74);
+	if (!blockSprite[0][38].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][38].LoadFrame(0, "image\\mapblock\\block3\\00.bmp"))
+		return false;
+	blockSprite[0][38].SetNumber(38);
+	if (!blockSprite[0][39].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][39].LoadFrame(0, "image\\mapblock\\block3\\01.bmp"))
+		return false;
+	blockSprite[0][39].SetNumber(39);
+	if (!blockSprite[0][58].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][58].LoadFrame(0, "image\\mapblock\\block3\\02.bmp"))
+		return false;
+	blockSprite[0][58].SetNumber(58);
+	if (!blockSprite[0][59].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][59].LoadFrame(0, "image\\mapblock\\block3\\03.bmp"))
+		return false;
+	blockSprite[0][59].SetNumber(59);
+	if (!blockSprite[0][48].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][48].LoadFrame(0, "image\\mapblock\\block3\\04.bmp"))
+		return false;
+	blockSprite[0][48].SetNumber(48);
+	if (!blockSprite[0][49].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][49].LoadFrame(0, "image\\mapblock\\block3\\05.bmp"))
+		return false;
+	blockSprite[0][49].SetNumber(49);
+	if (!blockSprite[0][68].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][68].LoadFrame(0, "image\\mapblock\\block3\\06.bmp"))
+		return false;
+	blockSprite[0][68].SetNumber(68);
+	if (!blockSprite[0][69].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][69].LoadFrame(0, "image\\mapblock\\block3\\07.bmp"))
+		return false;
+	blockSprite[0][69].SetNumber(69);
+	if (!blockSprite[0][76].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][76].LoadFrame(0, "image\\mapblock\\block3\\08.bmp"))
+		return false;
+	blockSprite[0][76].SetNumber(76);
+	if (!blockSprite[0][77].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][77].LoadFrame(0, "image\\mapblock\\block3\\09.bmp"))
+		return false;
+	blockSprite[0][77].SetNumber(77);
+	if (!blockSprite[0][78].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][78].LoadFrame(0, "image\\mapblock\\block3\\10.bmp"))
+		return false;
+	blockSprite[0][78].SetNumber(78);
+	if (!blockSprite[0][79].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][79].LoadFrame(0, "image\\mapblock\\block3\\11.bmp"))
+		return false;
+	blockSprite[0][79].SetNumber(79);
+	if (!blockSprite[0][45].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][45].LoadFrame(0, "image\\mapblock\\ice_wall\\00.bmp"))
+		return false;
+	blockSprite[0][45].SetNumber(45);
+	if (!blockSprite[0][46].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][46].LoadFrame(0, "image\\mapblock\\ice_wall\\01.bmp"))
+		return false;
+	blockSprite[0][46].SetNumber(46);
+	if (!blockSprite[0][47].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][47].LoadFrame(0, "image\\mapblock\\ice_wall\\02.bmp"))
+		return false;
+	blockSprite[0][47].SetNumber(47);
+	if (!blockSprite[0][55].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][55].LoadFrame(0, "image\\mapblock\\ice_wall\\03.bmp"))
+		return false;
+	blockSprite[0][55].SetNumber(55);
+	if (!blockSprite[0][56].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][56].LoadFrame(0, "image\\mapblock\\ice_wall\\04.bmp"))
+		return false;
+	blockSprite[0][56].SetNumber(56);
+	if (!blockSprite[0][57].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][57].LoadFrame(0, "image\\mapblock\\ice_wall\\05.bmp"))
+		return false;
+	blockSprite[0][57].SetNumber(57);
+	if (!blockSprite[0][65].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][65].LoadFrame(0, "image\\mapblock\\ice_wall\\06.bmp"))
+		return false;
+	blockSprite[0][65].SetNumber(65);
+	if (!blockSprite[0][66].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][66].LoadFrame(0, "image\\mapblock\\ice_wall\\07.bmp"))
+		return false;
+	blockSprite[0][66].SetNumber(66);
+	if (!blockSprite[0][67].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][67].LoadFrame(0, "image\\mapblock\\ice_wall\\08.bmp"))
+		return false;
+	blockSprite[0][67].SetNumber(67);
+	int cnt = 102;
+	if (!blockSprite[0][75].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][75].LoadFrame(0, "image\\mapblock\\block4\\00.bmp"))
+		return false;
+	blockSprite[0][75].SetNumber(75);
+	if (!blockSprite[0][81].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][81].LoadFrame(0, "image\\mapblock\\block4\\02.bmp"))
+		return false;
+	blockSprite[0][81].SetNumber(81);
+	if (!blockSprite[0][82].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][82].LoadFrame(0, "image\\mapblock\\block4\\03.bmp"))
+		return false;
+	blockSprite[0][82].SetNumber(82);
+	if (!blockSprite[0][83].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][83].LoadFrame(0, "image\\mapblock\\block4\\04.bmp"))
+		return false;
+	blockSprite[0][83].SetNumber(83);
+	if (!blockSprite[0][91].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][91].LoadFrame(0, "image\\mapblock\\block4\\05.bmp"))
+		return false;
+	blockSprite[0][91].SetNumber(91);
+	if (!blockSprite[0][92].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][92].LoadFrame(0, "image\\mapblock\\block4\\06.bmp"))
+		return false;
+	blockSprite[0][92].SetNumber(92);
+	if (!blockSprite[0][93].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][93].LoadFrame(0, "image\\mapblock\\block4\\07.bmp"))
+		return false;
+	blockSprite[0][93].SetNumber(93);
+	if (!blockSprite[0][84].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][84].LoadFrame(0, "image\\mapblock\\block4\\08.bmp"))
+		return false;
+	blockSprite[0][84].SetNumber(84);
+	if (!blockSprite[0][85].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][85].LoadFrame(0, "image\\mapblock\\block4\\09.bmp"))
+		return false;
+	blockSprite[0][85].SetNumber(85);
+	if (!blockSprite[0][86].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][86].LoadFrame(0, "image\\mapblock\\block4\\10.bmp"))
+		return false;
+	blockSprite[0][86].SetNumber(86);
+	if (!blockSprite[0][87].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][87].LoadFrame(0, "image\\mapblock\\block4\\11.bmp"))
+		return false;
+	blockSprite[0][87].SetNumber(87);
+	if (!blockSprite[0][88].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][88].LoadFrame(0, "image\\mapblock\\block4\\12.bmp"))
+		return false;
+	blockSprite[0][88].SetNumber(88);
+	if (!blockSprite[0][94].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][94].LoadFrame(0, "image\\mapblock\\block4\\13.bmp"))
+		return false;
+	blockSprite[0][94].SetNumber(94);
+	if (!blockSprite[0][95].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][95].LoadFrame(0, "image\\mapblock\\block4\\14.bmp"))
+		return false;
+	blockSprite[0][95].SetNumber(95);
+	if (!blockSprite[0][96].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][96].LoadFrame(0, "image\\mapblock\\block4\\15.bmp"))
+		return false;
+	blockSprite[0][96].SetNumber(96);
+	if (!blockSprite[0][98].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][98].LoadFrame(0, "image\\mapblock\\block4\\17.bmp"))
+		return false;
+	blockSprite[0][98].SetNumber(98);
+	if (!blockSprite[0][99].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][99].LoadFrame(0, "image\\mapblock\\block4\\19.bmp"))
+		return false;
+	blockSprite[0][99].SetNumber(99);
+	if (!blockSprite[0][97].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][97].LoadFrame(0, "image\\mapblock\\block4\\20.bmp"))
+		return false;
+	blockSprite[0][97].SetNumber(97);
+	if (!blockSprite[0][89].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!blockSprite[0][89].LoadFrame(0, "image\\mapblock\\block4\\22.bmp"))
+		return false;
+	blockSprite[0][89].SetNumber(89);
+
+	if (!fireSprite.InitSprite(10, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!fireSprite.LoadFrame(0, "image\\mapblock\\fire\\fire_01.bmp"))
+		return false;
+	if (!fireSprite.LoadFrame(1, "image\\mapblock\\fire\\fire_02.bmp"))
+		return false;
+	if (!fireSprite.LoadFrame(2, "image\\mapblock\\fire\\fire_03.bmp"))
+		return false;
+	if (!fireSprite.LoadFrame(3, "image\\mapblock\\fire\\fire_04.bmp"))
+		return false;
+	if (!fireSprite.LoadFrame(4, "image\\mapblock\\fire\\fire_05.bmp"))
+		return false;
+	if (!fireSprite.LoadFrame(5, "image\\mapblock\\fire\\fire_06.bmp"))
+		return false;
+	if (!fireSprite.LoadFrame(6, "image\\mapblock\\fire\\fire_07.bmp"))
+		return false;
+	if (!fireSprite.LoadFrame(7, "image\\mapblock\\fire\\fire_08.bmp"))
+		return false;
+	if (!fireSprite.LoadFrame(8, "image\\mapblock\\fire\\fire_09.bmp"))
+		return false;
+	if (!fireSprite.LoadFrame(9, "image\\mapblock\\fire\\fire_10.bmp"))
+		return false;
+
+	string path = "";
+	char paths[40];
+	string _index = "";
+	string _bmp = ".bmp";
+	for (int y = 0; y < TOTAL_BLOCK_SPRITE_Y; y++)
+	{
+		for (int x = 0; x < TOTAL_BLOCK_SPRITE_X; x++)
+		{
+			if (!blockSprite2[y][x].InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+				return false;
+			_index = std::to_string(x + y * TOTAL_BLOCK_SPRITE_X);
+			path = "image\\mapblock\\mapblock2\\";
+			path.append(_index);
+			path.append(_bmp);
+			char* c = new char[path.size() + 1];		//string을 char로 바꿔주는 과정
+			std:copy(path.begin(), path.end(), c);
+			c[path.size()] = '\0';
+			if (!blockSprite2[y][x].LoadFrame(0, c))
+				return false;
+			delete[] c;
+			blockSprite2[y][x].SetNumber(x+y*TOTAL_BLOCK_SPRITE_X);
+		}
+	}
+
+	curBlock.SetSprite(&blockSprite[0][10]);
+#pragma endregion
+
+	curMod = MOD_INTRO;
+
+	baseMap.LoadBMPFile("image\\map\\basemap.bmp");
+	baseMap.CopyBufferToSurface4(g_lpDirectDrawObject);
+
+	bossMap.LoadBMPFile("image\\map\\bossmap.bmp");
+	bossMap.CopyBufferToSurface2(g_lpDirectDrawObject);
+
+	bossMapRoof.LoadBMPFile("image\\map\\bossmapRoof.bmp");
+	bossMapRoof.CopyBufferToSurface3(g_lpDirectDrawObject);
+
+	curEditMap = &baseMap;
+	curEditWindow = EDIT_WINDOW::EDIT_BLOCK_WINDOW2;
+
+#pragma region player_walk
+	if (!player_walk_left.InitSprite(6, 20, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_walk_left.LoadFrame(0, "image\\me\\walk\\me_walk_left00.bmp"))
+		return false;
+	if (!player_walk_left.LoadFrame(1, "image\\me\\walk\\me_walk_left01.bmp"))
+		return false;
+	if (!player_walk_left.LoadFrame(2, "image\\me\\walk\\me_walk_left02.bmp"))
+		return false;
+	if (!player_walk_left.LoadFrame(3, "image\\me\\walk\\me_walk_left03.bmp"))
+		return false;
+	if (!player_walk_left.LoadFrame(4, "image\\me\\walk\\me_walk_left04.bmp"))
+		return false;
+	if (!player_walk_left.LoadFrame(5, "image\\me\\walk\\me_walk_left05.bmp"))
+		return false;
+
+	if (!player_walk_leftup.InitSprite(6, 20, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_walk_leftup.LoadFrame(0, "image\\me\\walk\\me_walk_leftup00.bmp"))
+		return false;
+	if (!player_walk_leftup.LoadFrame(1, "image\\me\\walk\\me_walk_leftup01.bmp"))
+		return false;
+	if (!player_walk_leftup.LoadFrame(2, "image\\me\\walk\\me_walk_leftup02.bmp"))
+		return false;
+	if (!player_walk_leftup.LoadFrame(3, "image\\me\\walk\\me_walk_leftup03.bmp"))
+		return false;
+	if (!player_walk_leftup.LoadFrame(4, "image\\me\\walk\\me_walk_leftup04.bmp"))
+		return false;
+	if (!player_walk_leftup.LoadFrame(5, "image\\me\\walk\\me_walk_leftup05.bmp"))
+		return false;
+
+	if (!player_walk_leftdown.InitSprite(6, 20, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_walk_leftdown.LoadFrame(0, "image\\me\\walk\\me_walk_leftdown00.bmp"))
+		return false;
+	if (!player_walk_leftdown.LoadFrame(1, "image\\me\\walk\\me_walk_leftdown01.bmp"))
+		return false;
+	if (!player_walk_leftdown.LoadFrame(2, "image\\me\\walk\\me_walk_leftdown02.bmp"))
+		return false;
+	if (!player_walk_leftdown.LoadFrame(3, "image\\me\\walk\\me_walk_leftdown03.bmp"))
+		return false;
+	if (!player_walk_leftdown.LoadFrame(4, "image\\me\\walk\\me_walk_leftdown04.bmp"))
+		return false;
+	if (!player_walk_leftdown.LoadFrame(5, "image\\me\\walk\\me_walk_leftdown05.bmp"))
+		return false;
+
+	if (!player_walk_right.InitSprite(6, 20, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_walk_right.LoadFrame(0, "image\\me\\walk\\me_walk_right00.bmp"))
+		return false;
+	if (!player_walk_right.LoadFrame(1, "image\\me\\walk\\me_walk_right01.bmp"))
+		return false;
+	if (!player_walk_right.LoadFrame(2, "image\\me\\walk\\me_walk_right02.bmp"))
+		return false;
+	if (!player_walk_right.LoadFrame(3, "image\\me\\walk\\me_walk_right03.bmp"))
+		return false;
+	if (!player_walk_right.LoadFrame(4, "image\\me\\walk\\me_walk_right04.bmp"))
+		return false;
+	if (!player_walk_right.LoadFrame(5, "image\\me\\walk\\me_walk_right05.bmp"))
+		return false;
+
+	if (!player_walk_rightup.InitSprite(6, 20, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_walk_rightup.LoadFrame(0, "image\\me\\walk\\me_walk_rightup00.bmp"))
+		return false;
+	if (!player_walk_rightup.LoadFrame(1, "image\\me\\walk\\me_walk_rightup01.bmp"))
+		return false;
+	if (!player_walk_rightup.LoadFrame(2, "image\\me\\walk\\me_walk_rightup02.bmp"))
+		return false;
+	if (!player_walk_rightup.LoadFrame(3, "image\\me\\walk\\me_walk_rightup03.bmp"))
+		return false;
+	if (!player_walk_rightup.LoadFrame(4, "image\\me\\walk\\me_walk_rightup04.bmp"))
+		return false;
+	if (!player_walk_rightup.LoadFrame(5, "image\\me\\walk\\me_walk_rightup05.bmp"))
+		return false;
+
+	if (!player_walk_rightdown.InitSprite(6, 20, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_walk_rightdown.LoadFrame(0, "image\\me\\walk\\me_walk_rightdown00.bmp"))
+		return false;
+	if (!player_walk_rightdown.LoadFrame(1, "image\\me\\walk\\me_walk_rightdown01.bmp"))
+		return false;
+	if (!player_walk_rightdown.LoadFrame(2, "image\\me\\walk\\me_walk_rightdown02.bmp"))
+		return false;
+	if (!player_walk_rightdown.LoadFrame(3, "image\\me\\walk\\me_walk_rightdown03.bmp"))
+		return false;
+	if (!player_walk_rightdown.LoadFrame(4, "image\\me\\walk\\me_walk_rightdown04.bmp"))
+		return false;
+	if (!player_walk_rightdown.LoadFrame(5, "image\\me\\walk\\me_walk_rightdown05.bmp"))
+		return false;
+
+	if (!player_walk_up.InitSprite(6, 20, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_walk_up.LoadFrame(0, "image\\me\\walk\\me_walk_up00.bmp"))
+		return false;
+	if (!player_walk_up.LoadFrame(1, "image\\me\\walk\\me_walk_up01.bmp"))
+		return false;
+	if (!player_walk_up.LoadFrame(2, "image\\me\\walk\\me_walk_up02.bmp"))
+		return false;
+	if (!player_walk_up.LoadFrame(3, "image\\me\\walk\\me_walk_up03.bmp"))
+		return false;
+	if (!player_walk_up.LoadFrame(4, "image\\me\\walk\\me_walk_up04.bmp"))
+		return false;
+	if (!player_walk_up.LoadFrame(5, "image\\me\\walk\\me_walk_up05.bmp"))
+		return false;
+
+	if (!player_walk_down.InitSprite(6, 20, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_walk_down.LoadFrame(0, "image\\me\\walk\\me_walk_down00.bmp"))
+		return false;
+	if (!player_walk_down.LoadFrame(1, "image\\me\\walk\\me_walk_down01.bmp"))
+		return false;
+	if (!player_walk_down.LoadFrame(2, "image\\me\\walk\\me_walk_down02.bmp"))
+		return false;
+	if (!player_walk_down.LoadFrame(3, "image\\me\\walk\\me_walk_down03.bmp"))
+		return false;
+	if (!player_walk_down.LoadFrame(4, "image\\me\\walk\\me_walk_down04.bmp"))
+		return false;
+	if (!player_walk_down.LoadFrame(5, "image\\me\\walk\\me_walk_down05.bmp"))
+		return false;
+#pragma endregion
+
+#pragma region player_roll
+
+	if (!player_roll_left.InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_roll_left.LoadFrame(0, "image\\me\\roll\\left\\left_00.bmp"))
+		return false;
+	if (!player_roll_left.LoadFrame(1, "image\\me\\roll\\left\\left_01.bmp"))
+		return false;
+	if (!player_roll_left.LoadFrame(2, "image\\me\\roll\\left\\left_02.bmp"))
+		return false;
+	if (!player_roll_left.LoadFrame(3, "image\\me\\roll\\left\\left_03.bmp"))
+		return false;
+	if (!player_roll_left.LoadFrame(4, "image\\me\\roll\\left\\left_04.bmp"))
+		return false;
+	if (!player_roll_left.LoadFrame(5, "image\\me\\roll\\left\\left_05.bmp"))
+		return false;
+	/*if (!player_roll_left.LoadFrame(6, "image\\me\\roll\\left\\left_00.bmp"))
+		return false;*/
+
+	if (!player_roll_leftup.InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_roll_leftup.LoadFrame(0, "image\\me\\roll\\leftup\\leftup_00.bmp"))
+		return false;
+	if (!player_roll_leftup.LoadFrame(1, "image\\me\\roll\\leftup\\leftup_01.bmp"))
+		return false;
+	if (!player_roll_leftup.LoadFrame(2, "image\\me\\roll\\leftup\\leftup_02.bmp"))
+		return false;
+	if (!player_roll_leftup.LoadFrame(3, "image\\me\\roll\\leftup\\leftup_03.bmp"))
+		return false;
+	if (!player_roll_leftup.LoadFrame(4, "image\\me\\roll\\leftup\\leftup_04.bmp"))
+		return false;
+	if (!player_roll_leftup.LoadFrame(5, "image\\me\\roll\\leftup\\leftup_05.bmp"))
+		return false;
+	/*if (!player_roll_leftup.LoadFrame(6, "image\\me\\roll\\leftup\\leftup_00.bmp"))
+		return false;*/
+
+	if (!player_roll_leftdown.InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_roll_leftdown.LoadFrame(0, "image\\me\\roll\\leftdown\\leftdown_00.bmp"))
+		return false;
+	if (!player_roll_leftdown.LoadFrame(1, "image\\me\\roll\\leftdown\\leftdown_01.bmp"))
+		return false;
+	if (!player_roll_leftdown.LoadFrame(2, "image\\me\\roll\\leftdown\\leftdown_02.bmp"))
+		return false;
+	if (!player_roll_leftdown.LoadFrame(3, "image\\me\\roll\\leftdown\\leftdown_03.bmp"))
+		return false;
+	if (!player_roll_leftdown.LoadFrame(4, "image\\me\\roll\\leftdown\\leftdown_04.bmp"))
+		return false;
+	if (!player_roll_leftdown.LoadFrame(5, "image\\me\\roll\\leftdown\\leftdown_05.bmp"))
+		return false;
+	/*if (!player_roll_leftdown.LoadFrame(6, "image\\me\\roll\\leftdown\\leftdown_00.bmp"))
+		return false;*/
+
+	if (!player_roll_right.InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_roll_right.LoadFrame(0, "image\\me\\roll\\right\\right_00.bmp"))
+		return false;
+	if (!player_roll_right.LoadFrame(1, "image\\me\\roll\\right\\right_01.bmp"))
+		return false;
+	if (!player_roll_right.LoadFrame(2, "image\\me\\roll\\right\\right_02.bmp"))
+		return false;
+	if (!player_roll_right.LoadFrame(3, "image\\me\\roll\\right\\right_03.bmp"))
+		return false;
+	if (!player_roll_right.LoadFrame(4, "image\\me\\roll\\right\\right_04.bmp"))
+		return false;
+	if (!player_roll_right.LoadFrame(5, "image\\me\\roll\\right\\right_05.bmp"))
+		return false;
+	/*if (!player_roll_right.LoadFrame(6, "image\\me\\roll\\right\\right_00.bmp"))
+		return false;*/
+
+	if (!player_roll_rightup.InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_roll_rightup.LoadFrame(0, "image\\me\\roll\\rightup\\rightup_00.bmp"))
+		return false;
+	if (!player_roll_rightup.LoadFrame(1, "image\\me\\roll\\rightup\\rightup_01.bmp"))
+		return false;
+	if (!player_roll_rightup.LoadFrame(2, "image\\me\\roll\\rightup\\rightup_02.bmp"))
+		return false;
+	if (!player_roll_rightup.LoadFrame(3, "image\\me\\roll\\rightup\\rightup_03.bmp"))
+		return false;
+	if (!player_roll_rightup.LoadFrame(4, "image\\me\\roll\\rightup\\rightup_04.bmp"))
+		return false;
+	if (!player_roll_rightup.LoadFrame(5, "image\\me\\roll\\rightup\\rightup_05.bmp"))
+		return false;
+	/*if (!player_roll_rightup.LoadFrame(6, "image\\me\\roll\\rightup\\rightup_00.bmp"))
+		return false;*/
+
+	if (!player_roll_rightdown.InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_roll_rightdown.LoadFrame(0, "image\\me\\roll\\rightdown\\rightdown_00.bmp"))
+		return false;
+	if (!player_roll_rightdown.LoadFrame(1, "image\\me\\roll\\rightdown\\rightdown_01.bmp"))
+		return false;
+	if (!player_roll_rightdown.LoadFrame(2, "image\\me\\roll\\rightdown\\rightdown_02.bmp"))
+		return false;
+	if (!player_roll_rightdown.LoadFrame(3, "image\\me\\roll\\rightdown\\rightdown_03.bmp"))
+		return false;
+	if (!player_roll_rightdown.LoadFrame(4, "image\\me\\roll\\rightdown\\rightdown_04.bmp"))
+		return false;
+	if (!player_roll_rightdown.LoadFrame(5, "image\\me\\roll\\rightdown\\rightdown_05.bmp"))
+		return false;
+	/*if (!player_roll_rightdown.LoadFrame(6, "image\\me\\roll\\rightdown\\rightdown_00.bmp"))
+		return false;*/
+
+	if (!player_roll_up.InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_roll_up.LoadFrame(0, "image\\me\\roll\\up\\up_00.bmp"))
+		return false;
+	if (!player_roll_up.LoadFrame(1, "image\\me\\roll\\up\\up_01.bmp"))
+		return false;
+	if (!player_roll_up.LoadFrame(2, "image\\me\\roll\\up\\up_02.bmp"))
+		return false;
+	if (!player_roll_up.LoadFrame(3, "image\\me\\roll\\up\\up_03.bmp"))
+		return false;
+	if (!player_roll_up.LoadFrame(4, "image\\me\\roll\\up\\up_04.bmp"))
+		return false;
+	if (!player_roll_up.LoadFrame(5, "image\\me\\roll\\up\\up_05.bmp"))
+		return false;
+	/*if (!player_roll_up.LoadFrame(6, "image\\me\\roll\\up\\up_00.bmp"))
+		return false;*/
+
+	if (!player_roll_down.InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_roll_down.LoadFrame(0, "image\\me\\roll\\down\\down_00.bmp"))
+		return false;
+	if (!player_roll_down.LoadFrame(1, "image\\me\\roll\\down\\down_01.bmp"))
+		return false;
+	if (!player_roll_down.LoadFrame(2, "image\\me\\roll\\down\\down_02.bmp"))
+		return false;
+	if (!player_roll_down.LoadFrame(3, "image\\me\\roll\\down\\down_03.bmp"))
+		return false;
+	if (!player_roll_down.LoadFrame(4, "image\\me\\roll\\down\\down_04.bmp"))
+		return false;
+	if (!player_roll_down.LoadFrame(5, "image\\me\\roll\\down\\down_05.bmp"))
+		return false;
+	/*if (!player_roll_down.LoadFrame(6, "image\\me\\roll\\down\\down_00.bmp"))
+		return false;*/
+#pragma endregion
+
+	player_dead.Init();
+	bow_walk.Init();
+	bow_roll.Init();
+	bow_attack.Init();
+	arrowSprite.Init();
+	boss_idle.Init();
+	boss_roll.Init();
+	boss_attack.Init();
+	boss_dead.Init();
+
+#pragma region player_dead
+	if (!player_dead.GetLeft()->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_dead.GetLeft()->LoadFrame(0, "image\\me\\dead\\left.bmp"))
+		return false;
+	if (!player_dead.GetLeftUp()->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_dead.GetLeftUp()->LoadFrame(0, "image\\me\\dead\\leftup.bmp"))
+		return false;
+	if (!player_dead.GetLeftDown()->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_dead.GetLeftDown()->LoadFrame(0, "image\\me\\dead\\leftdown.bmp"))
+		return false;
+	if (!player_dead.GetRight()->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_dead.GetRight()->LoadFrame(0, "image\\me\\dead\\right.bmp"))
+		return false;
+	if (!player_dead.GetRightUp()->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_dead.GetRightUp()->LoadFrame(0, "image\\me\\dead\\rightup.bmp"))
+		return false;
+	if (!player_dead.GetRightDown()->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_dead.GetRightDown()->LoadFrame(0, "image\\me\\dead\\rightdown.bmp"))
+		return false;
+	if (!player_dead.GetUp()->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_dead.GetUp()->LoadFrame(0, "image\\me\\dead\\up.bmp"))
+		return false;
+	if (!player_dead.GetDown()->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_dead.GetDown()->LoadFrame(0, "image\\me\\dead\\down.bmp"))
+		return false;
+#pragma endregion
+
+#pragma region player_skill
+	if (!player_skill.InitSprite(11, 64, 64, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_skill.LoadFrame(0, "image\\skill\\skill_01.bmp"))
+		return false;
+	if (!player_skill.LoadFrame(1, "image\\skill\\skill_02.bmp"))
+		return false;
+	if (!player_skill.LoadFrame(2, "image\\skill\\skill_03.bmp"))
+		return false;
+	if (!player_skill.LoadFrame(3, "image\\skill\\skill_04.bmp"))
+		return false;
+	if (!player_skill.LoadFrame(4, "image\\skill\\skill_05.bmp"))
+		return false;
+	if (!player_skill.LoadFrame(5, "image\\skill\\skill_06.bmp"))
+		return false;
+	if (!player_skill.LoadFrame(6, "image\\skill\\skill_07.bmp"))
+		return false;
+	if (!player_skill.LoadFrame(7, "image\\skill\\skill_08.bmp"))
+		return false;
+	if (!player_skill.LoadFrame(8, "image\\skill\\skill_09.bmp"))
+		return false;
+	if (!player_skill.LoadFrame(9, "image\\skill\\skill_10.bmp"))
+		return false;
+	if (!player_skill.LoadFrame(10, "image\\skill\\skill_11.bmp"))
+		return false;
+#pragma endregion
+
+#pragma region bow_walk
+	if (!bow_walk.GetLeft()->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_walk.GetLeft()->LoadFrame(0, "image\\bow\\walk\\left\\bow_walk_left_00.bmp"))
+		return false;
+	if (!bow_walk.GetLeft()->LoadFrame(1, "image\\bow\\walk\\left\\bow_walk_left_01.bmp"))
+		return false;
+	if (!bow_walk.GetLeft()->LoadFrame(2, "image\\bow\\walk\\left\\bow_walk_left_02.bmp"))
+		return false;
+	if (!bow_walk.GetLeft()->LoadFrame(3, "image\\bow\\walk\\left\\bow_walk_left_03.bmp"))
+		return false;
+	if (!bow_walk.GetLeft()->LoadFrame(4, "image\\bow\\walk\\left\\bow_walk_left_04.bmp"))
+		return false;
+	if (!bow_walk.GetLeft()->LoadFrame(5, "image\\bow\\walk\\left\\bow_walk_left_05.bmp"))
+		return false;
+
+	if (!bow_walk.GetLeftUp()->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_walk.GetLeftUp()->LoadFrame(0, "image\\bow\\walk\\leftup\\bow_walk_leftup_00.bmp"))
+		return false;
+	if (!bow_walk.GetLeftUp()->LoadFrame(1, "image\\bow\\walk\\leftup\\bow_walk_leftup_01.bmp"))
+		return false;
+	if (!bow_walk.GetLeftUp()->LoadFrame(2, "image\\bow\\walk\\leftup\\bow_walk_leftup_02.bmp"))
+		return false;
+	if (!bow_walk.GetLeftUp()->LoadFrame(3, "image\\bow\\walk\\leftup\\bow_walk_leftup_03.bmp"))
+		return false;
+	if (!bow_walk.GetLeftUp()->LoadFrame(4, "image\\bow\\walk\\leftup\\bow_walk_leftup_04.bmp"))
+		return false;
+	if (!bow_walk.GetLeftUp()->LoadFrame(5, "image\\bow\\walk\\leftup\\bow_walk_leftup_05.bmp"))
+		return false;
+
+	if (!bow_walk.GetLeftDown()->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_walk.GetLeftDown()->LoadFrame(0, "image\\bow\\walk\\leftdown\\bow_walk_leftdown_00.bmp"))
+		return false;
+	if (!bow_walk.GetLeftDown()->LoadFrame(1, "image\\bow\\walk\\leftdown\\bow_walk_leftdown_01.bmp"))
+		return false;
+	if (!bow_walk.GetLeftDown()->LoadFrame(2, "image\\bow\\walk\\leftdown\\bow_walk_leftdown_02.bmp"))
+		return false;
+	if (!bow_walk.GetLeftDown()->LoadFrame(3, "image\\bow\\walk\\leftdown\\bow_walk_leftdown_03.bmp"))
+		return false;
+	if (!bow_walk.GetLeftDown()->LoadFrame(4, "image\\bow\\walk\\leftdown\\bow_walk_leftdown_04.bmp"))
+		return false;
+	if (!bow_walk.GetLeftDown()->LoadFrame(5, "image\\bow\\walk\\leftdown\\bow_walk_leftdown_05.bmp"))
+		return false;
+
+	if (!bow_walk.GetRight()->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_walk.GetRight()->LoadFrame(0, "image\\bow\\walk\\right\\bow_walk_right_00.bmp"))
+		return false;
+	if (!bow_walk.GetRight()->LoadFrame(1, "image\\bow\\walk\\right\\bow_walk_right_01.bmp"))
+		return false;
+	if (!bow_walk.GetRight()->LoadFrame(2, "image\\bow\\walk\\right\\bow_walk_right_02.bmp"))
+		return false;
+	if (!bow_walk.GetRight()->LoadFrame(3, "image\\bow\\walk\\right\\bow_walk_right_03.bmp"))
+		return false;
+	if (!bow_walk.GetRight()->LoadFrame(4, "image\\bow\\walk\\right\\bow_walk_right_04.bmp"))
+		return false;
+	if (!bow_walk.GetRight()->LoadFrame(5, "image\\bow\\walk\\right\\bow_walk_right_05.bmp"))
+		return false;
+
+	if (!bow_walk.GetRightUp()->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_walk.GetRightUp()->LoadFrame(0, "image\\bow\\walk\\rightup\\bow_walk_rightup_00.bmp"))
+		return false;
+	if (!bow_walk.GetRightUp()->LoadFrame(1, "image\\bow\\walk\\rightup\\bow_walk_rightup_01.bmp"))
+		return false;
+	if (!bow_walk.GetRightUp()->LoadFrame(2, "image\\bow\\walk\\rightup\\bow_walk_rightup_02.bmp"))
+		return false;
+	if (!bow_walk.GetRightUp()->LoadFrame(3, "image\\bow\\walk\\rightup\\bow_walk_rightup_03.bmp"))
+		return false;
+	if (!bow_walk.GetRightUp()->LoadFrame(4, "image\\bow\\walk\\rightup\\bow_walk_rightup_04.bmp"))
+		return false;
+	if (!bow_walk.GetRightUp()->LoadFrame(5, "image\\bow\\walk\\rightup\\bow_walk_rightup_05.bmp"))
+		return false;
+
+	if (!bow_walk.GetRightDown()->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_walk.GetRightDown()->LoadFrame(0, "image\\bow\\walk\\rightdown\\bow_walk_rightdown_00.bmp"))
+		return false;
+	if (!bow_walk.GetRightDown()->LoadFrame(1, "image\\bow\\walk\\rightdown\\bow_walk_rightdown_01.bmp"))
+		return false;
+	if (!bow_walk.GetRightDown()->LoadFrame(2, "image\\bow\\walk\\rightdown\\bow_walk_rightdown_02.bmp"))
+		return false;
+	if (!bow_walk.GetRightDown()->LoadFrame(3, "image\\bow\\walk\\rightdown\\bow_walk_rightdown_03.bmp"))
+		return false;
+	if (!bow_walk.GetRightDown()->LoadFrame(4, "image\\bow\\walk\\rightdown\\bow_walk_rightdown_04.bmp"))
+		return false;
+	if (!bow_walk.GetRightDown()->LoadFrame(5, "image\\bow\\walk\\rightdown\\bow_walk_rightdown_05.bmp"))
+		return false;
+
+	if (!bow_walk.GetUp()->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_walk.GetUp()->LoadFrame(0, "image\\bow\\walk\\up\\bow_walk_up_00.bmp"))
+		return false;
+	if (!bow_walk.GetUp()->LoadFrame(1, "image\\bow\\walk\\up\\bow_walk_up_01.bmp"))
+		return false;
+	if (!bow_walk.GetUp()->LoadFrame(2, "image\\bow\\walk\\up\\bow_walk_up_02.bmp"))
+		return false;
+	if (!bow_walk.GetUp()->LoadFrame(3, "image\\bow\\walk\\up\\bow_walk_up_03.bmp"))
+		return false;
+	if (!bow_walk.GetUp()->LoadFrame(4, "image\\bow\\walk\\up\\bow_walk_up_04.bmp"))
+		return false;
+	if (!bow_walk.GetUp()->LoadFrame(5, "image\\bow\\walk\\up\\bow_walk_up_05.bmp"))
+		return false;
+
+	if (!bow_walk.GetDown()->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_walk.GetDown()->LoadFrame(0, "image\\bow\\walk\\down\\bow_walk_down_00.bmp"))
+		return false;
+	if (!bow_walk.GetDown()->LoadFrame(1, "image\\bow\\walk\\down\\bow_walk_down_01.bmp"))
+		return false;
+	if (!bow_walk.GetDown()->LoadFrame(2, "image\\bow\\walk\\down\\bow_walk_down_02.bmp"))
+		return false;
+	if (!bow_walk.GetDown()->LoadFrame(3, "image\\bow\\walk\\down\\bow_walk_down_03.bmp"))
+		return false;
+	if (!bow_walk.GetDown()->LoadFrame(4, "image\\bow\\walk\\down\\bow_walk_down_04.bmp"))
+		return false;
+	if (!bow_walk.GetDown()->LoadFrame(5, "image\\bow\\walk\\down\\bow_walk_down_05.bmp"))
+		return false;
+#pragma endregion
+
+#pragma region bow_roll
+	if (!bow_roll.GetLeft()->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_roll.GetLeft()->LoadFrame(0, "image\\bow\\roll\\left\\bow_roll_left_00.bmp"))
+		return false;
+	if (!bow_roll.GetLeft()->LoadFrame(1, "image\\bow\\roll\\left\\bow_roll_left_01.bmp"))
+		return false;
+	if (!bow_roll.GetLeft()->LoadFrame(2, "image\\bow\\roll\\left\\bow_roll_left_02.bmp"))
+		return false;
+	if (!bow_roll.GetLeft()->LoadFrame(3, "image\\bow\\roll\\left\\bow_roll_left_03.bmp"))
+		return false;
+	if (!bow_roll.GetLeft()->LoadFrame(4, "image\\bow\\roll\\left\\bow_roll_left_04.bmp"))
+		return false;
+	if (!bow_roll.GetLeft()->LoadFrame(5, "image\\bow\\roll\\left\\bow_roll_left_05.bmp"))
+		return false;
+
+	if (!bow_roll.GetLeftUp()->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_roll.GetLeftUp()->LoadFrame(0, "image\\bow\\roll\\leftup\\bow_roll_leftup_00.bmp"))
+		return false;
+	if (!bow_roll.GetLeftUp()->LoadFrame(1, "image\\bow\\roll\\leftup\\bow_roll_leftup_01.bmp"))
+		return false;
+	if (!bow_roll.GetLeftUp()->LoadFrame(2, "image\\bow\\roll\\leftup\\bow_roll_leftup_02.bmp"))
+		return false;
+	if (!bow_roll.GetLeftUp()->LoadFrame(3, "image\\bow\\roll\\leftup\\bow_roll_leftup_03.bmp"))
+		return false;
+	if (!bow_roll.GetLeftUp()->LoadFrame(4, "image\\bow\\roll\\leftup\\bow_roll_leftup_04.bmp"))
+		return false;
+	if (!bow_roll.GetLeftUp()->LoadFrame(5, "image\\bow\\roll\\leftup\\bow_roll_leftup_05.bmp"))
+		return false;
+
+	if (!bow_roll.GetLeftDown()->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_roll.GetLeftDown()->LoadFrame(0, "image\\bow\\roll\\leftdown\\bow_roll_leftdown_00.bmp"))
+		return false;
+	if (!bow_roll.GetLeftDown()->LoadFrame(1, "image\\bow\\roll\\leftdown\\bow_roll_leftdown_01.bmp"))
+		return false;
+	if (!bow_roll.GetLeftDown()->LoadFrame(2, "image\\bow\\roll\\leftdown\\bow_roll_leftdown_02.bmp"))
+		return false;
+	if (!bow_roll.GetLeftDown()->LoadFrame(3, "image\\bow\\roll\\leftdown\\bow_roll_leftdown_03.bmp"))
+		return false;
+	if (!bow_roll.GetLeftDown()->LoadFrame(4, "image\\bow\\roll\\leftdown\\bow_roll_leftdown_04.bmp"))
+		return false;
+	if (!bow_roll.GetLeftDown()->LoadFrame(5, "image\\bow\\roll\\leftdown\\bow_roll_leftdown_05.bmp"))
+		return false;
+
+	if (!bow_roll.GetRight()->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_roll.GetRight()->LoadFrame(0, "image\\bow\\roll\\right\\bow_roll_right_00.bmp"))
+		return false;
+	if (!bow_roll.GetRight()->LoadFrame(1, "image\\bow\\roll\\right\\bow_roll_right_01.bmp"))
+		return false;
+	if (!bow_roll.GetRight()->LoadFrame(2, "image\\bow\\roll\\right\\bow_roll_right_02.bmp"))
+		return false;
+	if (!bow_roll.GetRight()->LoadFrame(3, "image\\bow\\roll\\right\\bow_roll_right_03.bmp"))
+		return false;
+	if (!bow_roll.GetRight()->LoadFrame(4, "image\\bow\\roll\\right\\bow_roll_right_04.bmp"))
+		return false;
+	if (!bow_roll.GetRight()->LoadFrame(5, "image\\bow\\roll\\right\\bow_roll_right_05.bmp"))
+		return false;
+
+	if (!bow_roll.GetRightUp()->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_roll.GetRightUp()->LoadFrame(0, "image\\bow\\roll\\rightup\\bow_roll_rightup_00.bmp"))
+		return false;
+	if (!bow_roll.GetRightUp()->LoadFrame(1, "image\\bow\\roll\\rightup\\bow_roll_rightup_01.bmp"))
+		return false;
+	if (!bow_roll.GetRightUp()->LoadFrame(2, "image\\bow\\roll\\rightup\\bow_roll_rightup_02.bmp"))
+		return false;
+	if (!bow_roll.GetRightUp()->LoadFrame(3, "image\\bow\\roll\\rightup\\bow_roll_rightup_03.bmp"))
+		return false;
+	if (!bow_roll.GetRightUp()->LoadFrame(4, "image\\bow\\roll\\rightup\\bow_roll_rightup_04.bmp"))
+		return false;
+	if (!bow_roll.GetRightUp()->LoadFrame(5, "image\\bow\\roll\\rightup\\bow_roll_rightup_05.bmp"))
+		return false;
+
+	if (!bow_roll.GetRightDown()->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_roll.GetRightDown()->LoadFrame(0, "image\\bow\\roll\\rightdown\\bow_roll_rightdown_00.bmp"))
+		return false;
+	if (!bow_roll.GetRightDown()->LoadFrame(1, "image\\bow\\roll\\rightdown\\bow_roll_rightdown_01.bmp"))
+		return false;
+	if (!bow_roll.GetRightDown()->LoadFrame(2, "image\\bow\\roll\\rightdown\\bow_roll_rightdown_02.bmp"))
+		return false;
+	if (!bow_roll.GetRightDown()->LoadFrame(3, "image\\bow\\roll\\rightdown\\bow_roll_rightdown_03.bmp"))
+		return false;
+	if (!bow_roll.GetRightDown()->LoadFrame(4, "image\\bow\\roll\\rightdown\\bow_roll_rightdown_04.bmp"))
+		return false;
+	if (!bow_roll.GetRightDown()->LoadFrame(5, "image\\bow\\roll\\rightdown\\bow_roll_rightdown_05.bmp"))
+		return false;
+
+	if (!bow_roll.GetUp()->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_roll.GetUp()->LoadFrame(0, "image\\bow\\roll\\up\\bow_roll_up_00.bmp"))
+		return false;
+	if (!bow_roll.GetUp()->LoadFrame(1, "image\\bow\\roll\\up\\bow_roll_up_01.bmp"))
+		return false;
+	if (!bow_roll.GetUp()->LoadFrame(2, "image\\bow\\roll\\up\\bow_roll_up_02.bmp"))
+		return false;
+	if (!bow_roll.GetUp()->LoadFrame(3, "image\\bow\\roll\\up\\bow_roll_up_03.bmp"))
+		return false;
+	if (!bow_roll.GetUp()->LoadFrame(4, "image\\bow\\roll\\up\\bow_roll_up_04.bmp"))
+		return false;
+	if (!bow_roll.GetUp()->LoadFrame(5, "image\\bow\\roll\\up\\bow_roll_up_05.bmp"))
+		return false;
+
+	if (!bow_roll.GetDown()->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_roll.GetDown()->LoadFrame(0, "image\\bow\\roll\\down\\bow_roll_down_00.bmp"))
+		return false;
+	if (!bow_roll.GetDown()->LoadFrame(1, "image\\bow\\roll\\down\\bow_roll_down_01.bmp"))
+		return false;
+	if (!bow_roll.GetDown()->LoadFrame(2, "image\\bow\\roll\\down\\bow_roll_down_02.bmp"))
+		return false;
+	if (!bow_roll.GetDown()->LoadFrame(3, "image\\bow\\roll\\down\\bow_roll_down_03.bmp"))
+		return false;
+	if (!bow_roll.GetDown()->LoadFrame(4, "image\\bow\\roll\\down\\bow_roll_down_04.bmp"))
+		return false;
+	if (!bow_roll.GetDown()->LoadFrame(5, "image\\bow\\roll\\down\\bow_roll_down_05.bmp"))
+		return false;
+#pragma endregion
+
+#pragma region bow_attack
+	if (!bow_attack.GetLeft()->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_attack.GetLeft()->LoadFrame(0, "image\\bow\\attack\\bow_attack_left.bmp"))
+		return false;
+
+	if (!bow_attack.GetLeftUp()->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_attack.GetLeftUp()->LoadFrame(0, "image\\bow\\attack\\bow_attack_leftup.bmp"))
+		return false;
+
+	if (!bow_attack.GetLeftDown()->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_attack.GetLeftDown()->LoadFrame(0, "image\\bow\\attack\\bow_attack_leftdown.bmp"))
+		return false;
+
+	if (!bow_attack.GetRight()->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_attack.GetRight()->LoadFrame(0, "image\\bow\\attack\\bow_attack_right.bmp"))
+		return false;
+
+	if (!bow_attack.GetRightUp()->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_attack.GetRightUp()->LoadFrame(0, "image\\bow\\attack\\bow_attack_rightup.bmp"))
+		return false;
+
+	if (!bow_attack.GetRightDown()->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_attack.GetRightDown()->LoadFrame(0, "image\\bow\\attack\\bow_attack_rightdown.bmp"))
+		return false;
+
+	if (!bow_attack.GetUp()->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_attack.GetUp()->LoadFrame(0, "image\\bow\\attack\\bow_attack_up.bmp"))
+		return false;
+
+	if (!bow_attack.GetDown()->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_attack.GetDown()->LoadFrame(0, "image\\bow\\attack\\bow_attack_down.bmp"))
+		return false;
+#pragma endregion
+
+#pragma region arrow
+	if (!arrowSprite.GetLeft()->InitSprite(1, 130, 130, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!arrowSprite.GetLeft()->LoadFrame(0, "image\\arrow\\arrow_left.bmp"))
+		return false;
+
+	if (!arrowSprite.GetLeftUp()->InitSprite(1, 130, 130, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!arrowSprite.GetLeftUp()->LoadFrame(0, "image\\arrow\\arrow_leftup.bmp"))
+		return false;
+
+	if (!arrowSprite.GetLeftDown()->InitSprite(1, 130, 130, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!arrowSprite.GetLeftDown()->LoadFrame(0, "image\\arrow\\arrow_leftdown.bmp"))
+		return false;
+
+	if (!arrowSprite.GetRight()->InitSprite(1, 130, 130, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!arrowSprite.GetRight()->LoadFrame(0, "image\\arrow\\arrow_right.bmp"))
+		return false;
+
+	if (!arrowSprite.GetRightUp()->InitSprite(1, 130, 130, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!arrowSprite.GetRightUp()->LoadFrame(0, "image\\arrow\\arrow_rightup.bmp"))
+		return false;
+
+	if (!arrowSprite.GetRightDown()->InitSprite(1, 130, 130, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!arrowSprite.GetRightDown()->LoadFrame(0, "image\\arrow\\arrow_rightdown.bmp"))
+		return false;
+
+	if (!arrowSprite.GetUp()->InitSprite(1, 130, 130, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!arrowSprite.GetUp()->LoadFrame(0, "image\\arrow\\arrow_up.bmp"))
+		return false;
+
+	if (!arrowSprite.GetDown()->InitSprite(1, 130, 130, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!arrowSprite.GetDown()->LoadFrame(0, "image\\arrow\\arrow_down.bmp"))
+		return false;
+#pragma endregion
+
+#pragma region boss_idle
+	if (!boss_sleep.InitSprite(1, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_sleep.LoadFrame(0, "image\\boss\\idle\\sleep00.bmp"))
+		return false;
+
+	if (!boss_snowball.InitSprite(1, 24, 24, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_snowball.LoadFrame(0, "image\\boss\\weapon\\snowball.bmp"))
+		return false;
+
+	if (!boss_idle.GetLeft()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_idle.GetLeft()->LoadFrame(0, "image\\boss\\idle\\left\\00.bmp"))
+		return false;
+	if (!boss_idle.GetLeft()->LoadFrame(1, "image\\boss\\idle\\left\\01.bmp"))
+		return false;
+	if (!boss_idle.GetLeft()->LoadFrame(2, "image\\boss\\idle\\left\\02.bmp"))
+		return false;
+
+	if (!boss_idle.GetLeftUp()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_idle.GetLeftUp()->LoadFrame(0, "image\\boss\\idle\\leftup\\00.bmp"))
+		return false;
+	if (!boss_idle.GetLeftUp()->LoadFrame(1, "image\\boss\\idle\\leftup\\01.bmp"))
+		return false;
+	if (!boss_idle.GetLeftUp()->LoadFrame(2, "image\\boss\\idle\\leftup\\02.bmp"))
+		return false;
+
+	if (!boss_idle.GetLeftDown()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_idle.GetLeftDown()->LoadFrame(0, "image\\boss\\idle\\leftdown\\00.bmp"))
+		return false;
+	if (!boss_idle.GetLeftDown()->LoadFrame(1, "image\\boss\\idle\\leftdown\\01.bmp"))
+		return false;
+	if (!boss_idle.GetLeftDown()->LoadFrame(2, "image\\boss\\idle\\leftdown\\02.bmp"))
+		return false;
+
+	if (!boss_idle.GetRight()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_idle.GetRight()->LoadFrame(0, "image\\boss\\idle\\right\\00.bmp"))
+		return false;
+	if (!boss_idle.GetRight()->LoadFrame(1, "image\\boss\\idle\\right\\01.bmp"))
+		return false;
+	if (!boss_idle.GetRight()->LoadFrame(2, "image\\boss\\idle\\right\\02.bmp"))
+		return false;
+
+	if (!boss_idle.GetRightUp()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_idle.GetRightUp()->LoadFrame(0, "image\\boss\\idle\\rightup\\00.bmp"))
+		return false;
+	if (!boss_idle.GetRightUp()->LoadFrame(1, "image\\boss\\idle\\rightup\\01.bmp"))
+		return false;
+	if (!boss_idle.GetRightUp()->LoadFrame(2, "image\\boss\\idle\\rightup\\02.bmp"))
+		return false;
+
+	if (!boss_idle.GetRightDown()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_idle.GetRightDown()->LoadFrame(0, "image\\boss\\idle\\rightdown\\00.bmp"))
+		return false;
+	if (!boss_idle.GetRightDown()->LoadFrame(1, "image\\boss\\idle\\rightdown\\01.bmp"))
+		return false;
+	if (!boss_idle.GetRightDown()->LoadFrame(2, "image\\boss\\idle\\rightdown\\02.bmp"))
+		return false;
+
+	if (!boss_idle.GetUp()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_idle.GetUp()->LoadFrame(0, "image\\boss\\idle\\up\\00.bmp"))
+		return false;
+	if (!boss_idle.GetUp()->LoadFrame(1, "image\\boss\\idle\\up\\01.bmp"))
+		return false;
+	if (!boss_idle.GetUp()->LoadFrame(2, "image\\boss\\idle\\up\\02.bmp"))
+		return false;
+
+	if (!boss_idle.GetDown()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_idle.GetDown()->LoadFrame(0, "image\\boss\\idle\\down\\00.bmp"))
+		return false;
+	if (!boss_idle.GetDown()->LoadFrame(1, "image\\boss\\idle\\down\\01.bmp"))
+		return false;
+	if (!boss_idle.GetDown()->LoadFrame(2, "image\\boss\\idle\\down\\02.bmp"))
+		return false;
+#pragma endregion
+
+#pragma region boss_roll
+	if (!boss_roll.GetLeft()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_roll.GetLeft()->LoadFrame(0, "image\\boss\\roll\\left\\00.bmp"))
+		return false;
+	if (!boss_roll.GetLeft()->LoadFrame(1, "image\\boss\\roll\\left\\01.bmp"))
+		return false;
+	if (!boss_roll.GetLeft()->LoadFrame(2, "image\\boss\\roll\\left\\02.bmp"))
+		return false;
+
+	if (!boss_roll.GetLeftUp()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_roll.GetLeftUp()->LoadFrame(0, "image\\boss\\roll\\leftup\\00.bmp"))
+		return false;
+	if (!boss_roll.GetLeftUp()->LoadFrame(1, "image\\boss\\roll\\leftup\\01.bmp"))
+		return false;
+	if (!boss_roll.GetLeftUp()->LoadFrame(2, "image\\boss\\roll\\leftup\\02.bmp"))
+		return false;
+
+	if (!boss_roll.GetLeftDown()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_roll.GetLeftDown()->LoadFrame(0, "image\\boss\\roll\\leftdown\\00.bmp"))
+		return false;
+	if (!boss_roll.GetLeftDown()->LoadFrame(1, "image\\boss\\roll\\leftdown\\01.bmp"))
+		return false;
+	if (!boss_roll.GetLeftDown()->LoadFrame(2, "image\\boss\\roll\\leftdown\\02.bmp"))
+		return false;
+
+	if (!boss_roll.GetRight()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_roll.GetRight()->LoadFrame(0, "image\\boss\\roll\\right\\00.bmp"))
+		return false;
+	if (!boss_roll.GetRight()->LoadFrame(1, "image\\boss\\roll\\right\\01.bmp"))
+		return false;
+	if (!boss_roll.GetRight()->LoadFrame(2, "image\\boss\\roll\\right\\02.bmp"))
+		return false;
+
+	if (!boss_roll.GetRightUp()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_roll.GetRightUp()->LoadFrame(0, "image\\boss\\roll\\rightup\\00.bmp"))
+		return false;
+	if (!boss_roll.GetRightUp()->LoadFrame(1, "image\\boss\\roll\\rightup\\01.bmp"))
+		return false;
+	if (!boss_roll.GetRightUp()->LoadFrame(2, "image\\boss\\roll\\rightup\\02.bmp"))
+		return false;
+
+	if (!boss_roll.GetRightDown()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_roll.GetRightDown()->LoadFrame(0, "image\\boss\\roll\\rightdown\\00.bmp"))
+		return false;
+	if (!boss_roll.GetRightDown()->LoadFrame(1, "image\\boss\\roll\\rightdown\\01.bmp"))
+		return false;
+	if (!boss_roll.GetRightDown()->LoadFrame(2, "image\\boss\\roll\\rightdown\\02.bmp"))
+		return false;
+
+	if (!boss_roll.GetUp()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_roll.GetUp()->LoadFrame(0, "image\\boss\\roll\\up\\00.bmp"))
+		return false;
+	if (!boss_roll.GetUp()->LoadFrame(1, "image\\boss\\roll\\up\\01.bmp"))
+		return false;
+	if (!boss_roll.GetUp()->LoadFrame(2, "image\\boss\\roll\\up\\02.bmp"))
+		return false;
+
+	if (!boss_roll.GetDown()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_roll.GetDown()->LoadFrame(0, "image\\boss\\roll\\down\\00.bmp"))
+		return false;
+	if (!boss_roll.GetDown()->LoadFrame(1, "image\\boss\\roll\\down\\01.bmp"))
+		return false;
+	if (!boss_roll.GetDown()->LoadFrame(2, "image\\boss\\roll\\down\\02.bmp"))
+		return false;
+#pragma endregion
+
+#pragma region boss_attack
+	if (!boss_attack.GetLeft()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_attack.GetLeft()->LoadFrame(0, "image\\boss\\attack\\left\\00.bmp"))
+		return false;
+	if (!boss_attack.GetLeft()->LoadFrame(1, "image\\boss\\attack\\left\\01.bmp"))
+		return false;
+	if (!boss_attack.GetLeft()->LoadFrame(2, "image\\boss\\attack\\left\\02.bmp"))
+		return false;
+
+	if (!boss_attack.GetLeftUp()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_attack.GetLeftUp()->LoadFrame(0, "image\\boss\\attack\\leftup\\00.bmp"))
+		return false;
+	if (!boss_attack.GetLeftUp()->LoadFrame(1, "image\\boss\\attack\\leftup\\01.bmp"))
+		return false;
+	if (!boss_attack.GetLeftUp()->LoadFrame(2, "image\\boss\\attack\\leftup\\02.bmp"))
+		return false;
+
+	if (!boss_attack.GetLeftDown()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_attack.GetLeftDown()->LoadFrame(0, "image\\boss\\attack\\leftdown\\00.bmp"))
+		return false;
+	if (!boss_attack.GetLeftDown()->LoadFrame(1, "image\\boss\\attack\\leftdown\\01.bmp"))
+		return false;
+	if (!boss_attack.GetLeftDown()->LoadFrame(2, "image\\boss\\attack\\leftdown\\02.bmp"))
+		return false;
+
+	if (!boss_attack.GetRight()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_attack.GetRight()->LoadFrame(0, "image\\boss\\attack\\right\\00.bmp"))
+		return false;
+	if (!boss_attack.GetRight()->LoadFrame(1, "image\\boss\\attack\\right\\01.bmp"))
+		return false;
+	if (!boss_attack.GetRight()->LoadFrame(2, "image\\boss\\attack\\right\\02.bmp"))
+		return false;
+
+	if (!boss_attack.GetRightUp()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_attack.GetRightUp()->LoadFrame(0, "image\\boss\\attack\\rightup\\00.bmp"))
+		return false;
+	if (!boss_attack.GetRightUp()->LoadFrame(1, "image\\boss\\attack\\rightup\\01.bmp"))
+		return false;
+	if (!boss_attack.GetRightUp()->LoadFrame(2, "image\\boss\\attack\\rightup\\02.bmp"))
+		return false;
+
+	if (!boss_attack.GetRightDown()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_attack.GetRightDown()->LoadFrame(0, "image\\boss\\attack\\rightdown\\00.bmp"))
+		return false;
+	if (!boss_attack.GetRightDown()->LoadFrame(1, "image\\boss\\attack\\rightdown\\01.bmp"))
+		return false;
+	if (!boss_attack.GetRightDown()->LoadFrame(2, "image\\boss\\attack\\rightdown\\02.bmp"))
+		return false;
+
+	if (!boss_attack.GetUp()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_attack.GetUp()->LoadFrame(0, "image\\boss\\attack\\up\\00.bmp"))
+		return false;
+	if (!boss_attack.GetUp()->LoadFrame(1, "image\\boss\\attack\\up\\01.bmp"))
+		return false;
+	if (!boss_attack.GetUp()->LoadFrame(2, "image\\boss\\attack\\up\\02.bmp"))
+		return false;
+
+	if (!boss_attack.GetDown()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_attack.GetDown()->LoadFrame(0, "image\\boss\\attack\\down\\00.bmp"))
+		return false;
+	if (!boss_attack.GetDown()->LoadFrame(1, "image\\boss\\attack\\down\\01.bmp"))
+		return false;
+	if (!boss_attack.GetDown()->LoadFrame(2, "image\\boss\\attack\\down\\02.bmp"))
+		return false;
+#pragma endregion
+
+#pragma region boss_dead
+	if (!boss_dead.GetLeft()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_dead.GetLeft()->LoadFrame(0, "image\\boss\\dead\\left\\00.bmp"))
+		return false;
+	if (!boss_dead.GetLeft()->LoadFrame(1, "image\\boss\\dead\\left\\01.bmp"))
+		return false;
+	if (!boss_dead.GetLeft()->LoadFrame(2, "image\\boss\\dead\\left\\02.bmp"))
+		return false;
+
+	if (!boss_dead.GetLeftUp()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_dead.GetLeftUp()->LoadFrame(0, "image\\boss\\dead\\leftup\\00.bmp"))
+		return false;
+	if (!boss_dead.GetLeftUp()->LoadFrame(1, "image\\boss\\dead\\leftup\\01.bmp"))
+		return false;
+	if (!boss_dead.GetLeftUp()->LoadFrame(2, "image\\boss\\dead\\leftup\\02.bmp"))
+		return false;
+
+	if (!boss_dead.GetLeftDown()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_dead.GetLeftDown()->LoadFrame(0, "image\\boss\\dead\\leftdown\\00.bmp"))
+		return false;
+	if (!boss_dead.GetLeftDown()->LoadFrame(1, "image\\boss\\dead\\leftdown\\01.bmp"))
+		return false;
+	if (!boss_dead.GetLeftDown()->LoadFrame(2, "image\\boss\\dead\\leftdown\\02.bmp"))
+		return false;
+
+	if (!boss_dead.GetRight()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_dead.GetRight()->LoadFrame(0, "image\\boss\\dead\\right\\00.bmp"))
+		return false;
+	if (!boss_dead.GetRight()->LoadFrame(1, "image\\boss\\dead\\right\\01.bmp"))
+		return false;
+	if (!boss_dead.GetRight()->LoadFrame(2, "image\\boss\\dead\\right\\02.bmp"))
+		return false;
+
+	if (!boss_dead.GetRightUp()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_dead.GetRightUp()->LoadFrame(0, "image\\boss\\dead\\rightup\\00.bmp"))
+		return false;
+	if (!boss_dead.GetRightUp()->LoadFrame(1, "image\\boss\\dead\\rightup\\01.bmp"))
+		return false;
+	if (!boss_dead.GetRightUp()->LoadFrame(2, "image\\boss\\dead\\rightup\\02.bmp"))
+		return false;
+
+	if (!boss_dead.GetRightDown()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_dead.GetRightDown()->LoadFrame(0, "image\\boss\\dead\\rightdown\\00.bmp"))
+		return false;
+	if (!boss_dead.GetRightDown()->LoadFrame(1, "image\\boss\\dead\\rightdown\\01.bmp"))
+		return false;
+	if (!boss_dead.GetRightDown()->LoadFrame(2, "image\\boss\\dead\\rightdown\\02.bmp"))
+		return false;
+
+	if (!boss_dead.GetUp()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_dead.GetUp()->LoadFrame(0, "image\\boss\\dead\\up\\00.bmp"))
+		return false;
+	if (!boss_dead.GetUp()->LoadFrame(1, "image\\boss\\dead\\up\\01.bmp"))
+		return false;
+	if (!boss_dead.GetUp()->LoadFrame(2, "image\\boss\\dead\\up\\02.bmp"))
+		return false;
+
+	if (!boss_dead.GetDown()->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_dead.GetDown()->LoadFrame(0, "image\\boss\\dead\\down\\00.bmp"))
+		return false;
+	if (!boss_dead.GetDown()->LoadFrame(1, "image\\boss\\dead\\down\\01.bmp"))
+		return false;
+	if (!boss_dead.GetDown()->LoadFrame(2, "image\\boss\\dead\\down\\02.bmp"))
+		return false;
+#pragma endregion
+
+#pragma region boss_hp_bar
+	if (!boss_hp_window.InitSprite(1, 36, 552, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_hp_window.LoadFrame(0, "image\\gui\\boss_hp_bar\\boss_hp_window.bmp"))
+		return false;
+
+	if (!boss_hp.InitSprite(4, 18, 450, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_hp.LoadFrame(0, "image\\gui\\boss_hp_bar\\boss_hp0.bmp"))
+		return false;
+	if (!boss_hp.LoadFrame(1, "image\\gui\\boss_hp_bar\\boss_hp1.bmp"))
+		return false;
+	if (!boss_hp.LoadFrame(2, "image\\gui\\boss_hp_bar\\boss_hp2.bmp"))
+		return false;
+	if (!boss_hp.LoadFrame(3, "image\\gui\\boss_hp_bar\\boss_hp3.bmp"))
+		return false;
+#pragma endregion
+
+#pragma region player_hp
+	if (!player_hp.InitSprite(3, 50, 43, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_hp.LoadFrame(0, "image\\gui\\player_hp\\hp_0.bmp"))
+		return false;
+	if (!player_hp.LoadFrame(1, "image\\gui\\player_hp\\hp_1.bmp"))
+		return false;
+	if (!player_hp.LoadFrame(2, "image\\gui\\player_hp\\hp_2.bmp"))
+		return false;
+#pragma endregion
+
+#pragma region enemy_idle
+	if (!enemy_idle_left.InitSprite(6, 24 * 2, 21 * 2, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!enemy_idle_left.LoadFrame(0, "image\\enemy\\idle\\left\\00.bmp"))
+		return false;
+	if (!enemy_idle_left.LoadFrame(1, "image\\enemy\\idle\\left\\01.bmp"))
+		return false;
+	if (!enemy_idle_left.LoadFrame(2, "image\\enemy\\idle\\left\\02.bmp"))
+		return false;
+	if (!enemy_idle_left.LoadFrame(3, "image\\enemy\\idle\\left\\03.bmp"))
+		return false;
+	if (!enemy_idle_left.LoadFrame(4, "image\\enemy\\idle\\left\\04.bmp"))
+		return false;
+	if (!enemy_idle_left.LoadFrame(5, "image\\enemy\\idle\\left\\05.bmp"))
+		return false;
+
+	if (!enemy_idle_right.InitSprite(6, 24 * 2, 21 * 2, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!enemy_idle_right.LoadFrame(0, "image\\enemy\\idle\\right\\00.bmp"))
+		return false;
+	if (!enemy_idle_right.LoadFrame(1, "image\\enemy\\idle\\right\\01.bmp"))
+		return false;
+	if (!enemy_idle_right.LoadFrame(2, "image\\enemy\\idle\\right\\02.bmp"))
+		return false;
+	if (!enemy_idle_right.LoadFrame(3, "image\\enemy\\idle\\right\\03.bmp"))
+		return false;
+	if (!enemy_idle_right.LoadFrame(4, "image\\enemy\\idle\\right\\04.bmp"))
+		return false;
+	if (!enemy_idle_right.LoadFrame(5, "image\\enemy\\idle\\right\\05.bmp"))
+		return false;
+#pragma endregion
+
+#pragma region enemy_up
+	if (!enemy_up_left.InitSprite(5, 36 * 2, 21 * 2, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!enemy_up_left.LoadFrame(0, "image\\enemy\\up\\left\\00.bmp"))
+		return false;
+	if (!enemy_up_left.LoadFrame(1, "image\\enemy\\up\\left\\01.bmp"))
+		return false;
+	if (!enemy_up_left.LoadFrame(2, "image\\enemy\\up\\left\\02.bmp"))
+		return false;
+	if (!enemy_up_left.LoadFrame(3, "image\\enemy\\up\\left\\03.bmp"))
+		return false;
+	if (!enemy_up_left.LoadFrame(4, "image\\enemy\\up\\left\\04.bmp"))
+		return false;
+
+	if (!enemy_up_right.InitSprite(5, 36 * 2, 21 * 2, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!enemy_up_right.LoadFrame(0, "image\\enemy\\up\\right\\00.bmp"))
+		return false;
+	if (!enemy_up_right.LoadFrame(1, "image\\enemy\\up\\right\\01.bmp"))
+		return false;
+	if (!enemy_up_right.LoadFrame(2, "image\\enemy\\up\\right\\02.bmp"))
+		return false;
+	if (!enemy_up_right.LoadFrame(3, "image\\enemy\\up\\right\\03.bmp"))
+		return false;
+	if (!enemy_up_right.LoadFrame(4, "image\\enemy\\up\\right\\04.bmp"))
+		return false;
+#pragma endregion
+
+#pragma region enemy_hide
+	if (!enemy_hide_left.InitSprite(6, 20 * 2, 21 * 2, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!enemy_hide_left.LoadFrame(0, "image\\enemy\\hide\\left\\00.bmp"))
+		return false;
+	if (!enemy_hide_left.LoadFrame(1, "image\\enemy\\hide\\left\\01.bmp"))
+		return false;
+	if (!enemy_hide_left.LoadFrame(2, "image\\enemy\\hide\\left\\02.bmp"))
+		return false;
+	if (!enemy_hide_left.LoadFrame(3, "image\\enemy\\hide\\left\\03.bmp"))
+		return false;
+	if (!enemy_hide_left.LoadFrame(4, "image\\enemy\\hide\\left\\04.bmp"))
+		return false;
+	if (!enemy_hide_left.LoadFrame(5, "image\\enemy\\hide\\left\\05.bmp"))
+		return false;
+
+	if (!enemy_hide_right.InitSprite(6, 20 * 2, 21 * 2, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!enemy_hide_right.LoadFrame(0, "image\\enemy\\hide\\right\\00.bmp"))
+		return false;
+	if (!enemy_hide_right.LoadFrame(1, "image\\enemy\\hide\\right\\01.bmp"))
+		return false;
+	if (!enemy_hide_right.LoadFrame(2, "image\\enemy\\hide\\right\\02.bmp"))
+		return false;
+	if (!enemy_hide_right.LoadFrame(3, "image\\enemy\\hide\\right\\03.bmp"))
+		return false;
+	if (!enemy_hide_right.LoadFrame(4, "image\\enemy\\hide\\right\\04.bmp"))
+		return false;
+	if (!enemy_hide_right.LoadFrame(5, "image\\enemy\\hide\\right\\05.bmp"))
+		return false;
+#pragma endregion
+
+#pragma region enemy_attack
+	if (!enemy_attack_left.InitSprite(10, 22 * 2, 21 * 2, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!enemy_attack_left.LoadFrame(0, "image\\enemy\\attack\\left\\00.bmp"))
+		return false;
+	if (!enemy_attack_left.LoadFrame(1, "image\\enemy\\attack\\left\\01.bmp"))
+		return false;
+	if (!enemy_attack_left.LoadFrame(2, "image\\enemy\\attack\\left\\02.bmp"))
+		return false;
+	if (!enemy_attack_left.LoadFrame(3, "image\\enemy\\attack\\left\\03.bmp"))
+		return false;
+	if (!enemy_attack_left.LoadFrame(4, "image\\enemy\\attack\\left\\04.bmp"))
+		return false;
+	if (!enemy_attack_left.LoadFrame(5, "image\\enemy\\attack\\left\\05.bmp"))
+		return false;
+	if (!enemy_attack_left.LoadFrame(6, "image\\enemy\\attack\\left\\06.bmp"))
+		return false;
+	if (!enemy_attack_left.LoadFrame(7, "image\\enemy\\attack\\left\\07.bmp"))
+		return false;
+	if (!enemy_attack_left.LoadFrame(8, "image\\enemy\\attack\\left\\08.bmp"))
+		return false;
+	if (!enemy_attack_left.LoadFrame(9, "image\\enemy\\attack\\left\\09.bmp"))
+		return false;
+
+	if (!enemy_attack_right.InitSprite(10, 22 * 2, 21 * 2, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!enemy_attack_right.LoadFrame(0, "image\\enemy\\attack\\right\\00.bmp"))
+		return false;
+	if (!enemy_attack_right.LoadFrame(1, "image\\enemy\\attack\\right\\01.bmp"))
+		return false;
+	if (!enemy_attack_right.LoadFrame(2, "image\\enemy\\attack\\right\\02.bmp"))
+		return false;
+	if (!enemy_attack_right.LoadFrame(3, "image\\enemy\\attack\\right\\03.bmp"))
+		return false;
+	if (!enemy_attack_right.LoadFrame(4, "image\\enemy\\attack\\right\\04.bmp"))
+		return false;
+	if (!enemy_attack_right.LoadFrame(5, "image\\enemy\\attack\\right\\05.bmp"))
+		return false;
+	if (!enemy_attack_right.LoadFrame(6, "image\\enemy\\attack\\right\\06.bmp"))
+		return false;
+	if (!enemy_attack_right.LoadFrame(7, "image\\enemy\\attack\\right\\07.bmp"))
+		return false;
+	if (!enemy_attack_right.LoadFrame(8, "image\\enemy\\attack\\right\\08.bmp"))
+		return false;
+	if (!enemy_attack_right.LoadFrame(9, "image\\enemy\\attack\\right\\09.bmp"))
+		return false;
+#pragma endregion
+
+	float arrow_size = 0.15f;
+	arrowSprite.GetLeft()->SetSize(arrow_size);
+	arrowSprite.GetLeftUp()->SetSize(arrow_size);
+	arrowSprite.GetLeftDown()->SetSize(arrow_size);
+	arrowSprite.GetRight()->SetSize(arrow_size);
+	arrowSprite.GetRightUp()->SetSize(arrow_size);
+	arrowSprite.GetRightDown()->SetSize(arrow_size);
+	arrowSprite.GetUp()->SetSize(arrow_size);
+	arrowSprite.GetDown()->SetSize(arrow_size);
+
+	boss_snowball.SetSize(3);
+
+	return true;
+}

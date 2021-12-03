@@ -1,0 +1,139 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{5F729F69-C573-4451-8544-3A63A4610046}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Titan_Souls</RootNamespace>
+    <ProjectName>Titan_Souls</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="arrow.cpp" />
+    <ClCompile Include="block.cpp" />
+    <ClCompile Include="bmp.cpp" />
+    <ClCompile Include="boss.cpp" />
+    <ClCompile Include="buttondown.cpp" />
+    <ClCompile Include="camera.cpp" />
+    <ClCompile Include="choicewindow.cpp" />
+    <ClCompile Include="dsutil.cpp" />
+    <ClCompile Include="editormain.cpp" />
+    <ClCompile Include="enemy.cpp" />
+    <ClCompile Include="fireblock.cpp" />
+    <ClCompile Include="gamemain.cpp" />
+    <ClCompile Include="gobject.cpp" />
+    <ClCompile Include="gui.cpp" />
+    <ClCompile Include="InitDirectX.cpp" />
+    <ClCompile Include="intromain.cpp" />
+    <ClCompile Include="introsprite.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="map.cpp" />
+    <ClCompile Include="mapeditor.cpp" />
+    <ClCompile Include="myplayer.cpp" />
+    <ClCompile Include="Vector2.cpp" />
+    <ClCompile Include="snowball.cpp" />
+    <ClCompile Include="sprite.cpp" />
+    <ClCompile Include="sprite8.cpp" />
+    <ClCompile Include="timer.cpp" />
+    <ClCompile Include="worldmapBmp.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="arrow.h" />
+    <ClInclude Include="block.h" />
+    <ClInclude Include="bmp.h" />
+    <ClInclude Include="boss.h" />
+    <ClInclude Include="buttondown.h" />
+    <ClInclude Include="camera.h" />
+    <ClInclude Include="choicewindow.h" />
+    <ClInclude Include="define.h" />
+    <ClInclude Include="DSUTIL.h" />
+    <ClInclude Include="enemy.h" />
+    <ClInclude Include="fireblock.h" />
+    <ClInclude Include="gameEnum.h" />
+    <ClInclude Include="gobject.h" />
+    <ClInclude Include="gui.h" />
+    <ClInclude Include="introsprite.h" />
+    <ClInclude Include="map.h" />
+    <ClInclude Include="mapeditor.h" />
+    <ClInclude Include="myplayer.h" />
+    <ClInclude Include="snowball.h" />
+    <ClInclude Include="Vector2.h" />
+    <ClInclude Include="sprite.h" />
+    <ClInclude Include="sprite8.h" />
+    <ClInclude Include="timer.h" />
+    <ClInclude Include="worldmapBmp.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
