@@ -9,9 +9,9 @@ using namespace std;
 
 extern MOD curMod;
 
-extern DISTANCE_STATE curPlayerDistanceState;
+extern DISTANCE_TYPE curPlayerDistanceState;
 
-extern ACTION_STATE curPlayerActionState;
+extern ACTION_TYPE curPlayerActionState;
 
 extern CPlayer player;
 
@@ -128,7 +128,7 @@ void CCamera::CheckExpansion()
 	}
 }
 
-void CCamera::Initialize(CTimer *timer)
+void CCamera::Initialize(CTimer* timer)
 {
 	m_nExpantionInterval = 4;
 	m_nMoveInterval = 4;
@@ -190,7 +190,7 @@ void CCamera::Up()
 void CCamera::Down()
 {
 	m_y += 5;
-	if (m_y >WORLDMAP_HEIGHT - (SCREEN_HEIGHT >> 1))
+	if (m_y > WORLDMAP_HEIGHT - (SCREEN_HEIGHT >> 1))
 		m_y = WORLDMAP_HEIGHT - (SCREEN_HEIGHT >> 1);
 }
 
@@ -218,21 +218,21 @@ void CCamera::Move()
 {
 	//m_x += (m_nFinishX - m_x)* !((int)curPlayerActionState == 4) ? 0.5f : 0.1f;
 	//m_y += (m_nFinishY - m_y)* !((int)curPlayerActionState == 4) ? 0.5f : 0.1f;
-	if ((int)curPlayerActionState == ACTION_STATE::ATTACK)
+	if ((int)curPlayerActionState == ACTION_TYPE::ATTACK)
 		m_nMoveSpeed = 0.1f;
 	else
 		m_nMoveSpeed = 0.5f;
 	if (curMod == MOD::MOD_EDITOR)
 		m_nMoveSpeed = 1;
-	m_x += (m_nFinishX - m_x)*m_nMoveSpeed;
-	m_y += (m_nFinishY - m_y)*m_nMoveSpeed;
-	if (m_x < SCREEN_WIDTH>>1)
+	m_x += (m_nFinishX - m_x) * m_nMoveSpeed;
+	m_y += (m_nFinishY - m_y) * m_nMoveSpeed;
+	if (m_x < SCREEN_WIDTH >> 1)
 		m_x = SCREEN_WIDTH >> 1;
-	else if (m_x > WORLDMAP_WIDTH - (SCREEN_WIDTH>>1))
+	else if (m_x > WORLDMAP_WIDTH - (SCREEN_WIDTH >> 1))
 		m_x = WORLDMAP_WIDTH - (SCREEN_WIDTH >> 1);
-	if (m_y < SCREEN_HEIGHT>>1)
+	if (m_y < SCREEN_HEIGHT >> 1)
 		m_y = SCREEN_HEIGHT >> 1;
-	else if (m_y >WORLDMAP_HEIGHT - (SCREEN_HEIGHT >> 1))
+	else if (m_y > WORLDMAP_HEIGHT - (SCREEN_HEIGHT >> 1))
 		m_y = WORLDMAP_HEIGHT - (SCREEN_HEIGHT >> 1);
 }
 
@@ -305,7 +305,7 @@ int CCamera::GetFinishY()
 int CCamera::GetFinishX2()
 {
 	int _x = 0;
-	if ((curPlayerActionState != ACTION_STATE::ATTACK) && (curPlayerActionState != ACTION_STATE::ROLL))		//°ø°İÁßÀÌ ¾Æ´Ò¶§
+	if ((curPlayerActionState != ACTION_TYPE::ATTACK) && (curPlayerActionState != ACTION_TYPE::ROLL))		//ê³µê²©ì¤‘ì´ ì•„ë‹ë•Œ
 	{
 		_x = (int)player.GetPos().x;
 	}
@@ -320,7 +320,7 @@ int CCamera::GetFinishX2()
 int CCamera::GetFinishY2()
 {
 	int _y;
-	if ((curPlayerActionState != ACTION_STATE::ATTACK) && (curPlayerActionState != ACTION_STATE::ROLL))		//°ø°İÁßÀÌ ¾Æ´Ò¶§
+	if ((curPlayerActionState != ACTION_TYPE::ATTACK) && (curPlayerActionState != ACTION_TYPE::ROLL))		//ê³µê²©ì¤‘ì´ ì•„ë‹ë•Œ
 	{
 		_y = (int)player.GetPos().y;
 	}
@@ -331,20 +331,20 @@ int CCamera::GetFinishY2()
 	return _y;
 }
 
-void CCamera::AlphaBlending(LPDIRECTDRAWSURFACE7 lpSurface)		//¹öÆÛ¿¡¼­ Ç¥¸éÀ¸·Î º¹»çÇÏ´Â ÇÔ¼ö
+void CCamera::AlphaBlending(LPDIRECTDRAWSURFACE7 lpSurface)		//ë²„í¼ì—ì„œ í‘œë©´ìœ¼ë¡œ ë³µì‚¬í•˜ëŠ” í•¨ìˆ˜
 {
-	unsigned char *rgb = new unsigned char[SCREEN_HEIGHT*SCREEN_WIDTH * 4];
-	DDSURFACEDESC2 ddsd;					//Ç¥¸éÀÇ Á¤º¸¸¦ È®ÀÎÇÒ¼ö ÀÖ´Â º¯¼ö¸¦ ¼±¾ğ
-	ZeroMemory(&ddsd, sizeof(ddsd));		//ddsdÁÖ¼Ò¿¡¼­ ddsdÅ©±â¸¸Å­ ¸Ş¸ğ¸®¿µ¿ªÀ» 0À¸·Î Ã¤¿öÁÜ
-	ddsd.dwSize = sizeof(ddsd);				//dwSize¸¦ ddsdÅ©±â¸¸Å­ ÃÊ±âÈ­ ÇØÁØ´Ù
+	unsigned char* rgb = new unsigned char[SCREEN_HEIGHT * SCREEN_WIDTH * 4];
+	DDSURFACEDESC2 ddsd;					//í‘œë©´ì˜ ì •ë³´ë¥¼ í™•ì¸í• ìˆ˜ ìˆëŠ” ë³€ìˆ˜ë¥¼ ì„ ì–¸
+	ZeroMemory(&ddsd, sizeof(ddsd));		//ddsdì£¼ì†Œì—ì„œ ddsdí¬ê¸°ë§Œí¼ ë©”ëª¨ë¦¬ì˜ì—­ì„ 0ìœ¼ë¡œ ì±„ì›Œì¤Œ
+	ddsd.dwSize = sizeof(ddsd);				//dwSizeë¥¼ ddsdí¬ê¸°ë§Œí¼ ì´ˆê¸°í™” í•´ì¤€ë‹¤
 
-	FAILED(lpSurface->Lock(NULL, &ddsd, DDLOCK_WAIT, NULL));				//¸¸¾à Ç¥¸éÀ» Àá±İÇÏ´Âµ¥ ½ÇÆĞÇÒ°æ¿ì false¸¦ ¹İÈ¯ÇØÁØ´Ù
+	FAILED(lpSurface->Lock(NULL, &ddsd, DDLOCK_WAIT, NULL));				//ë§Œì•½ í‘œë©´ì„ ì ê¸ˆí•˜ëŠ”ë° ì‹¤íŒ¨í• ê²½ìš° falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
 
-	//unsigned char *pDest, *pSrc;			//Ç¥¸éÀÇÁÖ¼Ò¸¦ ´ãÀ»¼ö ÀÖ´Â º¯¼ö, ¹öÆÛÀÇ ÁÖ¼Ò¸¦ ´ãÀ»¼ö ÀÖ´Â º¯¼ö
+	//unsigned char *pDest, *pSrc;			//í‘œë©´ì˜ì£¼ì†Œë¥¼ ë‹´ì„ìˆ˜ ìˆëŠ” ë³€ìˆ˜, ë²„í¼ì˜ ì£¼ì†Œë¥¼ ë‹´ì„ìˆ˜ ìˆëŠ” ë³€ìˆ˜
 	//unsigned char *aaa = new unsigned char[SCREEN_HEIGHT*SCREEN_WIDTH * 4];
 	//CopyMemory(aaa, (unsigned char*)ddsd.lpSurface, SCREEN_HEIGHT*SCREEN_WIDTH * 4);
-	unsigned char *surface = (unsigned char*)ddsd.lpSurface;
-	CopyMemory(rgb, surface, SCREEN_HEIGHT*SCREEN_WIDTH * 4);
+	unsigned char* surface = (unsigned char*)ddsd.lpSurface;
+	CopyMemory(rgb, surface, SCREEN_HEIGHT * SCREEN_WIDTH * 4);
 	for (int i = 0; i < SCREEN_HEIGHT; i++)
 	{
 		for (int j = 0; j < SCREEN_WIDTH; j++)
@@ -356,9 +356,9 @@ void CCamera::AlphaBlending(LPDIRECTDRAWSURFACE7 lpSurface)		//¹öÆÛ¿¡¼­ Ç¥¸éÀ¸·Î
 			/*bgRed = (bgRed * Alpha) >> 8;
 			bgGreen = (bgGreen * Alpha) >> 8;
 			bgBlue = (bgBlue * Alpha) >> 8;*/
-			rgb[(i*SCREEN_WIDTH * 4) + (j * 4)] = (rgb[(i*SCREEN_WIDTH * 4) + (j * 4)] * Alpha) >> 8;
-			rgb[(i*SCREEN_WIDTH * 4) + (j * 4) + 1] = (rgb[(i*SCREEN_WIDTH * 4) + (j * 4) + 1] * Alpha) >> 8;
-			rgb[(i*SCREEN_WIDTH * 4) + (j * 4) + 2] = (rgb[(i*SCREEN_WIDTH * 4) + (j * 4) + 2] * Alpha) >> 8;
+			rgb[(i * SCREEN_WIDTH * 4) + (j * 4)] = (rgb[(i * SCREEN_WIDTH * 4) + (j * 4)] * Alpha) >> 8;
+			rgb[(i * SCREEN_WIDTH * 4) + (j * 4) + 1] = (rgb[(i * SCREEN_WIDTH * 4) + (j * 4) + 1] * Alpha) >> 8;
+			rgb[(i * SCREEN_WIDTH * 4) + (j * 4) + 2] = (rgb[(i * SCREEN_WIDTH * 4) + (j * 4) + 2] * Alpha) >> 8;
 			/*CopyMemory(aaa + i*SCREEN_WIDTH * 4 + j * 4 + 2, &bgRed, 1);
 			CopyMemory(aaa + i*SCREEN_WIDTH * 4 + j * 4 + 1, &bgGreen, 1);
 			CopyMemory(aaa + i*SCREEN_WIDTH * 4 + j * 4, &bgBlue, 1);*/
@@ -366,11 +366,11 @@ void CCamera::AlphaBlending(LPDIRECTDRAWSURFACE7 lpSurface)		//¹öÆÛ¿¡¼­ Ç¥¸éÀ¸·Î
 		}
 		//CopyMemory(aaa + i*SCREEN_WIDTH * 4, &rgb, SCREEN_WIDTH * 4);
 	}
-	CopyMemory(surface, rgb, SCREEN_HEIGHT*SCREEN_WIDTH * 4);
+	CopyMemory(surface, rgb, SCREEN_HEIGHT * SCREEN_WIDTH * 4);
 	//ZeroMemory(surface, sizeof(surface));
 
 	/*pDest = (unsigned char*)ddsd.lpSurface;
-	pSrc = aaa;*/						//¹öÆÛÀÇ ÁÖ¼Ò¸¦ ºÒ·¯¿È
+	pSrc = aaa;*/						//ë²„í¼ì˜ ì£¼ì†Œë¥¼ ë¶ˆëŸ¬ì˜´
 
 	//CopyMemory(aaaa, surface, sizeof(surface));
 
@@ -418,9 +418,9 @@ void worker(thread_data* data)
 		for (j = 0; j < SCREEN_WIDTH; j++)
 		{
 			index = (i * SCREEN_WIDTH * 4) + (j * 4) + data->start;
-			*(data->rgb+index) = (*(data->rgb + index) * data->alpha) >> 8;
-			*(data->rgb+index + 1) = (*(data->rgb + index + 1) * data->alpha) >> 8;
-			*(data->rgb+index + 2) = (*(data->rgb + index + 2) * data->alpha) >> 8;
+			*(data->rgb + index) = (*(data->rgb + index) * data->alpha) >> 8;
+			*(data->rgb + index + 1) = (*(data->rgb + index + 1) * data->alpha) >> 8;
+			*(data->rgb + index + 2) = (*(data->rgb + index + 2) * data->alpha) >> 8;
 
 
 			//CopyMemory(surface + SCREEN_HEIGHT * SCREEN_WIDTH * 4 + 1, abc, 5 * SCREEN_WIDTH * 4 + 839 * 4);
@@ -430,19 +430,24 @@ void worker(thread_data* data)
 
 void CCamera::AlphaBlending2(LPDIRECTDRAWSURFACE7 lpSurface)
 {
-	DDSURFACEDESC2 ddsd;					//Ç¥¸éÀÇ Á¤º¸¸¦ È®ÀÎÇÒ¼ö ÀÖ´Â º¯¼ö¸¦ ¼±¾ğ
-	ZeroMemory(&ddsd, sizeof(ddsd));		//ddsdÁÖ¼Ò¿¡¼­ ddsdÅ©±â¸¸Å­ ¸Ş¸ğ¸®¿µ¿ªÀ» 0À¸·Î Ã¤¿öÁÜ
-	ddsd.dwSize = sizeof(ddsd);				//dwSize¸¦ ddsdÅ©±â¸¸Å­ ÃÊ±âÈ­ ÇØÁØ´Ù
+	DDSURFACEDESC2 ddsd;					//í‘œë©´ì˜ ì •ë³´ë¥¼ í™•ì¸í• ìˆ˜ ìˆëŠ” ë³€ìˆ˜ë¥¼ ì„ ì–¸
+	ZeroMemory(&ddsd, sizeof(ddsd));		//ddsdì£¼ì†Œì—ì„œ ddsdí¬ê¸°ë§Œí¼ ë©”ëª¨ë¦¬ì˜ì—­ì„ 0ìœ¼ë¡œ ì±„ì›Œì¤Œ
+	ddsd.dwSize = sizeof(ddsd);				//dwSizeë¥¼ ddsdí¬ê¸°ë§Œí¼ ì´ˆê¸°í™” í•´ì¤€ë‹¤
 
-	lpSurface->Lock(NULL, &ddsd, DDLOCK_WAIT, NULL);				//¸¸¾à Ç¥¸éÀ» Àá±İÇÏ´Âµ¥ ½ÇÆĞÇÒ°æ¿ì false¸¦ ¹İÈ¯ÇØÁØ´Ù
+	lpSurface->Lock(NULL, &ddsd, DDLOCK_WAIT, NULL);				//ë§Œì•½ í‘œë©´ì„ ì ê¸ˆí•˜ëŠ”ë° ì‹¤íŒ¨í• ê²½ìš° falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
 
-	//unsigned char *pDest, *pSrc;			//Ç¥¸éÀÇÁÖ¼Ò¸¦ ´ãÀ»¼ö ÀÖ´Â º¯¼ö, ¹öÆÛÀÇ ÁÖ¼Ò¸¦ ´ãÀ»¼ö ÀÖ´Â º¯¼ö
+	//unsigned char *pDest, *pSrc;			//í‘œë©´ì˜ì£¼ì†Œë¥¼ ë‹´ì„ìˆ˜ ìˆëŠ” ë³€ìˆ˜, ë²„í¼ì˜ ì£¼ì†Œë¥¼ ë‹´ì„ìˆ˜ ìˆëŠ” ë³€ìˆ˜
 	//unsigned char *aaa = new unsigned char[SCREEN_HEIGHT*SCREEN_WIDTH * 4];
 	//CopyMemory(aaa, (unsigned char*)ddsd.lpSurface, SCREEN_HEIGHT*SCREEN_WIDTH * 4);
 	unsigned char* surface = (unsigned char*)ddsd.lpSurface;
-	CopyMemory(_rgb, surface, SCREEN_HEIGHT * SCREEN_WIDTH * 4);
+	//CopyMemory(_rgb, surface, SCREEN_HEIGHT * SCREEN_WIDTH * 4);
 
-	//const int num_pro = std::thread::hardware_concurrency();  //cpu ¾²·¹µå °¹¼ö ÆÄ¾Ç ÇÔ¼ö
+	for (int i = 0; i < ddsd.dwHeight; i++)
+	{
+		CopyMemory(_rgb + i * SCREEN_WIDTH * 4, surface + i * ddsd.lPitch, SCREEN_WIDTH * 4);
+	}
+
+	//const int num_pro = std::thread::hardware_concurrency();  //cpu ì“°ë ˆë“œ ê°¯ìˆ˜ íŒŒì•… í•¨ìˆ˜
 	//vector<std::thread> workers;
 	//workers.resize(num_pro);
 
@@ -452,7 +457,7 @@ void CCamera::AlphaBlending2(LPDIRECTDRAWSURFACE7 lpSurface)
 
 	for (int b = 0; b < threadCnt; b++)
 	{
-		thread_data *data;
+		thread_data* data;
 		data = (thread_data*)malloc(sizeof(thread_data));
 		ZeroMemory(data, sizeof(thread_data));
 		data->rgb = _rgb;
@@ -476,8 +481,15 @@ void CCamera::AlphaBlending2(LPDIRECTDRAWSURFACE7 lpSurface)
 	//{
 	//}
 
-	CopyMemory(surface , _rgb, SCREEN_HEIGHT * SCREEN_WIDTH * 4);
-	memset(surface + SCREEN_HEIGHT * SCREEN_WIDTH * 4, 0, 5 * SCREEN_WIDTH * 4 + 839 * 4);
+	//CopyMemory(surface, _rgb, (SCREEN_HEIGHT * SCREEN_WIDTH) << 2);
+
+	for (int i = 0; i < ddsd.dwHeight; i++)
+	{
+		CopyMemory(surface + i * ddsd.lPitch, _rgb + i * SCREEN_WIDTH * 4, SCREEN_WIDTH * 4);
+	}
+
+
+	//memset(surface + SCREEN_HEIGHT * SCREEN_WIDTH * 4, 0, 5 * SCREEN_WIDTH * 4 + 839 * 4);
 
 	//CopyMemory(abc, surface + SCREEN_HEIGHT * SCREEN_WIDTH * 4, 40);
 	//sprintf_s(buffer2, TEXT("%d,, %d"), ddsd.dwWidth, ddsd.dwHeight);
