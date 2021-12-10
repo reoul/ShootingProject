@@ -2,6 +2,7 @@
 #define __sprite8_h_
 
 #include "sprite.h"
+#include "gameEnum.h"
 
 class CSprite8
 {
@@ -18,6 +19,7 @@ public:
 	CSprite8();
 	~CSprite8();
 	void Init();
+	CSprite* GetSprite(DISTANCE_TYPE type);
 	CSprite* GetLeft();
 	CSprite* GetLeftUp();
 	CSprite* GetLeftDown();

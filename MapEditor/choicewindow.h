@@ -22,9 +22,9 @@ public:
 	void Initialize();
 	bool Drawing(LPDIRECTDRAWSURFACE7 pSurface);
 	RECT GetRect();
-	void CheckBlockClick(int x, int y);		//¿¡µğÅÍ¿¡¼­ ºí·°À» Å¬¸¯Çß´ÂÁö È®ÀÎÇÏ´Â ÇÔ¼ö
+	void CheckBlockClick(int x, int y);		//ì—ë””í„°ì—ì„œ ë¸”ëŸ­ì„ í´ë¦­í–ˆëŠ”ì§€ í™•ì¸í•˜ëŠ” í•¨ìˆ˜
 	void SetCanMove(bool move);
 	bool GetCanMove();
-	void SetXY(int x,int y);		//¿¡µğÅÍ ºí·°Ã¢ À§Ä¡ ¼³Á¤
+	void SetXY(int x,int y);		//ì—ë””í„° ë¸”ëŸ­ì°½ ìœ„ì¹˜ ì„¤ì •
 };
 #endif

@@ -146,10 +146,10 @@ bool CSprite::LoadFrame(int nFrame, char* filename)
 
 bool CSprite::Drawing(int nFrame, int x, int y, LPDIRECTDRAWSURFACE7 pSurface, bool bUsingColorKey)
 {
-	RECT destRect;					//Ãâ·Â ¿µ¿ª ¼³Á¤ º¯¼ö
-	RECT destRect2;					//¿øº» ÀÌ¹ÌÁö ¿µ¿ª ¼³Á¤ º¯¼ö
+	RECT destRect;					//ì¶œë ¥ ì˜ì—­ ì„¤ì • ë³€ìˆ˜
+	RECT destRect2;					//ì›ë³¸ ì´ë¯¸ì§€ ì˜ì—­ ì„¤ì • ë³€ìˆ˜
 
-	//destRect.left = x - (m_nWidth >> 1) - (m_nWidth * (camera.GetExpansion() - 1));			//È®´ë¹öÀü
+	//destRect.left = x - (m_nWidth >> 1) - (m_nWidth * (camera.GetExpansion() - 1));			//í™•ëŒ€ë²„ì „
 	//destRect.top = y - (m_nHeight >> 1) - (m_nHeight * (camera.GetExpansion() - 1));
 	//destRect.right = destRect.left + m_nWidth + 2*(m_nWidth * (camera.GetExpansion() - 1));
 	//destRect.bottom = destRect.top + m_nHeight + 2*(m_nHeight * (camera.GetExpansion() - 1));
@@ -295,11 +295,11 @@ bool CSprite::Drawing(RECT rect, LPDIRECTDRAWSURFACE7 pSurface, bool bUsingColor
 
 bool CSprite::DrawingBossHp(int nFrame, int x, int y, LPDIRECTDRAWSURFACE7 pSurface, bool bUsingColorKey)
 {
-	RECT destRect;					//Ãâ·Â ¿µ¿ª ¼³Á¤ º¯¼ö
-	RECT destRect2;					//¿øº» ÀÌ¹ÌÁö ¿µ¿ª ¼³Á¤ º¯¼ö
+	RECT destRect;					//ì¶œë ¥ ì˜ì—­ ì„¤ì • ë³€ìˆ˜
+	RECT destRect2;					//ì›ë³¸ ì´ë¯¸ì§€ ì˜ì—­ ì„¤ì • ë³€ìˆ˜
 
 	destRect.left = x - (draw_Width >> 1);
-	destRect.top = y - (draw_Height >> 1) + (draw_Height * ((1000 - boss.m_nHp) * 0.001f));		// º¸½º Ã¼·Â ±ïÀÎ ¸¸Å­ Ã¼·Â ºÎºÐ ÁÙ¿©ÁÜ
+	destRect.top = y - (draw_Height >> 1) + (draw_Height * ((1000 - boss.m_nHp) * 0.001f));		// ë³´ìŠ¤ ì²´ë ¥ ê¹ì¸ ë§Œí¼ ì²´ë ¥ ë¶€ë¶„ ì¤„ì—¬ì¤Œ
 	destRect.right = destRect.left + draw_Width;
 	destRect.bottom = y - (draw_Height >> 1) + draw_Height;
 
@@ -475,8 +475,8 @@ bool CSprite::Drawing2(int nFrame, int x, int y, LPDIRECTDRAWSURFACE7 pSurface, 
 
 bool CSprite::BlockDrawing(int x, int y, LPDIRECTDRAWSURFACE7 pSurface, bool bUsingColorKey)
 {
-	RECT destRect;					//Ãâ·Â ¿µ¿ª ¼³Á¤ º¯¼ö
-	RECT destRect2;					//¿øº» ÀÌ¹ÌÁö ¿µ¿ª ¼³Á¤ º¯¼ö
+	RECT destRect;					//ì¶œë ¥ ì˜ì—­ ì„¤ì • ë³€ìˆ˜
+	RECT destRect2;					//ì›ë³¸ ì´ë¯¸ì§€ ì˜ì—­ ì„¤ì • ë³€ìˆ˜
 
 	destRect.left = x;
 	destRect.top = y;
@@ -574,7 +574,7 @@ void CSprite::Rotate(double Degree, int _curFrame)
 			orig_y = (int)(ycenter + ((double)y - ycenter) * cc - ((double)x - xcenter) * ss);
 			ZeroMemory(pixel, 3);
 			if ((orig_y >= 0 && orig_y < m_nHeight) && (orig_x >= 0 && orig_x < m_nWidth))
-				CopyMemory(pixel, m_pBMPArray->GetBMPBuffer() + (orig_x << 2) + orig_y * (m_nWidth << 2), 3);		//¿øº» ÇÈ¼¿ °ª ÃßÃâ
+				CopyMemory(pixel, m_pBMPArray->GetBMPBuffer() + (orig_x << 2) + orig_y * (m_nWidth << 2), 3);		//ì›ë³¸ í”½ì…€ ê°’ ì¶”ì¶œ
 			//char b = *(m_pBMPArray->GetBMPBuffer() + (orig_x << 2) + orig_y * (m_nWidth << 2));
 			//char g = *(m_pBMPArray->GetBMPBuffer() + (orig_x << 2) + orig_y * (m_nWidth << 2)+1);
 			//char r = *(m_pBMPArray->GetBMPBuffer() + (orig_x << 2) + orig_y * (m_nWidth << 2)+2);

@@ -29,6 +29,31 @@ void CSprite8::Init()
 	down = new CSprite();
 }
 
+CSprite* CSprite8::GetSprite(DISTANCE_TYPE type)
+{
+	switch (type)
+	{
+	case LEFT:
+		return left;
+	case RIGHT:
+		return right;
+	case UP:
+		return up;
+	case DOWN:
+		return down;
+	case LEFTUP:
+		return leftup;
+	case RIGHTUP:
+		return rightup;
+	case LEFTDOWN:
+		return leftdown;
+	case RIGHTDOWN:
+		return rightdown;
+	default:
+		return left;
+	}
+}
+
 bool CSprite8::ReleaseAll()
 {
 	if (!left->ReleaseAll())

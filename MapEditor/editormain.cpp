@@ -51,7 +51,7 @@ void EditorMain(void)
 
 	camera.InitExpantion();
 
-	//È­¸éÀÌµ¿
+	//í™”ë©´ì´ë™
 	if (DirectInputKeyboardDown(g_lpDirectInputKeyboard, DIK_A))
 	{
 		camera.Left();
@@ -84,7 +84,7 @@ void EditorMain(void)
 	g_editor.GetChoiceWindow()->Drawing(g_lpSecondarySurface);
 
 	HRESULT hResult;
-	if (FAILED(hResult = g_lpPrimarySurface->Flip(NULL, DDFLIP_WAIT)))	//´õºí¹öÆÛ¸µ È­¸éÀüÈ¯
+	if (FAILED(hResult = g_lpPrimarySurface->Flip(NULL, DDFLIP_WAIT)))	//ë”ë¸”ë²„í¼ë§ í™”ë©´ì „í™˜
 	{
 		if (hResult == DDERR_SURFACELOST)
 			g_lpPrimarySurface->Restore();

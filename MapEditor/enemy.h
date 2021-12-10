@@ -12,9 +12,9 @@ public:
 	int m_nMoveInterval;
 private:
 	int m_nLastMoveTime;
-	float m_nMoveSpeedFold;		//¿òÁ÷ÀÓ ¼ÓµµÀÇ ¹èÀ²(1ÀÌ ±âº», 2´Â 2¹è)
-	int draw_x;		//Ä³¸¯ÅÍ¸¦ È­¸é¿¡ ±×·ÁÁÙ¶§ ±×·ÁÁÖ´Â xÁÂÇ¥
-	int draw_y;		//Ä³¸¯ÅÍ¸¦ È­¸é¿¡ ±×·ÁÁÙ¶§ ±×·ÁÁÖ´Â yÁÂÇ¥
+	float m_nMoveSpeedFold;		//ì›€ì§ì„ ì†ë„ì˜ ë°°ìœ¨(1ì´ ê¸°ë³¸, 2ëŠ” 2ë°°)
+	int draw_x;		//ìºë¦­í„°ë¥¼ í™”ë©´ì— ê·¸ë ¤ì¤„ë•Œ ê·¸ë ¤ì£¼ëŠ” xì¢Œí‘œ
+	int draw_y;		//ìºë¦­í„°ë¥¼ í™”ë©´ì— ê·¸ë ¤ì¤„ë•Œ ê·¸ë ¤ì£¼ëŠ” yì¢Œí‘œ
 
 	CSprite* m_pLeftIdleSprite;
 	CSprite* m_pRightIdleSprite;

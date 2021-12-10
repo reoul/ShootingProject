@@ -10,7 +10,7 @@ extern EDIT_STATE curEditState;
 extern char *wallBlockData[BLOCK_X*BLOCK_Y * 2];
 extern char *wallBlockData2[BLOCK_X*BLOCK_Y * 2];
 
-extern MOD curMod;			//ÇöÀç ¸ğµå
+extern MOD curMod;			//í˜„ì¬ ëª¨ë“œ
 
 CWorldMap::CWorldMap()
 {
@@ -25,7 +25,7 @@ CWorldMap::~CWorldMap()
 }
 
 
-bool CWorldMap::LoadBMPFile(char *filename)		//ºñÆ®¸ÊÀÇ Á¤º¸¸¦ ºÒ·¯¿Í ¹öÆÛ¿¡ »ö»óÁ¤º¸¸¦ ´ã¾ÆÁÖ°í 24bitÀÌ¹ÌÁö¸¦ 32bitÀÌ¹ÌÁö·Î ¹Ù²ãÁÜ
+bool CWorldMap::LoadBMPFile(char *filename)		//ë¹„íŠ¸ë§µì˜ ì •ë³´ë¥¼ ë¶ˆëŸ¬ì™€ ë²„í¼ì— ìƒ‰ìƒì •ë³´ë¥¼ ë‹´ì•„ì£¼ê³  24bitì´ë¯¸ì§€ë¥¼ 32bitì´ë¯¸ì§€ë¡œ ë°”ê¿”ì¤Œ
 {
 	HANDLE hfile;
 	DWORD actualRead;
@@ -38,68 +38,71 @@ bool CWorldMap::LoadBMPFile(char *filename)		//ºñÆ®¸ÊÀÇ Á¤º¸¸¦ ºÒ·¯¿Í ¹öÆÛ¿¡ »ö»
 		return false;
 	}
 
-	BITMAPFILEHEADER bmpfilehead;		//ºñÆ®¸ÊÆÄÀÏ ÀÚÃ¼ÀÇ Á¤º¸¸¦ ÀúÀåÇÒ º¯¼ö ¼±¾ğ
-	if (!ReadFile(hfile, &bmpfilehead, sizeof(bmpfilehead), &actualRead, NULL))		//ºñÆ®¸ÊÆÄÀÏ ÀÚÃ¼ÀÇ Á¤º¸¸¦ ÀĞÀ»¼ö ¾ø´Ù¸é
+	BITMAPFILEHEADER bmpfilehead;		//ë¹„íŠ¸ë§µíŒŒì¼ ìì²´ì˜ ì •ë³´ë¥¼ ì €ì¥í•  ë³€ìˆ˜ ì„ ì–¸
+	if (!ReadFile(hfile, &bmpfilehead, sizeof(bmpfilehead), &actualRead, NULL))		//ë¹„íŠ¸ë§µíŒŒì¼ ìì²´ì˜ ì •ë³´ë¥¼ ì½ì„ìˆ˜ ì—†ë‹¤ë©´
 	{
-		CloseHandle(hfile);		//ÇÚµéÀ» ¹İ³³ÇØÁÖ°í
-		return false;			//false¸¦ ¹İÈ¯ÇØÁØ´Ù
+		CloseHandle(hfile);		//í•¸ë“¤ì„ ë°˜ë‚©í•´ì£¼ê³ 
+		return false;			//falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
 	}
-	if (bmpfilehead.bfType != 0x4D42)		//ºñÆ®¸ÊÆÄÀÏÀÌ ¾Æ´Ò°æ¿ì
+	if (bmpfilehead.bfType != 0x4D42)		//ë¹„íŠ¸ë§µíŒŒì¼ì´ ì•„ë‹ê²½ìš°
 	{
-		CloseHandle(hfile);		//ÇÚµéÀ» ¹İ³³ÇØÁÖ°í
-		return false;			//false¸¦ ¹İÈ¯ÇØÁØ´Ù
-	}
-
-	BITMAPINFOHEADER bmpinfohead;		//ºñÆ®¸Ê¿µ»ó ÀÚÃ¼ÀÇ Á¤º¸¸¦ ÀúÀåÇÒ º¯¼ö ¼±¾ğ
-	if (!ReadFile(hfile, &bmpinfohead, sizeof(bmpinfohead), &actualRead, NULL))		//ºñÆ®¸Ê¿µ»ó ÀÚÃ¼ÀÇ Á¤º¸¸¦ ÀĞÀ»¼ö ¾ø´Ù¸é
-	{
-		CloseHandle(hfile);		//ÇÚµéÀ» ¹İ³³ÇØÁÖ°í
-		return false;			//false¸¦ ¹İÈ¯ÇØÁØ´Ù
+		CloseHandle(hfile);		//í•¸ë“¤ì„ ë°˜ë‚©í•´ì£¼ê³ 
+		return false;			//falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
 	}
 
-	if (bmpinfohead.biBitCount != 24)		//ÇÈ¼¿´ç ºñÆ®¼ö°¡ 24°³°¡ ¾Æ´Ï¸é 
+	BITMAPINFOHEADER bmpinfohead;		//ë¹„íŠ¸ë§µì˜ìƒ ìì²´ì˜ ì •ë³´ë¥¼ ì €ì¥í•  ë³€ìˆ˜ ì„ ì–¸
+	if (!ReadFile(hfile, &bmpinfohead, sizeof(bmpinfohead), &actualRead, NULL))		//ë¹„íŠ¸ë§µì˜ìƒ ìì²´ì˜ ì •ë³´ë¥¼ ì½ì„ìˆ˜ ì—†ë‹¤ë©´
 	{
-		CloseHandle(hfile);		//ÇÚµéÀ» ¹İ³³ÇØÁÖ°í
-		return false;			//false¸¦ ¹İÈ¯ÇØÁØ´Ù
+		CloseHandle(hfile);		//í•¸ë“¤ì„ ë°˜ë‚©í•´ì£¼ê³ 
+		return false;			//falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
 	}
 
-	int nHeight = bmpinfohead.biHeight;		//ºñÆ®¸ÊÀÇ ³ôÀÌ¸¦ ºÒ·¯¿Í nHeight¿¡ ÃÊ±âÈ­
-	bool bBottomUp;			//ÀÌ¹ÌÁö°¡ µÚÁı¾îÁ®ÀÖ´ÂÁö È®ÀÎÇÏ´Â boolÇü º¯¼ö, true¸é ÀÌ¹ÌÁö°¡ µÚÁı¾îÁ®ÀÖÀ½
-
-	if (nHeight > 0)		//ºñÆ®¸ÊÀÇ ³ôÀÌ°¡ 0º¸´Ù Å©¸é
+	if (bmpinfohead.biBitCount != 24)		//í”½ì…€ë‹¹ ë¹„íŠ¸ìˆ˜ê°€ 24ê°œê°€ ì•„ë‹ˆë©´ 
 	{
-		bBottomUp = true;	//ÀÌ¹ÌÁö°¡ µÚÁı¾îÁ®ÀÖÀ½
+		CloseHandle(hfile);		//í•¸ë“¤ì„ ë°˜ë‚©í•´ì£¼ê³ 
+		return false;			//falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
 	}
-	else					//ºñÆ®¸ÊÀÇ ³ôÀÌ°¡ 0º¸´Ù Å©Áö¾ÊÀ»°æ¿ì
+
+	int nHeight = bmpinfohead.biHeight;		//ë¹„íŠ¸ë§µì˜ ë†’ì´ë¥¼ ë¶ˆëŸ¬ì™€ nHeightì— ì´ˆê¸°í™”
+	bool bBottomUp;			//ì´ë¯¸ì§€ê°€ ë’¤ì§‘ì–´ì ¸ìˆëŠ”ì§€ í™•ì¸í•˜ëŠ” boolí˜• ë³€ìˆ˜, trueë©´ ì´ë¯¸ì§€ê°€ ë’¤ì§‘ì–´ì ¸ìˆìŒ
+
+	if (nHeight > 0)		//ë¹„íŠ¸ë§µì˜ ë†’ì´ê°€ 0ë³´ë‹¤ í¬ë©´
 	{
-		bBottomUp = false;		//ÀÌ¹ÌÁö°¡ Á¤»óÀûÀ¸·Î ÀÖÀ½
-		nHeight = -nHeight;		//³ôÀÌ¸¦ ¾ç¼ö·Î ¹Ù²ãÁÜ
+		bBottomUp = true;	//ì´ë¯¸ì§€ê°€ ë’¤ì§‘ì–´ì ¸ìˆìŒ
+	}
+	else					//ë¹„íŠ¸ë§µì˜ ë†’ì´ê°€ 0ë³´ë‹¤ í¬ì§€ì•Šì„ê²½ìš°
+	{
+		bBottomUp = false;		//ì´ë¯¸ì§€ê°€ ì •ìƒì ìœ¼ë¡œ ìˆìŒ
+		nHeight = -nHeight;		//ë†’ì´ë¥¼ ì–‘ìˆ˜ë¡œ ë°”ê¿”ì¤Œ
 	}
 
 	m_nHeight = nHeight;
 	m_nWidth = bmpinfohead.biWidth;
 
-	if (m_pBuffer)				//¹öÆÛ°¡ ÀÖ´Ù¸é
-		delete[] m_pBuffer;		//¹öÆÛ¸¦ »èÁ¦ÇØÁØ´Ù
+	if (m_pBuffer)				//ë²„í¼ê°€ ìˆë‹¤ë©´
+		delete[] m_pBuffer;		//ë²„í¼ë¥¼ ì‚­ì œí•´ì¤€ë‹¤
 
 	if (m_pBuffer2)
 		delete[] m_pBuffer2;
 
-	m_pBuffer = new unsigned char[m_nHeight * m_nWidth * 4];		//»õ·Î¿î ¹öÆÛ¸¦ 32ºñÆ®·Î Ç¥ÇöÇØÁÖ±âÀ§ÇØ¼­ ÃÑÇÈ¼¿°¹¼ö*4¸¦ ÇØÁØ´Ù
+	m_pBuffer = new unsigned char[m_nHeight * m_nWidth * 4];		//ìƒˆë¡œìš´ ë²„í¼ë¥¼ 32ë¹„íŠ¸ë¡œ í‘œí˜„í•´ì£¼ê¸°ìœ„í•´ì„œ ì´í”½ì…€ê°¯ìˆ˜*4ë¥¼ í•´ì¤€ë‹¤
 	m_pBuffer2 = new unsigned char[m_nHeight * m_nWidth * 3];
 
-	struct RBGstruct			//ºñÆ®¸ÊÀº RGBÀÇ ¼ø¼­°¡ ¾Æ´Ñ BGR¼ø¼­·Î ÀúÀåµÊ
+	struct RBGstruct			//ë¹„íŠ¸ë§µì€ RGBì˜ ìˆœì„œê°€ ì•„ë‹Œ BGRìˆœì„œë¡œ ì €ì¥ë¨
 	{
 		unsigned char B;
 		unsigned char G;
 		unsigned char R;
 	};
 
-	struct RBGstruct *rgb24 = new RBGstruct[m_nWidth];		//ÇÈ¼¿»ö»ó Á¤º¸ ´ãÀ» º¯¼ö ¼±¾ğ
+	struct RBGstruct *rgb24 = new RBGstruct[m_nWidth];		//í”½ì…€ìƒ‰ìƒ ì •ë³´ ë‹´ì„ ë³€ìˆ˜ ì„ ì–¸
+	int nStoredLine = (m_nWidth * 3 + 3) & ~3;
+	unsigned char temp[4];
+	int nRemainder = nStoredLine - (m_nWidth * 3);
 
-	int nDestY, nDeltaY;		//ÇöÀç ³ôÀÌ,ÀÌ¹ÌÁö°¡ µÚÁıÈû »óÅÂ¿¡µû¶ó ´ÙÀ½¶óÀÎÀ¸·Î ¹Ù²Ü¶§ ³ôÀÌ¿¡ ´õÇØÁÖ´Â°ª
+	int nDestY, nDeltaY;		//í˜„ì¬ ë†’ì´,ì´ë¯¸ì§€ê°€ ë’¤ì§‘í˜ ìƒíƒœì—ë”°ë¼ ë‹¤ìŒë¼ì¸ìœ¼ë¡œ ë°”ê¿€ë•Œ ë†’ì´ì— ë”í•´ì£¼ëŠ”ê°’
 
-	//if (bBottomUp)				//ÀÌ¹ÌÁö°¡ µÚÁı¾îÁ®ÀÖÀ¸¸é
+	//if (bBottomUp)				//ì´ë¯¸ì§€ê°€ ë’¤ì§‘ì–´ì ¸ìˆìœ¼ë©´
 	//{
 	//	nDestY = nHeight - 1;
 	//	nDeltaY = -1;
@@ -113,16 +116,16 @@ bool CWorldMap::LoadBMPFile(char *filename)		//ºñÆ®¸ÊÀÇ Á¤º¸¸¦ ºÒ·¯¿Í ¹öÆÛ¿¡ »ö»
 	nDestY = 0;
 	nDeltaY = 1;
 
-	for (int y = 0; y < m_nHeight; y++)				//ÀÌ¹ÌÁöÀÇ ³ôÀÌÇÈ¼¿¼ö¸¸Å­
+	for (int y = 0; y < m_nHeight; y++)				//ì´ë¯¸ì§€ì˜ ë†’ì´í”½ì…€ìˆ˜ë§Œí¼
 	{
-		if (!ReadFile(hfile, rgb24, 3*m_nWidth, &actualRead, NULL))		//ÆÄÀÏ¿¡ 3¹ÙÀÌÆ® Å©±â¸¸Å­ ÀĞ¾î¿Í¼­ rgb24¿¡ ÀúÀå½ÃÄÑÁÜ
-		{														//ÆÄÀÏÀ» ¸ø ÀĞ¾î¿Ô´Ù¸é
-			CloseHandle(hfile);									//ÇÚµéÀ» ¹İ³³ÇØÁÖ°í
-			delete[] m_pBuffer;									//¹öÆÛ¸¦ »èÁ¦ÇØÁÖ°í
-			return false;										//false¸¦ ¹İÈ¯ÇØÁØ´Ù
+		if (!ReadFile(hfile, rgb24, 3*m_nWidth, &actualRead, NULL))		//íŒŒì¼ì— 3ë°”ì´íŠ¸ í¬ê¸°ë§Œí¼ ì½ì–´ì™€ì„œ rgb24ì— ì €ì¥ì‹œì¼œì¤Œ
+		{														//íŒŒì¼ì„ ëª» ì½ì–´ì™”ë‹¤ë©´
+			CloseHandle(hfile);									//í•¸ë“¤ì„ ë°˜ë‚©í•´ì£¼ê³ 
+			delete[] m_pBuffer;									//ë²„í¼ë¥¼ ì‚­ì œí•´ì£¼ê³ 
+			return false;										//falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
 		}
 		CopyMemory(m_pBuffer2+ nDestY*(m_nWidth*3), rgb24, 3*m_nWidth);
-		for (int x = 0; x < m_nWidth; x++)			//ÀÌ¹ÌÁöÀÇ °¡·ÎÇÈ¼¿¼ö¸¸Å­
+		for (int x = 0; x < m_nWidth; x++)			//ì´ë¯¸ì§€ì˜ ê°€ë¡œí”½ì…€ìˆ˜ë§Œí¼
 		{
 			//CopyMemory(m_pBuffer + (x << 2) + nDestY*(m_nWidth << 2), &rgb24[x], 3);
 			CopyMemory(m_pBuffer + (x << 2) + nDestY*(m_nWidth << 2), rgb24+x, 3);
@@ -130,6 +133,12 @@ bool CWorldMap::LoadBMPFile(char *filename)		//ºñÆ®¸ÊÀÇ Á¤º¸¸¦ ºÒ·¯¿Í ¹öÆÛ¿¡ »ö»
 		}
 
 		nDestY += nDeltaY;
+		if (!ReadFile(hfile, temp, nRemainder, &actualRead, NULL))
+		{
+			CloseHandle(hfile);
+			delete[] m_pBuffer;
+			return false;
+		}
 	}
 
 	delete[] rgb24;
@@ -168,22 +177,22 @@ void CWorldMap::Restore()
 {
 	m_pSurface[0]->Restore();
 
-	DDSURFACEDESC2 ddsd;					//Ç¥¸éÀÇ Á¤º¸¸¦ È®ÀÎÇÒ¼ö ÀÖ´Â º¯¼ö¸¦ ¼±¾ğ
-	ZeroMemory(&ddsd, sizeof(ddsd));		//ddsdÁÖ¼Ò¿¡¼­ ddsdÅ©±â¸¸Å­ ¸Ş¸ğ¸®¿µ¿ªÀ» 0À¸·Î Ã¤¿öÁÜ
-	ddsd.dwSize = sizeof(ddsd);				//dwSize¸¦ ddsdÅ©±â¸¸Å­ ÃÊ±âÈ­ ÇØÁØ´Ù
+	DDSURFACEDESC2 ddsd;					//í‘œë©´ì˜ ì •ë³´ë¥¼ í™•ì¸í• ìˆ˜ ìˆëŠ” ë³€ìˆ˜ë¥¼ ì„ ì–¸
+	ZeroMemory(&ddsd, sizeof(ddsd));		//ddsdì£¼ì†Œì—ì„œ ddsdí¬ê¸°ë§Œí¼ ë©”ëª¨ë¦¬ì˜ì—­ì„ 0ìœ¼ë¡œ ì±„ì›Œì¤Œ
+	ddsd.dwSize = sizeof(ddsd);				//dwSizeë¥¼ ddsdí¬ê¸°ë§Œí¼ ì´ˆê¸°í™” í•´ì¤€ë‹¤
 
-	m_pSurface[0]->Lock(NULL, &ddsd, DDLOCK_WAIT, NULL);					//¸¸¾à Ç¥¸éÀ» Àá±İÇÏ´Âµ¥ ½ÇÆĞÇÒ°æ¿ì false¸¦ ¹İÈ¯ÇØÁØ´Ù
+	m_pSurface[0]->Lock(NULL, &ddsd, DDLOCK_WAIT, NULL);					//ë§Œì•½ í‘œë©´ì„ ì ê¸ˆí•˜ëŠ”ë° ì‹¤íŒ¨í• ê²½ìš° falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
 
-	unsigned char *pDest, *pSrc;			//Ç¥¸éÀÇÁÖ¼Ò¸¦ ´ãÀ»¼ö ÀÖ´Â º¯¼ö, ¹öÆÛÀÇ ÁÖ¼Ò¸¦ ´ãÀ»¼ö ÀÖ´Â º¯¼ö
+	unsigned char *pDest, *pSrc;			//í‘œë©´ì˜ì£¼ì†Œë¥¼ ë‹´ì„ìˆ˜ ìˆëŠ” ë³€ìˆ˜, ë²„í¼ì˜ ì£¼ì†Œë¥¼ ë‹´ì„ìˆ˜ ìˆëŠ” ë³€ìˆ˜
 
-	pDest = (unsigned char*)ddsd.lpSurface;		//Ç¥¸éÀÇ ÁÖ¼Ò°ªÀ» ºÒ·¯¿È
-	pSrc = m_pBuffer;						//¹öÆÛÀÇ ÁÖ¼Ò¸¦ ºÒ·¯¿È
+	pDest = (unsigned char*)ddsd.lpSurface;		//í‘œë©´ì˜ ì£¼ì†Œê°’ì„ ë¶ˆëŸ¬ì˜´
+	pSrc = m_pBuffer;						//ë²„í¼ì˜ ì£¼ì†Œë¥¼ ë¶ˆëŸ¬ì˜´
 
-	for (int y = 0; y < m_nHeight; y++)			//³ôÀÌ¸¸Å­ for¹®À» µ¹¸°´Ù
+	for (int y = 0; y < m_nHeight; y++)			//ë†’ì´ë§Œí¼ forë¬¸ì„ ëŒë¦°ë‹¤
 	{
-		CopyMemory(pDest, pSrc, m_nWidth << 2);	//Ç¥¸é¿¡´Ù°¡ pSrc¿¡¼­ °¡·Î±æÀÌ * 4ÇÑ Å©±â¸¸Å­ ¸Ş¸ğ¸®¸¦ º¹»çÇÑ´Ù
-		pDest += ddsd.lPitch;					//pDest ½ÃÀÛÁÖ¼Ò¸¦ ´ÙÀ½¶óÀÎ½ÃÀÛÁÖ¼Ò·Î ¹Ù²Û´Ù
-		pSrc += (m_nWidth << 2);				//pSrc ½ÃÀÛÁÖ¼Ò¸¦ ´ÙÀ½¶óÀÎ½ÃÀÛÁÖ¼Ò·Î ¹Ù²Û´Ù
+		CopyMemory(pDest, pSrc, m_nWidth << 2);	//í‘œë©´ì—ë‹¤ê°€ pSrcì—ì„œ ê°€ë¡œê¸¸ì´ * 4í•œ í¬ê¸°ë§Œí¼ ë©”ëª¨ë¦¬ë¥¼ ë³µì‚¬í•œë‹¤
+		pDest += ddsd.lPitch;					//pDest ì‹œì‘ì£¼ì†Œë¥¼ ë‹¤ìŒë¼ì¸ì‹œì‘ì£¼ì†Œë¡œ ë°”ê¾¼ë‹¤
+		pSrc += (m_nWidth << 2);				//pSrc ì‹œì‘ì£¼ì†Œë¥¼ ë‹¤ìŒë¼ì¸ì‹œì‘ì£¼ì†Œë¡œ ë°”ê¾¼ë‹¤
 	}
 
 	m_pSurface[0]->Unlock(NULL);
@@ -374,14 +383,14 @@ bool CWorldMap::Drawing2(int x, int y, LPDIRECTDRAWSURFACE7 pSurface, bool bUsin
 
 }
 
-bool CWorldMap::CopyBufferToSurface(LPDIRECTDRAW7 pDirectDraw)		//¹öÆÛ¿¡¼­ Ç¥¸éÀ¸·Î º¹»çÇÏ´Â ÇÔ¼ö
+bool CWorldMap::CopyBufferToSurface(LPDIRECTDRAW7 pDirectDraw)		//ë²„í¼ì—ì„œ í‘œë©´ìœ¼ë¡œ ë³µì‚¬í•˜ëŠ” í•¨ìˆ˜
 {
-	if (!m_pBuffer)			//¹öÆÛ°¡ ¾øÀ¸¸é
-		return false;		//false¸¦ ¹İÈ¯
+	if (!m_pBuffer)			//ë²„í¼ê°€ ì—†ìœ¼ë©´
+		return false;		//falseë¥¼ ë°˜í™˜
 
-	DDSURFACEDESC2 ddsd;					//Ç¥¸éÀÇ Á¤º¸¸¦ È®ÀÎÇÒ¼ö ÀÖ´Â º¯¼ö¸¦ ¼±¾ğ
-	ZeroMemory(&ddsd, sizeof(ddsd));		//ddsdÁÖ¼Ò¿¡¼­ ddsdÅ©±â¸¸Å­ ¸Ş¸ğ¸®¿µ¿ªÀ» 0À¸·Î Ã¤¿öÁÜ
-	ddsd.dwSize = sizeof(ddsd);				//dwSize¸¦ ddsdÅ©±â¸¸Å­ ÃÊ±âÈ­ ÇØÁØ´Ù
+	DDSURFACEDESC2 ddsd;					//í‘œë©´ì˜ ì •ë³´ë¥¼ í™•ì¸í• ìˆ˜ ìˆëŠ” ë³€ìˆ˜ë¥¼ ì„ ì–¸
+	ZeroMemory(&ddsd, sizeof(ddsd));		//ddsdì£¼ì†Œì—ì„œ ddsdí¬ê¸°ë§Œí¼ ë©”ëª¨ë¦¬ì˜ì—­ì„ 0ìœ¼ë¡œ ì±„ì›Œì¤Œ
+	ddsd.dwSize = sizeof(ddsd);				//dwSizeë¥¼ ddsdí¬ê¸°ë§Œí¼ ì´ˆê¸°í™” í•´ì¤€ë‹¤
 
 	ddsd.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
 
@@ -407,27 +416,27 @@ bool CWorldMap::CopyBufferToSurface(LPDIRECTDRAW7 pDirectDraw)		//¹öÆÛ¿¡¼­ Ç¥¸éÀ
 		}
 	}
 
-	if (FAILED(m_pSurface[0]->Lock(NULL, &ddsd, DDLOCK_WAIT, NULL)))		//Ç¥¸é¿¡ Á¢±ÙÇÏ¿© ÀĞ°Å³ª ¾²´Â ÀÛ¾÷À» ÇÏ±â À§ÇØ¼­ Ç¥¸éÀº Àá±Ù´Ù
-		return false;						//¸¸¾à Ç¥¸éÀ» Àá±İÇÏ´Âµ¥ ½ÇÆĞÇÒ°æ¿ì false¸¦ ¹İÈ¯ÇØÁØ´Ù
+	if (FAILED(m_pSurface[0]->Lock(NULL, &ddsd, DDLOCK_WAIT, NULL)))		//í‘œë©´ì— ì ‘ê·¼í•˜ì—¬ ì½ê±°ë‚˜ ì“°ëŠ” ì‘ì—…ì„ í•˜ê¸° ìœ„í•´ì„œ í‘œë©´ì€ ì ê·¼ë‹¤
+		return false;						//ë§Œì•½ í‘œë©´ì„ ì ê¸ˆí•˜ëŠ”ë° ì‹¤íŒ¨í• ê²½ìš° falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
 
-	unsigned char *pDest, *pSrc;			//Ç¥¸éÀÇÁÖ¼Ò¸¦ ´ãÀ»¼ö ÀÖ´Â º¯¼ö, ¹öÆÛÀÇ ÁÖ¼Ò¸¦ ´ãÀ»¼ö ÀÖ´Â º¯¼ö
+	unsigned char *pDest, *pSrc;			//í‘œë©´ì˜ì£¼ì†Œë¥¼ ë‹´ì„ìˆ˜ ìˆëŠ” ë³€ìˆ˜, ë²„í¼ì˜ ì£¼ì†Œë¥¼ ë‹´ì„ìˆ˜ ìˆëŠ” ë³€ìˆ˜
 
-	pDest = (unsigned char*)ddsd.lpSurface;		//Ç¥¸éÀÇ ÁÖ¼Ò°ªÀ» ºÒ·¯¿È
-	pSrc = m_pBuffer;						//¹öÆÛÀÇ ÁÖ¼Ò¸¦ ºÒ·¯¿È
+	pDest = (unsigned char*)ddsd.lpSurface;		//í‘œë©´ì˜ ì£¼ì†Œê°’ì„ ë¶ˆëŸ¬ì˜´
+	pSrc = m_pBuffer;						//ë²„í¼ì˜ ì£¼ì†Œë¥¼ ë¶ˆëŸ¬ì˜´
 
-	for (int y = 0; y < m_nHeight; y++)			//³ôÀÌ¸¸Å­ for¹®À» µ¹¸°´Ù
+	for (int y = 0; y < m_nHeight; y++)			//ë†’ì´ë§Œí¼ forë¬¸ì„ ëŒë¦°ë‹¤
 	{
-		CopyMemory(pDest, pSrc, m_nWidth << 2);	//Ç¥¸é¿¡´Ù°¡ pSrc¿¡¼­ °¡·Î±æÀÌ * 4ÇÑ Å©±â¸¸Å­ ¸Ş¸ğ¸®¸¦ º¹»çÇÑ´Ù
-		pDest += ddsd.lPitch;					//pDest ½ÃÀÛÁÖ¼Ò¸¦ ´ÙÀ½¶óÀÎ½ÃÀÛÁÖ¼Ò·Î ¹Ù²Û´Ù
-		pSrc += (m_nWidth << 2);				//pSrc ½ÃÀÛÁÖ¼Ò¸¦ ´ÙÀ½¶óÀÎ½ÃÀÛÁÖ¼Ò·Î ¹Ù²Û´Ù
+		CopyMemory(pDest, pSrc, m_nWidth << 2);	//í‘œë©´ì—ë‹¤ê°€ pSrcì—ì„œ ê°€ë¡œê¸¸ì´ * 4í•œ í¬ê¸°ë§Œí¼ ë©”ëª¨ë¦¬ë¥¼ ë³µì‚¬í•œë‹¤
+		pDest += ddsd.lPitch;					//pDest ì‹œì‘ì£¼ì†Œë¥¼ ë‹¤ìŒë¼ì¸ì‹œì‘ì£¼ì†Œë¡œ ë°”ê¾¼ë‹¤
+		pSrc += (m_nWidth << 2);				//pSrc ì‹œì‘ì£¼ì†Œë¥¼ ë‹¤ìŒë¼ì¸ì‹œì‘ì£¼ì†Œë¡œ ë°”ê¾¼ë‹¤
 	}
 
-	m_pSurface[0]->Unlock(NULL);			//Àá±İÀ» ÇØÃ¼ÇØÁØ´Ù
+	m_pSurface[0]->Unlock(NULL);			//ì ê¸ˆì„ í•´ì²´í•´ì¤€ë‹¤
 
 	return true;
 }
 
-bool CWorldMap::CopyBufferToSurface2(LPDIRECTDRAW7 pDirectDraw)		//¹öÆÛ¿¡¼­ Ç¥¸éÀ¸·Î º¹»çÇÏ´Â ÇÔ¼ö
+bool CWorldMap::CopyBufferToSurface2(LPDIRECTDRAW7 pDirectDraw)		//ë²„í¼ì—ì„œ í‘œë©´ìœ¼ë¡œ ë³µì‚¬í•˜ëŠ” í•¨ìˆ˜
 {
 	char *filename = "image\\map\\bossmap.bmp";
 	HANDLE hfile;
@@ -441,29 +450,29 @@ bool CWorldMap::CopyBufferToSurface2(LPDIRECTDRAW7 pDirectDraw)		//¹öÆÛ¿¡¼­ Ç¥¸é
 		return false;
 	}
 
-	BITMAPFILEHEADER bmpfilehead;		//ºñÆ®¸ÊÆÄÀÏ ÀÚÃ¼ÀÇ Á¤º¸¸¦ ÀúÀåÇÒ º¯¼ö ¼±¾ğ
-	if (!ReadFile(hfile, &bmpfilehead, sizeof(bmpfilehead), &actualRead, NULL))		//ºñÆ®¸ÊÆÄÀÏ ÀÚÃ¼ÀÇ Á¤º¸¸¦ ÀĞÀ»¼ö ¾ø´Ù¸é
+	BITMAPFILEHEADER bmpfilehead;		//ë¹„íŠ¸ë§µíŒŒì¼ ìì²´ì˜ ì •ë³´ë¥¼ ì €ì¥í•  ë³€ìˆ˜ ì„ ì–¸
+	if (!ReadFile(hfile, &bmpfilehead, sizeof(bmpfilehead), &actualRead, NULL))		//ë¹„íŠ¸ë§µíŒŒì¼ ìì²´ì˜ ì •ë³´ë¥¼ ì½ì„ìˆ˜ ì—†ë‹¤ë©´
 	{
-		CloseHandle(hfile);		//ÇÚµéÀ» ¹İ³³ÇØÁÖ°í
-		return false;			//false¸¦ ¹İÈ¯ÇØÁØ´Ù
+		CloseHandle(hfile);		//í•¸ë“¤ì„ ë°˜ë‚©í•´ì£¼ê³ 
+		return false;			//falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
 	}
-	if (bmpfilehead.bfType != 0x4D42)		//ºñÆ®¸ÊÆÄÀÏÀÌ ¾Æ´Ò°æ¿ì
+	if (bmpfilehead.bfType != 0x4D42)		//ë¹„íŠ¸ë§µíŒŒì¼ì´ ì•„ë‹ê²½ìš°
 	{
-		CloseHandle(hfile);		//ÇÚµéÀ» ¹İ³³ÇØÁÖ°í
-		return false;			//false¸¦ ¹İÈ¯ÇØÁØ´Ù
-	}
-
-	BITMAPINFOHEADER bmpinfohead;		//ºñÆ®¸Ê¿µ»ó ÀÚÃ¼ÀÇ Á¤º¸¸¦ ÀúÀåÇÒ º¯¼ö ¼±¾ğ
-	if (!ReadFile(hfile, &bmpinfohead, sizeof(bmpinfohead), &actualRead, NULL))		//ºñÆ®¸Ê¿µ»ó ÀÚÃ¼ÀÇ Á¤º¸¸¦ ÀĞÀ»¼ö ¾ø´Ù¸é
-	{
-		CloseHandle(hfile);		//ÇÚµéÀ» ¹İ³³ÇØÁÖ°í
-		return false;			//false¸¦ ¹İÈ¯ÇØÁØ´Ù
+		CloseHandle(hfile);		//í•¸ë“¤ì„ ë°˜ë‚©í•´ì£¼ê³ 
+		return false;			//falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
 	}
 
-	if (bmpinfohead.biBitCount != 24)		//ÇÈ¼¿´ç ºñÆ®¼ö°¡ 24°³°¡ ¾Æ´Ï¸é 
+	BITMAPINFOHEADER bmpinfohead;		//ë¹„íŠ¸ë§µì˜ìƒ ìì²´ì˜ ì •ë³´ë¥¼ ì €ì¥í•  ë³€ìˆ˜ ì„ ì–¸
+	if (!ReadFile(hfile, &bmpinfohead, sizeof(bmpinfohead), &actualRead, NULL))		//ë¹„íŠ¸ë§µì˜ìƒ ìì²´ì˜ ì •ë³´ë¥¼ ì½ì„ìˆ˜ ì—†ë‹¤ë©´
 	{
-		CloseHandle(hfile);		//ÇÚµéÀ» ¹İ³³ÇØÁÖ°í
-		return false;			//false¸¦ ¹İÈ¯ÇØÁØ´Ù
+		CloseHandle(hfile);		//í•¸ë“¤ì„ ë°˜ë‚©í•´ì£¼ê³ 
+		return false;			//falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
+	}
+
+	if (bmpinfohead.biBitCount != 24)		//í”½ì…€ë‹¹ ë¹„íŠ¸ìˆ˜ê°€ 24ê°œê°€ ì•„ë‹ˆë©´ 
+	{
+		CloseHandle(hfile);		//í•¸ë“¤ì„ ë°˜ë‚©í•´ì£¼ê³ 
+		return false;			//falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
 	}
 
 	BITMAPFILEHEADER bmpfilehead2 = bmpfilehead;
@@ -473,19 +482,19 @@ bool CWorldMap::CopyBufferToSurface2(LPDIRECTDRAW7 pDirectDraw)		//¹öÆÛ¿¡¼­ Ç¥¸é
 
 	DWORD dwWritten;
 	HANDLE hfile2;
-	hfile2 = CreateFile(TEXT(filename), GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);    //ÆÄÀÏ »ı¼º
+	hfile2 = CreateFile(TEXT(filename), GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);    //íŒŒì¼ ìƒì„±
 
-	WriteFile(hfile2, &bmpfilehead2, sizeof(bmpfilehead2), &dwWritten, NULL);  //ÆÄÀÏ¿¡ µ¥ÀÌÅÍ¸¦ ±â·Ï
+	WriteFile(hfile2, &bmpfilehead2, sizeof(bmpfilehead2), &dwWritten, NULL);  //íŒŒì¼ì— ë°ì´í„°ë¥¼ ê¸°ë¡
 	WriteFile(hfile2, &bmpinfohead2, sizeof(bmpinfohead2), &dwWritten, NULL);
 	WriteFile(hfile2, m_pBuffer2, WORLDMAP_DATA_SIZE, &dwWritten, NULL);  //7680000
 	CloseHandle(hfile2);
 
-	if (!m_pBuffer)			//¹öÆÛ°¡ ¾øÀ¸¸é
-		return false;		//false¸¦ ¹İÈ¯
+	if (!m_pBuffer)			//ë²„í¼ê°€ ì—†ìœ¼ë©´
+		return false;		//falseë¥¼ ë°˜í™˜
 
-	DDSURFACEDESC2 ddsd;					//Ç¥¸éÀÇ Á¤º¸¸¦ È®ÀÎÇÒ¼ö ÀÖ´Â º¯¼ö¸¦ ¼±¾ğ
-	ZeroMemory(&ddsd, sizeof(ddsd));		//ddsdÁÖ¼Ò¿¡¼­ ddsdÅ©±â¸¸Å­ ¸Ş¸ğ¸®¿µ¿ªÀ» 0À¸·Î Ã¤¿öÁÜ
-	ddsd.dwSize = sizeof(ddsd);				//dwSize¸¦ ddsdÅ©±â¸¸Å­ ÃÊ±âÈ­ ÇØÁØ´Ù
+	DDSURFACEDESC2 ddsd;					//í‘œë©´ì˜ ì •ë³´ë¥¼ í™•ì¸í• ìˆ˜ ìˆëŠ” ë³€ìˆ˜ë¥¼ ì„ ì–¸
+	ZeroMemory(&ddsd, sizeof(ddsd));		//ddsdì£¼ì†Œì—ì„œ ddsdí¬ê¸°ë§Œí¼ ë©”ëª¨ë¦¬ì˜ì—­ì„ 0ìœ¼ë¡œ ì±„ì›Œì¤Œ
+	ddsd.dwSize = sizeof(ddsd);				//dwSizeë¥¼ ddsdí¬ê¸°ë§Œí¼ ì´ˆê¸°í™” í•´ì¤€ë‹¤
 
 	ddsd.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
 
@@ -513,10 +522,10 @@ bool CWorldMap::CopyBufferToSurface2(LPDIRECTDRAW7 pDirectDraw)		//¹öÆÛ¿¡¼­ Ç¥¸é
 		}
 	}
 
-	if (FAILED(m_pSurface[0]->Lock(NULL, &ddsd, DDLOCK_WAIT, NULL)))		//Ç¥¸é¿¡ Á¢±ÙÇÏ¿© ÀĞ°Å³ª ¾²´Â ÀÛ¾÷À» ÇÏ±â À§ÇØ¼­ Ç¥¸éÀº Àá±Ù´Ù
-		return false;						//¸¸¾à Ç¥¸éÀ» Àá±İÇÏ´Âµ¥ ½ÇÆĞÇÒ°æ¿ì false¸¦ ¹İÈ¯ÇØÁØ´Ù
+	if (FAILED(m_pSurface[0]->Lock(NULL, &ddsd, DDLOCK_WAIT, NULL)))		//í‘œë©´ì— ì ‘ê·¼í•˜ì—¬ ì½ê±°ë‚˜ ì“°ëŠ” ì‘ì—…ì„ í•˜ê¸° ìœ„í•´ì„œ í‘œë©´ì€ ì ê·¼ë‹¤
+		return false;						//ë§Œì•½ í‘œë©´ì„ ì ê¸ˆí•˜ëŠ”ë° ì‹¤íŒ¨í• ê²½ìš° falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
 
-	int nDestY, nDeltaY, nDestY2, nDeltaY2;		//ÇöÀç ³ôÀÌ,ÀÌ¹ÌÁö°¡ µÚÁıÈû »óÅÂ¿¡µû¶ó ´ÙÀ½¶óÀÎÀ¸·Î ¹Ù²Ü¶§ ³ôÀÌ¿¡ ´õÇØÁÖ´Â°ª
+	int nDestY, nDeltaY, nDestY2, nDeltaY2;		//í˜„ì¬ ë†’ì´,ì´ë¯¸ì§€ê°€ ë’¤ì§‘í˜ ìƒíƒœì—ë”°ë¼ ë‹¤ìŒë¼ì¸ìœ¼ë¡œ ë°”ê¿€ë•Œ ë†’ì´ì— ë”í•´ì£¼ëŠ”ê°’
 	nDestY = m_nHeight - 1;
 	nDeltaY = -1;
 	//nDestY = 0;
@@ -527,9 +536,9 @@ bool CWorldMap::CopyBufferToSurface2(LPDIRECTDRAW7 pDirectDraw)		//¹öÆÛ¿¡¼­ Ç¥¸é
 	nDestY2 = 0;
 	nDeltaY2 = 1;
 
-	for (int y = 0; y < m_nHeight; y++)				//ÀÌ¹ÌÁöÀÇ ³ôÀÌÇÈ¼¿¼ö¸¸Å­
+	for (int y = 0; y < m_nHeight; y++)				//ì´ë¯¸ì§€ì˜ ë†’ì´í”½ì…€ìˆ˜ë§Œí¼
 	{
-		for (int x = 0; x < m_nWidth; x++)			//ÀÌ¹ÌÁöÀÇ °¡·ÎÇÈ¼¿¼ö¸¸Å­
+		for (int x = 0; x < m_nWidth; x++)			//ì´ë¯¸ì§€ì˜ ê°€ë¡œí”½ì…€ìˆ˜ë§Œí¼
 		{
 			CopyMemory(m_pBuffer + (x << 2) + nDestY*(m_nWidth << 2), m_pBuffer2 + (x << 2) + nDestY2*(m_nWidth << 2) - (x + nDestY2*m_nWidth), 3);
 		}
@@ -538,24 +547,24 @@ bool CWorldMap::CopyBufferToSurface2(LPDIRECTDRAW7 pDirectDraw)		//¹öÆÛ¿¡¼­ Ç¥¸é
 		nDestY2 += nDeltaY2;
 	}
 
-	unsigned char *pDest, *pSrc;			//Ç¥¸éÀÇÁÖ¼Ò¸¦ ´ãÀ»¼ö ÀÖ´Â º¯¼ö, ¹öÆÛÀÇ ÁÖ¼Ò¸¦ ´ãÀ»¼ö ÀÖ´Â º¯¼ö
+	unsigned char *pDest, *pSrc;			//í‘œë©´ì˜ì£¼ì†Œë¥¼ ë‹´ì„ìˆ˜ ìˆëŠ” ë³€ìˆ˜, ë²„í¼ì˜ ì£¼ì†Œë¥¼ ë‹´ì„ìˆ˜ ìˆëŠ” ë³€ìˆ˜
 
-	pDest = (unsigned char*)ddsd.lpSurface;		//Ç¥¸éÀÇ ÁÖ¼Ò°ªÀ» ºÒ·¯¿È
-	pSrc = m_pBuffer;						//¹öÆÛÀÇ ÁÖ¼Ò¸¦ ºÒ·¯¿È
+	pDest = (unsigned char*)ddsd.lpSurface;		//í‘œë©´ì˜ ì£¼ì†Œê°’ì„ ë¶ˆëŸ¬ì˜´
+	pSrc = m_pBuffer;						//ë²„í¼ì˜ ì£¼ì†Œë¥¼ ë¶ˆëŸ¬ì˜´
 
-	for (int y = 0; y < m_nHeight; y++)			//³ôÀÌ¸¸Å­ for¹®À» µ¹¸°´Ù
+	for (int y = 0; y < m_nHeight; y++)			//ë†’ì´ë§Œí¼ forë¬¸ì„ ëŒë¦°ë‹¤
 	{
-		CopyMemory(pDest, pSrc, m_nWidth << 2);	//Ç¥¸é¿¡´Ù°¡ pSrc¿¡¼­ °¡·Î±æÀÌ * 4ÇÑ Å©±â¸¸Å­ ¸Ş¸ğ¸®¸¦ º¹»çÇÑ´Ù
-		pDest += ddsd.lPitch;					//pDest ½ÃÀÛÁÖ¼Ò¸¦ ´ÙÀ½¶óÀÎ½ÃÀÛÁÖ¼Ò·Î ¹Ù²Û´Ù
-		pSrc += (m_nWidth << 2);				//pSrc ½ÃÀÛÁÖ¼Ò¸¦ ´ÙÀ½¶óÀÎ½ÃÀÛÁÖ¼Ò·Î ¹Ù²Û´Ù
+		CopyMemory(pDest, pSrc, m_nWidth << 2);	//í‘œë©´ì—ë‹¤ê°€ pSrcì—ì„œ ê°€ë¡œê¸¸ì´ * 4í•œ í¬ê¸°ë§Œí¼ ë©”ëª¨ë¦¬ë¥¼ ë³µì‚¬í•œë‹¤
+		pDest += ddsd.lPitch;					//pDest ì‹œì‘ì£¼ì†Œë¥¼ ë‹¤ìŒë¼ì¸ì‹œì‘ì£¼ì†Œë¡œ ë°”ê¾¼ë‹¤
+		pSrc += (m_nWidth << 2);				//pSrc ì‹œì‘ì£¼ì†Œë¥¼ ë‹¤ìŒë¼ì¸ì‹œì‘ì£¼ì†Œë¡œ ë°”ê¾¼ë‹¤
 	}
 
-	m_pSurface[0]->Unlock(NULL);			//Àá±İÀ» ÇØÃ¼ÇØÁØ´Ù
+	m_pSurface[0]->Unlock(NULL);			//ì ê¸ˆì„ í•´ì²´í•´ì¤€ë‹¤
 
 	return true;
 }
 
-bool CWorldMap::CopyBufferToSurface3(LPDIRECTDRAW7 pDirectDraw)		//¹öÆÛ¿¡¼­ Ç¥¸éÀ¸·Î º¹»çÇÏ´Â ÇÔ¼ö
+bool CWorldMap::CopyBufferToSurface3(LPDIRECTDRAW7 pDirectDraw)		//ë²„í¼ì—ì„œ í‘œë©´ìœ¼ë¡œ ë³µì‚¬í•˜ëŠ” í•¨ìˆ˜
 {
 	char *filename = "image\\map\\bossmapRoof.bmp";
 	HANDLE hfile;
@@ -569,39 +578,39 @@ bool CWorldMap::CopyBufferToSurface3(LPDIRECTDRAW7 pDirectDraw)		//¹öÆÛ¿¡¼­ Ç¥¸é
 		return false;
 	}
 
-	BITMAPFILEHEADER bmpfilehead;		//ºñÆ®¸ÊÆÄÀÏ ÀÚÃ¼ÀÇ Á¤º¸¸¦ ÀúÀåÇÒ º¯¼ö ¼±¾ğ
-	if (!ReadFile(hfile, &bmpfilehead, sizeof(bmpfilehead), &actualRead, NULL))		//ºñÆ®¸ÊÆÄÀÏ ÀÚÃ¼ÀÇ Á¤º¸¸¦ ÀĞÀ»¼ö ¾ø´Ù¸é
+	BITMAPFILEHEADER bmpfilehead;		//ë¹„íŠ¸ë§µíŒŒì¼ ìì²´ì˜ ì •ë³´ë¥¼ ì €ì¥í•  ë³€ìˆ˜ ì„ ì–¸
+	if (!ReadFile(hfile, &bmpfilehead, sizeof(bmpfilehead), &actualRead, NULL))		//ë¹„íŠ¸ë§µíŒŒì¼ ìì²´ì˜ ì •ë³´ë¥¼ ì½ì„ìˆ˜ ì—†ë‹¤ë©´
 	{
-		CloseHandle(hfile);		//ÇÚµéÀ» ¹İ³³ÇØÁÖ°í
-		return false;			//false¸¦ ¹İÈ¯ÇØÁØ´Ù
+		CloseHandle(hfile);		//í•¸ë“¤ì„ ë°˜ë‚©í•´ì£¼ê³ 
+		return false;			//falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
 	}
-	if (bmpfilehead.bfType != 0x4D42)		//ºñÆ®¸ÊÆÄÀÏÀÌ ¾Æ´Ò°æ¿ì
+	if (bmpfilehead.bfType != 0x4D42)		//ë¹„íŠ¸ë§µíŒŒì¼ì´ ì•„ë‹ê²½ìš°
 	{
-		CloseHandle(hfile);		//ÇÚµéÀ» ¹İ³³ÇØÁÖ°í
-		return false;			//false¸¦ ¹İÈ¯ÇØÁØ´Ù
-	}
-
-	BITMAPINFOHEADER bmpinfohead;		//ºñÆ®¸Ê¿µ»ó ÀÚÃ¼ÀÇ Á¤º¸¸¦ ÀúÀåÇÒ º¯¼ö ¼±¾ğ
-	if (!ReadFile(hfile, &bmpinfohead, sizeof(bmpinfohead), &actualRead, NULL))		//ºñÆ®¸Ê¿µ»ó ÀÚÃ¼ÀÇ Á¤º¸¸¦ ÀĞÀ»¼ö ¾ø´Ù¸é
-	{
-		CloseHandle(hfile);		//ÇÚµéÀ» ¹İ³³ÇØÁÖ°í
-		return false;			//false¸¦ ¹İÈ¯ÇØÁØ´Ù
+		CloseHandle(hfile);		//í•¸ë“¤ì„ ë°˜ë‚©í•´ì£¼ê³ 
+		return false;			//falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
 	}
 
-	if (bmpinfohead.biBitCount != 24)		//ÇÈ¼¿´ç ºñÆ®¼ö°¡ 24°³°¡ ¾Æ´Ï¸é 
+	BITMAPINFOHEADER bmpinfohead;		//ë¹„íŠ¸ë§µì˜ìƒ ìì²´ì˜ ì •ë³´ë¥¼ ì €ì¥í•  ë³€ìˆ˜ ì„ ì–¸
+	if (!ReadFile(hfile, &bmpinfohead, sizeof(bmpinfohead), &actualRead, NULL))		//ë¹„íŠ¸ë§µì˜ìƒ ìì²´ì˜ ì •ë³´ë¥¼ ì½ì„ìˆ˜ ì—†ë‹¤ë©´
 	{
-		CloseHandle(hfile);		//ÇÚµéÀ» ¹İ³³ÇØÁÖ°í
-		return false;			//false¸¦ ¹İÈ¯ÇØÁØ´Ù
+		CloseHandle(hfile);		//í•¸ë“¤ì„ ë°˜ë‚©í•´ì£¼ê³ 
+		return false;			//falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
+	}
+
+	if (bmpinfohead.biBitCount != 24)		//í”½ì…€ë‹¹ ë¹„íŠ¸ìˆ˜ê°€ 24ê°œê°€ ì•„ë‹ˆë©´ 
+	{
+		CloseHandle(hfile);		//í•¸ë“¤ì„ ë°˜ë‚©í•´ì£¼ê³ 
+		return false;			//falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
 	}
 
 	CloseHandle(hfile);
 
-	if (!m_pBuffer)			//¹öÆÛ°¡ ¾øÀ¸¸é
-		return false;		//false¸¦ ¹İÈ¯
+	if (!m_pBuffer)			//ë²„í¼ê°€ ì—†ìœ¼ë©´
+		return false;		//falseë¥¼ ë°˜í™˜
 
-	DDSURFACEDESC2 ddsd;					//Ç¥¸éÀÇ Á¤º¸¸¦ È®ÀÎÇÒ¼ö ÀÖ´Â º¯¼ö¸¦ ¼±¾ğ
-	ZeroMemory(&ddsd, sizeof(ddsd));		//ddsdÁÖ¼Ò¿¡¼­ ddsdÅ©±â¸¸Å­ ¸Ş¸ğ¸®¿µ¿ªÀ» 0À¸·Î Ã¤¿öÁÜ
-	ddsd.dwSize = sizeof(ddsd);				//dwSize¸¦ ddsdÅ©±â¸¸Å­ ÃÊ±âÈ­ ÇØÁØ´Ù
+	DDSURFACEDESC2 ddsd;					//í‘œë©´ì˜ ì •ë³´ë¥¼ í™•ì¸í• ìˆ˜ ìˆëŠ” ë³€ìˆ˜ë¥¼ ì„ ì–¸
+	ZeroMemory(&ddsd, sizeof(ddsd));		//ddsdì£¼ì†Œì—ì„œ ddsdí¬ê¸°ë§Œí¼ ë©”ëª¨ë¦¬ì˜ì—­ì„ 0ìœ¼ë¡œ ì±„ì›Œì¤Œ
+	ddsd.dwSize = sizeof(ddsd);				//dwSizeë¥¼ ddsdí¬ê¸°ë§Œí¼ ì´ˆê¸°í™” í•´ì¤€ë‹¤
 
 	ddsd.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
 
@@ -629,10 +638,10 @@ bool CWorldMap::CopyBufferToSurface3(LPDIRECTDRAW7 pDirectDraw)		//¹öÆÛ¿¡¼­ Ç¥¸é
 		}
 	}
 
-	if (FAILED(m_pSurface[0]->Lock(NULL, &ddsd, DDLOCK_WAIT, NULL)))		//Ç¥¸é¿¡ Á¢±ÙÇÏ¿© ÀĞ°Å³ª ¾²´Â ÀÛ¾÷À» ÇÏ±â À§ÇØ¼­ Ç¥¸éÀº Àá±Ù´Ù
-		return false;						//¸¸¾à Ç¥¸éÀ» Àá±İÇÏ´Âµ¥ ½ÇÆĞÇÒ°æ¿ì false¸¦ ¹İÈ¯ÇØÁØ´Ù
+	if (FAILED(m_pSurface[0]->Lock(NULL, &ddsd, DDLOCK_WAIT, NULL)))		//í‘œë©´ì— ì ‘ê·¼í•˜ì—¬ ì½ê±°ë‚˜ ì“°ëŠ” ì‘ì—…ì„ í•˜ê¸° ìœ„í•´ì„œ í‘œë©´ì€ ì ê·¼ë‹¤
+		return false;						//ë§Œì•½ í‘œë©´ì„ ì ê¸ˆí•˜ëŠ”ë° ì‹¤íŒ¨í• ê²½ìš° falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
 
-	int nDestY, nDeltaY, nDestY2, nDeltaY2;		//ÇöÀç ³ôÀÌ,ÀÌ¹ÌÁö°¡ µÚÁıÈû »óÅÂ¿¡µû¶ó ´ÙÀ½¶óÀÎÀ¸·Î ¹Ù²Ü¶§ ³ôÀÌ¿¡ ´õÇØÁÖ´Â°ª
+	int nDestY, nDeltaY, nDestY2, nDeltaY2;		//í˜„ì¬ ë†’ì´,ì´ë¯¸ì§€ê°€ ë’¤ì§‘í˜ ìƒíƒœì—ë”°ë¼ ë‹¤ìŒë¼ì¸ìœ¼ë¡œ ë°”ê¿€ë•Œ ë†’ì´ì— ë”í•´ì£¼ëŠ”ê°’
 	nDestY = m_nHeight - 1;
 	nDeltaY = -1;
 	//nDestY = 0;
@@ -643,9 +652,9 @@ bool CWorldMap::CopyBufferToSurface3(LPDIRECTDRAW7 pDirectDraw)		//¹öÆÛ¿¡¼­ Ç¥¸é
 	nDestY2 = 0;
 	nDeltaY2 = 1;
 
-	for (int y = 0; y < m_nHeight; y++)				//ÀÌ¹ÌÁöÀÇ ³ôÀÌÇÈ¼¿¼ö¸¸Å­
+	for (int y = 0; y < m_nHeight; y++)				//ì´ë¯¸ì§€ì˜ ë†’ì´í”½ì…€ìˆ˜ë§Œí¼
 	{
-		for (int x = 0; x < m_nWidth; x++)			//ÀÌ¹ÌÁöÀÇ °¡·ÎÇÈ¼¿¼ö¸¸Å­
+		for (int x = 0; x < m_nWidth; x++)			//ì´ë¯¸ì§€ì˜ ê°€ë¡œí”½ì…€ìˆ˜ë§Œí¼
 		{
 			CopyMemory(m_pBuffer + (x << 2) + nDestY*(m_nWidth << 2), m_pBuffer2 + (x << 2) + nDestY2*(m_nWidth << 2) - (x + nDestY2*m_nWidth), 3);
 		}
@@ -654,19 +663,19 @@ bool CWorldMap::CopyBufferToSurface3(LPDIRECTDRAW7 pDirectDraw)		//¹öÆÛ¿¡¼­ Ç¥¸é
 		nDestY2 += nDeltaY2;
 	}
 
-	unsigned char *pDest, *pSrc;			//Ç¥¸éÀÇÁÖ¼Ò¸¦ ´ãÀ»¼ö ÀÖ´Â º¯¼ö, ¹öÆÛÀÇ ÁÖ¼Ò¸¦ ´ãÀ»¼ö ÀÖ´Â º¯¼ö
+	unsigned char *pDest, *pSrc;			//í‘œë©´ì˜ì£¼ì†Œë¥¼ ë‹´ì„ìˆ˜ ìˆëŠ” ë³€ìˆ˜, ë²„í¼ì˜ ì£¼ì†Œë¥¼ ë‹´ì„ìˆ˜ ìˆëŠ” ë³€ìˆ˜
 
-	pDest = (unsigned char*)ddsd.lpSurface;		//Ç¥¸éÀÇ ÁÖ¼Ò°ªÀ» ºÒ·¯¿È
-	pSrc = m_pBuffer;						//¹öÆÛÀÇ ÁÖ¼Ò¸¦ ºÒ·¯¿È
+	pDest = (unsigned char*)ddsd.lpSurface;		//í‘œë©´ì˜ ì£¼ì†Œê°’ì„ ë¶ˆëŸ¬ì˜´
+	pSrc = m_pBuffer;						//ë²„í¼ì˜ ì£¼ì†Œë¥¼ ë¶ˆëŸ¬ì˜´
 
-	for (int y = 0; y < m_nHeight; y++)			//³ôÀÌ¸¸Å­ for¹®À» µ¹¸°´Ù
+	for (int y = 0; y < m_nHeight; y++)			//ë†’ì´ë§Œí¼ forë¬¸ì„ ëŒë¦°ë‹¤
 	{
-		CopyMemory(pDest, pSrc, m_nWidth << 2);	//Ç¥¸é¿¡´Ù°¡ pSrc¿¡¼­ °¡·Î±æÀÌ * 4ÇÑ Å©±â¸¸Å­ ¸Ş¸ğ¸®¸¦ º¹»çÇÑ´Ù
-		pDest += ddsd.lPitch;					//pDest ½ÃÀÛÁÖ¼Ò¸¦ ´ÙÀ½¶óÀÎ½ÃÀÛÁÖ¼Ò·Î ¹Ù²Û´Ù
-		pSrc += (m_nWidth << 2);				//pSrc ½ÃÀÛÁÖ¼Ò¸¦ ´ÙÀ½¶óÀÎ½ÃÀÛÁÖ¼Ò·Î ¹Ù²Û´Ù
+		CopyMemory(pDest, pSrc, m_nWidth << 2);	//í‘œë©´ì—ë‹¤ê°€ pSrcì—ì„œ ê°€ë¡œê¸¸ì´ * 4í•œ í¬ê¸°ë§Œí¼ ë©”ëª¨ë¦¬ë¥¼ ë³µì‚¬í•œë‹¤
+		pDest += ddsd.lPitch;					//pDest ì‹œì‘ì£¼ì†Œë¥¼ ë‹¤ìŒë¼ì¸ì‹œì‘ì£¼ì†Œë¡œ ë°”ê¾¼ë‹¤
+		pSrc += (m_nWidth << 2);				//pSrc ì‹œì‘ì£¼ì†Œë¥¼ ë‹¤ìŒë¼ì¸ì‹œì‘ì£¼ì†Œë¡œ ë°”ê¾¼ë‹¤
 	}
 
-	m_pSurface[0]->Unlock(NULL);			//Àá±İÀ» ÇØÃ¼ÇØÁØ´Ù
+	m_pSurface[0]->Unlock(NULL);			//ì ê¸ˆì„ í•´ì²´í•´ì¤€ë‹¤
 
 	return true;
 }
@@ -685,29 +694,29 @@ bool CWorldMap::CopyBufferToSurface4(LPDIRECTDRAW7 pDirectDraw)
 		return false;
 	}
 
-	BITMAPFILEHEADER bmpfilehead;		//ºñÆ®¸ÊÆÄÀÏ ÀÚÃ¼ÀÇ Á¤º¸¸¦ ÀúÀåÇÒ º¯¼ö ¼±¾ğ
-	if (!ReadFile(hfile, &bmpfilehead, sizeof(bmpfilehead), &actualRead, NULL))		//ºñÆ®¸ÊÆÄÀÏ ÀÚÃ¼ÀÇ Á¤º¸¸¦ ÀĞÀ»¼ö ¾ø´Ù¸é
+	BITMAPFILEHEADER bmpfilehead;		//ë¹„íŠ¸ë§µíŒŒì¼ ìì²´ì˜ ì •ë³´ë¥¼ ì €ì¥í•  ë³€ìˆ˜ ì„ ì–¸
+	if (!ReadFile(hfile, &bmpfilehead, sizeof(bmpfilehead), &actualRead, NULL))		//ë¹„íŠ¸ë§µíŒŒì¼ ìì²´ì˜ ì •ë³´ë¥¼ ì½ì„ìˆ˜ ì—†ë‹¤ë©´
 	{
-		CloseHandle(hfile);		//ÇÚµéÀ» ¹İ³³ÇØÁÖ°í
-		return false;			//false¸¦ ¹İÈ¯ÇØÁØ´Ù
+		CloseHandle(hfile);		//í•¸ë“¤ì„ ë°˜ë‚©í•´ì£¼ê³ 
+		return false;			//falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
 	}
-	if (bmpfilehead.bfType != 0x4D42)		//ºñÆ®¸ÊÆÄÀÏÀÌ ¾Æ´Ò°æ¿ì
+	if (bmpfilehead.bfType != 0x4D42)		//ë¹„íŠ¸ë§µíŒŒì¼ì´ ì•„ë‹ê²½ìš°
 	{
-		CloseHandle(hfile);		//ÇÚµéÀ» ¹İ³³ÇØÁÖ°í
-		return false;			//false¸¦ ¹İÈ¯ÇØÁØ´Ù
-	}
-
-	BITMAPINFOHEADER bmpinfohead;		//ºñÆ®¸Ê¿µ»ó ÀÚÃ¼ÀÇ Á¤º¸¸¦ ÀúÀåÇÒ º¯¼ö ¼±¾ğ
-	if (!ReadFile(hfile, &bmpinfohead, sizeof(bmpinfohead), &actualRead, NULL))		//ºñÆ®¸Ê¿µ»ó ÀÚÃ¼ÀÇ Á¤º¸¸¦ ÀĞÀ»¼ö ¾ø´Ù¸é
-	{
-		CloseHandle(hfile);		//ÇÚµéÀ» ¹İ³³ÇØÁÖ°í
-		return false;			//false¸¦ ¹İÈ¯ÇØÁØ´Ù
+		CloseHandle(hfile);		//í•¸ë“¤ì„ ë°˜ë‚©í•´ì£¼ê³ 
+		return false;			//falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
 	}
 
-	if (bmpinfohead.biBitCount != 24)		//ÇÈ¼¿´ç ºñÆ®¼ö°¡ 24°³°¡ ¾Æ´Ï¸é 
+	BITMAPINFOHEADER bmpinfohead;		//ë¹„íŠ¸ë§µì˜ìƒ ìì²´ì˜ ì •ë³´ë¥¼ ì €ì¥í•  ë³€ìˆ˜ ì„ ì–¸
+	if (!ReadFile(hfile, &bmpinfohead, sizeof(bmpinfohead), &actualRead, NULL))		//ë¹„íŠ¸ë§µì˜ìƒ ìì²´ì˜ ì •ë³´ë¥¼ ì½ì„ìˆ˜ ì—†ë‹¤ë©´
 	{
-		CloseHandle(hfile);		//ÇÚµéÀ» ¹İ³³ÇØÁÖ°í
-		return false;			//false¸¦ ¹İÈ¯ÇØÁØ´Ù
+		CloseHandle(hfile);		//í•¸ë“¤ì„ ë°˜ë‚©í•´ì£¼ê³ 
+		return false;			//falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
+	}
+
+	if (bmpinfohead.biBitCount != 24)		//í”½ì…€ë‹¹ ë¹„íŠ¸ìˆ˜ê°€ 24ê°œê°€ ì•„ë‹ˆë©´ 
+	{
+		CloseHandle(hfile);		//í•¸ë“¤ì„ ë°˜ë‚©í•´ì£¼ê³ 
+		return false;			//falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
 	}
 
 	BITMAPFILEHEADER bmpfilehead2 = bmpfilehead;
@@ -717,19 +726,19 @@ bool CWorldMap::CopyBufferToSurface4(LPDIRECTDRAW7 pDirectDraw)
 
 	DWORD dwWritten;
 	HANDLE hfile2;
-	hfile2 = CreateFile(TEXT(filename), GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);    //ÆÄÀÏ »ı¼º
+	hfile2 = CreateFile(TEXT(filename), GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);    //íŒŒì¼ ìƒì„±
 
-	WriteFile(hfile2, &bmpfilehead2, sizeof(bmpfilehead2), &dwWritten, NULL);  //ÆÄÀÏ¿¡ µ¥ÀÌÅÍ¸¦ ±â·Ï
+	WriteFile(hfile2, &bmpfilehead2, sizeof(bmpfilehead2), &dwWritten, NULL);  //íŒŒì¼ì— ë°ì´í„°ë¥¼ ê¸°ë¡
 	WriteFile(hfile2, &bmpinfohead2, sizeof(bmpinfohead2), &dwWritten, NULL);
 	WriteFile(hfile2, m_pBuffer2, WORLDMAP_DATA_SIZE, &dwWritten, NULL);  //7680000
 	CloseHandle(hfile2);
 
-	if (!m_pBuffer)			//¹öÆÛ°¡ ¾øÀ¸¸é
-		return false;		//false¸¦ ¹İÈ¯
+	if (!m_pBuffer)			//ë²„í¼ê°€ ì—†ìœ¼ë©´
+		return false;		//falseë¥¼ ë°˜í™˜
 
-	DDSURFACEDESC2 ddsd;					//Ç¥¸éÀÇ Á¤º¸¸¦ È®ÀÎÇÒ¼ö ÀÖ´Â º¯¼ö¸¦ ¼±¾ğ
-	ZeroMemory(&ddsd, sizeof(ddsd));		//ddsdÁÖ¼Ò¿¡¼­ ddsdÅ©±â¸¸Å­ ¸Ş¸ğ¸®¿µ¿ªÀ» 0À¸·Î Ã¤¿öÁÜ
-	ddsd.dwSize = sizeof(ddsd);				//dwSize¸¦ ddsdÅ©±â¸¸Å­ ÃÊ±âÈ­ ÇØÁØ´Ù
+	DDSURFACEDESC2 ddsd;					//í‘œë©´ì˜ ì •ë³´ë¥¼ í™•ì¸í• ìˆ˜ ìˆëŠ” ë³€ìˆ˜ë¥¼ ì„ ì–¸
+	ZeroMemory(&ddsd, sizeof(ddsd));		//ddsdì£¼ì†Œì—ì„œ ddsdí¬ê¸°ë§Œí¼ ë©”ëª¨ë¦¬ì˜ì—­ì„ 0ìœ¼ë¡œ ì±„ì›Œì¤Œ
+	ddsd.dwSize = sizeof(ddsd);				//dwSizeë¥¼ ddsdí¬ê¸°ë§Œí¼ ì´ˆê¸°í™” í•´ì¤€ë‹¤
 
 	ddsd.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
 
@@ -757,10 +766,10 @@ bool CWorldMap::CopyBufferToSurface4(LPDIRECTDRAW7 pDirectDraw)
 		}
 	}
 
-	if (FAILED(m_pSurface[0]->Lock(NULL, &ddsd, DDLOCK_WAIT, NULL)))		//Ç¥¸é¿¡ Á¢±ÙÇÏ¿© ÀĞ°Å³ª ¾²´Â ÀÛ¾÷À» ÇÏ±â À§ÇØ¼­ Ç¥¸éÀº Àá±Ù´Ù
-		return false;						//¸¸¾à Ç¥¸éÀ» Àá±İÇÏ´Âµ¥ ½ÇÆĞÇÒ°æ¿ì false¸¦ ¹İÈ¯ÇØÁØ´Ù
+	if (FAILED(m_pSurface[0]->Lock(NULL, &ddsd, DDLOCK_WAIT, NULL)))		//í‘œë©´ì— ì ‘ê·¼í•˜ì—¬ ì½ê±°ë‚˜ ì“°ëŠ” ì‘ì—…ì„ í•˜ê¸° ìœ„í•´ì„œ í‘œë©´ì€ ì ê·¼ë‹¤
+		return false;						//ë§Œì•½ í‘œë©´ì„ ì ê¸ˆí•˜ëŠ”ë° ì‹¤íŒ¨í• ê²½ìš° falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
 
-	int nDestY, nDeltaY, nDestY2, nDeltaY2;		//ÇöÀç ³ôÀÌ,ÀÌ¹ÌÁö°¡ µÚÁıÈû »óÅÂ¿¡µû¶ó ´ÙÀ½¶óÀÎÀ¸·Î ¹Ù²Ü¶§ ³ôÀÌ¿¡ ´õÇØÁÖ´Â°ª
+	int nDestY, nDeltaY, nDestY2, nDeltaY2;		//í˜„ì¬ ë†’ì´,ì´ë¯¸ì§€ê°€ ë’¤ì§‘í˜ ìƒíƒœì—ë”°ë¼ ë‹¤ìŒë¼ì¸ìœ¼ë¡œ ë°”ê¿€ë•Œ ë†’ì´ì— ë”í•´ì£¼ëŠ”ê°’
 	nDestY = m_nHeight - 1;
 	nDeltaY = -1;
 	//nDestY = 0;
@@ -771,9 +780,9 @@ bool CWorldMap::CopyBufferToSurface4(LPDIRECTDRAW7 pDirectDraw)
 	nDestY2 = 0;
 	nDeltaY2 = 1;
 
-	for (int y = 0; y < m_nHeight; y++)				//ÀÌ¹ÌÁöÀÇ ³ôÀÌÇÈ¼¿¼ö¸¸Å­
+	for (int y = 0; y < m_nHeight; y++)				//ì´ë¯¸ì§€ì˜ ë†’ì´í”½ì…€ìˆ˜ë§Œí¼
 	{
-		for (int x = 0; x < m_nWidth; x++)			//ÀÌ¹ÌÁöÀÇ °¡·ÎÇÈ¼¿¼ö¸¸Å­
+		for (int x = 0; x < m_nWidth; x++)			//ì´ë¯¸ì§€ì˜ ê°€ë¡œí”½ì…€ìˆ˜ë§Œí¼
 		{
 			CopyMemory(m_pBuffer + (x << 2) + nDestY * (m_nWidth << 2), m_pBuffer2 + (x << 2) + nDestY2 * (m_nWidth << 2) - (x + nDestY2 * m_nWidth), 3);
 		}
@@ -782,19 +791,19 @@ bool CWorldMap::CopyBufferToSurface4(LPDIRECTDRAW7 pDirectDraw)
 		nDestY2 += nDeltaY2;
 	}
 
-	unsigned char* pDest, * pSrc;			//Ç¥¸éÀÇÁÖ¼Ò¸¦ ´ãÀ»¼ö ÀÖ´Â º¯¼ö, ¹öÆÛÀÇ ÁÖ¼Ò¸¦ ´ãÀ»¼ö ÀÖ´Â º¯¼ö
+	unsigned char* pDest, * pSrc;			//í‘œë©´ì˜ì£¼ì†Œë¥¼ ë‹´ì„ìˆ˜ ìˆëŠ” ë³€ìˆ˜, ë²„í¼ì˜ ì£¼ì†Œë¥¼ ë‹´ì„ìˆ˜ ìˆëŠ” ë³€ìˆ˜
 
-	pDest = (unsigned char*)ddsd.lpSurface;		//Ç¥¸éÀÇ ÁÖ¼Ò°ªÀ» ºÒ·¯¿È
-	pSrc = m_pBuffer;						//¹öÆÛÀÇ ÁÖ¼Ò¸¦ ºÒ·¯¿È
+	pDest = (unsigned char*)ddsd.lpSurface;		//í‘œë©´ì˜ ì£¼ì†Œê°’ì„ ë¶ˆëŸ¬ì˜´
+	pSrc = m_pBuffer;						//ë²„í¼ì˜ ì£¼ì†Œë¥¼ ë¶ˆëŸ¬ì˜´
 
-	for (int y = 0; y < m_nHeight; y++)			//³ôÀÌ¸¸Å­ for¹®À» µ¹¸°´Ù
+	for (int y = 0; y < m_nHeight; y++)			//ë†’ì´ë§Œí¼ forë¬¸ì„ ëŒë¦°ë‹¤
 	{
-		CopyMemory(pDest, pSrc, m_nWidth << 2);	//Ç¥¸é¿¡´Ù°¡ pSrc¿¡¼­ °¡·Î±æÀÌ * 4ÇÑ Å©±â¸¸Å­ ¸Ş¸ğ¸®¸¦ º¹»çÇÑ´Ù
-		pDest += ddsd.lPitch;					//pDest ½ÃÀÛÁÖ¼Ò¸¦ ´ÙÀ½¶óÀÎ½ÃÀÛÁÖ¼Ò·Î ¹Ù²Û´Ù
-		pSrc += (m_nWidth << 2);				//pSrc ½ÃÀÛÁÖ¼Ò¸¦ ´ÙÀ½¶óÀÎ½ÃÀÛÁÖ¼Ò·Î ¹Ù²Û´Ù
+		CopyMemory(pDest, pSrc, m_nWidth << 2);	//í‘œë©´ì—ë‹¤ê°€ pSrcì—ì„œ ê°€ë¡œê¸¸ì´ * 4í•œ í¬ê¸°ë§Œí¼ ë©”ëª¨ë¦¬ë¥¼ ë³µì‚¬í•œë‹¤
+		pDest += ddsd.lPitch;					//pDest ì‹œì‘ì£¼ì†Œë¥¼ ë‹¤ìŒë¼ì¸ì‹œì‘ì£¼ì†Œë¡œ ë°”ê¾¼ë‹¤
+		pSrc += (m_nWidth << 2);				//pSrc ì‹œì‘ì£¼ì†Œë¥¼ ë‹¤ìŒë¼ì¸ì‹œì‘ì£¼ì†Œë¡œ ë°”ê¾¼ë‹¤
 	}
 
-	m_pSurface[0]->Unlock(NULL);			//Àá±İÀ» ÇØÃ¼ÇØÁØ´Ù
+	m_pSurface[0]->Unlock(NULL);			//ì ê¸ˆì„ í•´ì²´í•´ì¤€ë‹¤
 
 	return true;
 }
@@ -803,9 +812,9 @@ void CWorldMap::CopyMapData()
 {
 	DWORD dwWritten;
 	HANDLE hfile;
-	hfile = CreateFile("data\\blockData.txt", GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);    //ÆÄÀÏ »ı¼º
+	hfile = CreateFile("data\\blockData.txt", GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);    //íŒŒì¼ ìƒì„±
 
-	WriteFile(hfile, g_editor.GetBlockData(), BLOCK_X*BLOCK_Y * 2, &dwWritten, NULL);  //ÆÄÀÏ¿¡ µ¥ÀÌÅÍ¸¦ ±â·Ï
+	WriteFile(hfile, g_editor.GetBlockData(), BLOCK_X*BLOCK_Y * 2, &dwWritten, NULL);  //íŒŒì¼ì— ë°ì´í„°ë¥¼ ê¸°ë¡
 
 	CloseHandle(hfile);
 
@@ -823,9 +832,9 @@ void CWorldMap::InitMapData()
 		memcpy(g_editor.GetBlockData()+i*2, zero, 2);
 	}
 	
-	hfile = CreateFile("data\\blockData.txt", GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);    //ÆÄÀÏ »ı¼º
+	hfile = CreateFile("data\\blockData.txt", GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);    //íŒŒì¼ ìƒì„±
 
-	WriteFile(hfile, g_editor.GetBlockData(), BLOCK_X*BLOCK_Y * 2, &dwWritten, NULL);  //ÆÄÀÏ¿¡ µ¥ÀÌÅÍ¸¦ ±â·Ï
+	WriteFile(hfile, g_editor.GetBlockData(), BLOCK_X*BLOCK_Y * 2, &dwWritten, NULL);  //íŒŒì¼ì— ë°ì´í„°ë¥¼ ê¸°ë¡
 
 	CloseHandle(hfile);
 }

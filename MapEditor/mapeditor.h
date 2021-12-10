@@ -10,13 +10,13 @@
 
 using namespace std;
 
-class MAPEDITOR			//¸Ê¿¡µğÅÍ °ü·Ã Å¬·¡½º
+class MAPEDITOR			//ë§µì—ë””í„° ê´€ë ¨ í´ë˜ìŠ¤
 {
 private:
-	int m_startX;			//¸¶¿ì½º ½ÃÀÛ xÁÂÇ¥
-	int m_startY;			//¸¶¿ì½º ½ÃÀÛ yÁÂÇ¥
-	int m_endX;			//¸¶¿ì½º Á¾·á xÁÂÇ¥
-	int m_endY;			//¸¶¿ì½º Á¾·á yÁÂÇ¥
+	int m_startX;			//ë§ˆìš°ìŠ¤ ì‹œì‘ xì¢Œí‘œ
+	int m_startY;			//ë§ˆìš°ìŠ¤ ì‹œì‘ yì¢Œí‘œ
+	int m_endX;			//ë§ˆìš°ìŠ¤ ì¢…ë£Œ xì¢Œí‘œ
+	int m_endY;			//ë§ˆìš°ìŠ¤ ì¢…ë£Œ yì¢Œí‘œ
 	bool isChoiceWindow;
 	CChoiceWindow* window;
 	char m_pBlockData[BLOCK_X*BLOCK_Y*2];
@@ -29,8 +29,8 @@ public:
 	void Initialize();
 	void CheckChoiceWindow(int x, int y);
 	bool IsChoiceWindow();
-	void SetStartXY(int x,int y);		//¸¶¿ì½º ½ÃÀÛ x,yÁÂÇ¥ ¼³Á¤
-	void SetEndXY(int x,int y);			//¸¶¿ì½º Á¾·á x,yÁÂÇ¥ ¼³Á¤
+	void SetStartXY(int x,int y);		//ë§ˆìš°ìŠ¤ ì‹œì‘ x,yì¢Œí‘œ ì„¤ì •
+	void SetEndXY(int x,int y);			//ë§ˆìš°ìŠ¤ ì¢…ë£Œ x,yì¢Œí‘œ ì„¤ì •
 	void SetBlock(CBLOCK block[][BLOCK_X],CSprite* curBlock,CTimer *timer);
 	CChoiceWindow* GetChoiceWindow();
 	char* GetBlockData();

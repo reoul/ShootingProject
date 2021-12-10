@@ -122,6 +122,7 @@
     <ClInclude Include="gameEnum.h" />
     <ClInclude Include="gobject.h" />
     <ClInclude Include="gui.h" />
+    <ClInclude Include="ice.h" />
     <ClInclude Include="introsprite.h" />
     <ClInclude Include="map.h" />
     <ClInclude Include="mapeditor.h" />

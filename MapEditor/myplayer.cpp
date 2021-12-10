@@ -10,9 +10,9 @@ using namespace std;
 
 extern CCamera camera;
 
-extern DISTANCE_STATE curPlayerDistanceState;
-extern ACTION_STATE curPlayerActionState;
-extern ACTION_STATE curBossActionState;
+extern DISTANCE_TYPE curPlayerDistanceState;
+extern ACTION_TYPE curPlayerActionState;
+extern ACTION_TYPE curBossActionState;
 
 extern CArrow arrow[TOTAL_ARROW];
 extern CTimer g_Timer;
@@ -40,8 +40,8 @@ void CPlayer::Initialize(int x, int y, CTimer* timer, int currentFrame, int fram
 	draw_y = y;
 	m_nOldX = x;
 	m_nOldY = y;
-	curPlayerDistanceState = DISTANCE_STATE::DOWN;
-	curPlayerActionState = ACTION_STATE::FAINT;
+	curPlayerDistanceState = DISTANCE_TYPE::DOWN;
+	curPlayerActionState = ACTION_TYPE::FAINT;
 	moveSpeed = 60;
 	m_nMoveSpeedFold = 2;
 	m_bIsSkill = false;
@@ -210,11 +210,11 @@ void CPlayer::CheckWallCollision()
 	int collisionCount = 0;
 	int oldBlockX = 0;
 	int oldBlockY = 0;
-	if (map.GetStage() == 0)		//±âº» ¸ÊÀÏ¶§
+	if (map.GetStageNum() == 0)		//ê¸°ë³¸ ë§µì¼ë•Œ
 	{
 		for (int i = 0; i < wallBlock.size(); i++)
 		{
-			SetRect(&blockRect, wallBlock[i].x * 32, wallBlock[i].y * 32, wallBlock[i].x * 32 + 32, wallBlock[i].y * 32 + 32);	//ÇØ´ç ºí·ÏÀÇ ¿µ¿ª
+			SetRect(&blockRect, wallBlock[i].x * 32, wallBlock[i].y * 32, wallBlock[i].x * 32 + 32, wallBlock[i].y * 32 + 32);	//í•´ë‹¹ ë¸”ë¡ì˜ ì˜ì—­
 			if (CheckHitWallRect(blockRect))
 			{
 				collisionCount++;
@@ -222,27 +222,27 @@ void CPlayer::CheckWallCollision()
 				{
 					if (oldBlockX != wallBlock[i].x && oldBlockY != wallBlock[i].y)
 					{
-						collisionRect = GetHitRect2(blockRect);		//ÇÃ·¹ÀÌ¾î¶û ºí·°ÀÌ¶û Ãæµ¹µÈ ¿µ¿ª
+						collisionRect = GetHitRect2(blockRect);		//í”Œë ˆì´ì–´ë‘ ë¸”ëŸ­ì´ë‘ ì¶©ëŒëœ ì˜ì—­
 						int __left = abs(blockRect.left - collisionRect.left);
 						int __right = abs(blockRect.right - collisionRect.right);
 						int __top = abs(blockRect.top - collisionRect.top);
 						int __bottom = abs(blockRect.bottom - collisionRect.bottom);
 
-						if (__bottom + __top + __right == 0)		//¿ŞÂÊ À§ ¸ğ¼­¸®
+						if (__bottom + __top + __right == 0)		//ì™¼ìª½ ìœ„ ëª¨ì„œë¦¬
 						{
 							//SetY(GetPos().y - (DEFAULT_BLOCK_SIZE - __bottom));
 							SetX(GetPos().x + (DEFAULT_BLOCK_SIZE - __left));
 						}
-						else if (__left + __bottom + __top == 0)		//¿À¸¥ÂÊ ¾Æ·¡ ¸ğ¼­¸®
+						else if (__left + __bottom + __top == 0)		//ì˜¤ë¥¸ìª½ ì•„ë˜ ëª¨ì„œë¦¬
 						{
 							//SetY(GetPos().y - (DEFAULT_BLOCK_SIZE - __bottom));
 							SetX(GetPos().x - (DEFAULT_BLOCK_SIZE - __right));
 						}
-						else if (__left + __bottom == 0)	//¿ŞÂÊ À§ ¸ğ¼­¸®
+						else if (__left + __bottom == 0)	//ì™¼ìª½ ìœ„ ëª¨ì„œë¦¬
 						{
 							SetY(GetPos().y + (DEFAULT_BLOCK_SIZE - __top));
 						}
-						else if (__left + __top == 0)	//¿ŞÂÊ ¾Æ·¡ ¸ğ¼­¸®
+						else if (__left + __top == 0)	//ì™¼ìª½ ì•„ë˜ ëª¨ì„œë¦¬
 						{
 							SetY(GetPos().y - (DEFAULT_BLOCK_SIZE - __bottom));
 						}
@@ -250,34 +250,34 @@ void CPlayer::CheckWallCollision()
 						{
 							SetX(GetPos().x + (DEFAULT_BLOCK_SIZE - __left));
 						}
-						else if (__right + __bottom == 0)	//¿À¸¥ÂÊ À§ ¸ğ¼­¸®
+						else if (__right + __bottom == 0)	//ì˜¤ë¥¸ìª½ ìœ„ ëª¨ì„œë¦¬
 						{
 							SetY(GetPos().y + (DEFAULT_BLOCK_SIZE - __top));
 						}
 						continue;
 						//SetX(m_nOldX + m_nSpeedX);
 						//SetY(m_nOldY);
-						//if (CheckHitWallRect(blockRect))		//x¸¸ ÀÌµ¿ÇßÀ»¶§ Ãæµ¹ÇÏ´ÂÁö Ã¼Å©
+						//if (CheckHitWallRect(blockRect))		//xë§Œ ì´ë™í–ˆì„ë•Œ ì¶©ëŒí•˜ëŠ”ì§€ ì²´í¬
 						//	isX = true;
 
 						//SetX(m_nOldX);
 						//SetY(m_nOldY + m_nSpeedY);
-						//if (CheckHitWallRect(blockRect))		//y¸¸ ÀÌµ¿ÇßÀ»¶§ Ãæµ¹ÇÏ´ÂÁö Ã¼Å©
+						//if (CheckHitWallRect(blockRect))		//yë§Œ ì´ë™í–ˆì„ë•Œ ì¶©ëŒí•˜ëŠ”ì§€ ì²´í¬
 						//	isY = true;
 
-						//if (isX)		//xÃàÀ¸·Î ÀÌµ¿ ÈÄ Ãæµ¹ÀÌ ¹ß»ıÇßÀ»¶§
+						//if (isX)		//xì¶•ìœ¼ë¡œ ì´ë™ í›„ ì¶©ëŒì´ ë°œìƒí–ˆì„ë•Œ
 						//{
 						//	SetX(GetPos().x + (DEFAULT_BLOCK_SIZE - (__left == 0 ? __right : __left)) * (__left == 0 ? -1 : 1));
 						//	SetY(m_nOldY + m_nSpeedY);
 						//}
-						//else if (isY)		//yÃàÀ¸·Î ÀÌµ¿ ÈÄ Ãæµ¹ÀÌ ¹ß»ıÇßÀ»¶§
+						//else if (isY)		//yì¶•ìœ¼ë¡œ ì´ë™ í›„ ì¶©ëŒì´ ë°œìƒí–ˆì„ë•Œ
 						//{
 						//	SetX(m_nOldX + m_nSpeedX);
 						//	SetY(GetPos().y + (DEFAULT_BLOCK_SIZE - (__top == 0 ? __bottom : __top)) * (__top == 0 ? -1 : 1));
 						//}
 					}
 				}
-				collisionRect = GetHitRect2(blockRect);		//ÇÃ·¹ÀÌ¾î¶û ºí·°ÀÌ¶û Ãæµ¹µÈ ¿µ¿ª
+				collisionRect = GetHitRect2(blockRect);		//í”Œë ˆì´ì–´ë‘ ë¸”ëŸ­ì´ë‘ ì¶©ëŒëœ ì˜ì—­
 				int _left = abs(blockRect.left - collisionRect.left);
 				int _right = abs(blockRect.right - collisionRect.right);
 				int _top = abs(blockRect.top - collisionRect.top);
@@ -288,19 +288,19 @@ void CPlayer::CheckWallCollision()
 
 				SetX(m_nOldX + m_nSpeedX);
 				SetY(m_nOldY);
-				if (CheckHitWallRect(blockRect))		//x¸¸ ÀÌµ¿ÇßÀ»¶§ Ãæµ¹ÇÏ´ÂÁö Ã¼Å©
+				if (CheckHitWallRect(blockRect))		//xë§Œ ì´ë™í–ˆì„ë•Œ ì¶©ëŒí•˜ëŠ”ì§€ ì²´í¬
 					isX = true;
 
 				SetX(m_nOldX);
 				SetY(m_nOldY + m_nSpeedY);
-				if (CheckHitWallRect(blockRect))		//y¸¸ ÀÌµ¿ÇßÀ»¶§ Ãæµ¹ÇÏ´ÂÁö Ã¼Å©
+				if (CheckHitWallRect(blockRect))		//yë§Œ ì´ë™í–ˆì„ë•Œ ì¶©ëŒí•˜ëŠ”ì§€ ì²´í¬
 					isY = true;
 
-				if (!isX && !isY)		//¸ğ¼­¸®¿¡ ºÎµóÃÆÀ»¶§
+				if (!isX && !isY)		//ëª¨ì„œë¦¬ì— ë¶€ë”›ì³¤ì„ë•Œ
 				{
-					if (_left + _top == 0)		//¿ŞÂÊ À§ ¸ğ¼­¸®
+					if (_left + _top == 0)		//ì™¼ìª½ ìœ„ ëª¨ì„œë¦¬
 					{
-						if (_right <= _bottom)		//xÃàÀÌ ´õ ±æ¶§
+						if (_right <= _bottom)		//xì¶•ì´ ë” ê¸¸ë•Œ
 						{
 							SetX(m_nOldX + m_nSpeedX);
 							SetY(m_nOldY + m_nSpeedY - (DEFAULT_BLOCK_SIZE - _bottom));
@@ -311,9 +311,9 @@ void CPlayer::CheckWallCollision()
 							SetY(m_nOldY + m_nSpeedY);
 						}
 					}
-					if (_top + _right == 0)		//¿À¸¥ÂÊ À§ ¸ğ¼­¸®
+					if (_top + _right == 0)		//ì˜¤ë¥¸ìª½ ìœ„ ëª¨ì„œë¦¬
 					{
-						if (_left <= _bottom)		//xÃàÀÌ ´õ ±æ¶§
+						if (_left <= _bottom)		//xì¶•ì´ ë” ê¸¸ë•Œ
 						{
 							SetX(m_nOldX + m_nSpeedX);
 							SetY(m_nOldY + m_nSpeedY - (DEFAULT_BLOCK_SIZE - _bottom));
@@ -324,9 +324,9 @@ void CPlayer::CheckWallCollision()
 							SetY(m_nOldY + m_nSpeedY);
 						}
 					}
-					if (_right + _bottom == 0)	//¿À¸¥ÂÊ ¾Æ·¡ ¸ğ¼­¸®
+					if (_right + _bottom == 0)	//ì˜¤ë¥¸ìª½ ì•„ë˜ ëª¨ì„œë¦¬
 					{
-						if (_left <= _top)		//xÃàÀÌ ´õ ±æ¶§
+						if (_left <= _top)		//xì¶•ì´ ë” ê¸¸ë•Œ
 						{
 							SetX(m_nOldX + m_nSpeedX);
 							SetY(m_nOldY + m_nSpeedY + (DEFAULT_BLOCK_SIZE - _top));
@@ -337,9 +337,9 @@ void CPlayer::CheckWallCollision()
 							SetY(m_nOldY + m_nSpeedY);
 						}
 					}
-					if (_left + _bottom == 0)	//¿ŞÂÊ ¾Æ·¡ ¸ğ¼­¸®
+					if (_left + _bottom == 0)	//ì™¼ìª½ ì•„ë˜ ëª¨ì„œë¦¬
 					{
-						if (_right <= _top)		//xÃàÀÌ ´õ ±æ¶§
+						if (_right <= _top)		//xì¶•ì´ ë” ê¸¸ë•Œ
 						{
 							SetX(m_nOldX + m_nSpeedX);
 							SetY(m_nOldY + m_nSpeedY + (DEFAULT_BLOCK_SIZE - _top));
@@ -351,12 +351,12 @@ void CPlayer::CheckWallCollision()
 						}
 					}
 				}
-				else if (isX)		//xÃàÀ¸·Î ÀÌµ¿ ÈÄ Ãæµ¹ÀÌ ¹ß»ıÇßÀ»¶§
+				else if (isX)		//xì¶•ìœ¼ë¡œ ì´ë™ í›„ ì¶©ëŒì´ ë°œìƒí–ˆì„ë•Œ
 				{
 					SetX(m_nOldX + m_nSpeedX + (DEFAULT_BLOCK_SIZE - (_left == 0 ? _right : _left)) * (_left == 0 ? -1 : 1));
 					SetY(m_nOldY + m_nSpeedY);
 				}
-				else if (isY)		//yÃàÀ¸·Î ÀÌµ¿ ÈÄ Ãæµ¹ÀÌ ¹ß»ıÇßÀ»¶§
+				else if (isY)		//yì¶•ìœ¼ë¡œ ì´ë™ í›„ ì¶©ëŒì´ ë°œìƒí–ˆì„ë•Œ
 				{
 					SetX(m_nOldX + m_nSpeedX);
 					SetY(m_nOldY + m_nSpeedY + (DEFAULT_BLOCK_SIZE - (_top == 0 ? _bottom : _top)) * (_top == 0 ? -1 : 1));
@@ -364,70 +364,70 @@ void CPlayer::CheckWallCollision()
 			}
 		}
 	}
-	else	//º¸½º ¸ÊÀÏ¶§
+	else	//ë³´ìŠ¤ ë§µì¼ë•Œ
 	{
 		for (int i = 0; i < 139; i++)
 		{
-			SetRect(&blockRect, wall[i].GetPos().x * 32, wall[i].GetPos().y * 32, wall[i].GetPos().x * 32 + 32, wall[i].GetPos().y * 32 + 32);	//ÇØ´ç ºí·ÏÀÇ ¿µ¿ª
+			SetRect(&blockRect, wall[i].GetPos().x * 32, wall[i].GetPos().y * 32, wall[i].GetPos().x * 32 + 32, wall[i].GetPos().y * 32 + 32);	//í•´ë‹¹ ë¸”ë¡ì˜ ì˜ì—­
 			if (CheckHitWallRect(blockRect))
 			{
 				collisionCount++;
 				if (collisionCount > 1)
 				{
-					if (oldBlockX != wall[i].GetPos().x && oldBlockY != wall[i].GetPos().y)		//°°Àº xÃà
+					if (oldBlockX != wall[i].GetPos().x && oldBlockY != wall[i].GetPos().y)		//ê°™ì€ xì¶•
 					{
-						collisionRect = GetHitRect2(blockRect);		//ÇÃ·¹ÀÌ¾î¶û ºí·°ÀÌ¶û Ãæµ¹µÈ ¿µ¿ª
+						collisionRect = GetHitRect2(blockRect);		//í”Œë ˆì´ì–´ë‘ ë¸”ëŸ­ì´ë‘ ì¶©ëŒëœ ì˜ì—­
 						int __left = abs(blockRect.left - collisionRect.left);
 						int __right = abs(blockRect.right - collisionRect.right);
 						int __top = abs(blockRect.top - collisionRect.top);
 						int __bottom = abs(blockRect.bottom - collisionRect.bottom);
 
-						if (__bottom + __top + __right == 0)		//¿ŞÂÊ À§ ¸ğ¼­¸®
+						if (__bottom + __top + __right == 0)		//ì™¼ìª½ ìœ„ ëª¨ì„œë¦¬
 						{
 							//SetY(GetPos().y - (DEFAULT_BLOCK_SIZE - __bottom));
 							SetX(GetPos().x + (DEFAULT_BLOCK_SIZE - __left));
 						}
-						else if (__left + __bottom + __top == 0)		//¿À¸¥ÂÊ ¾Æ·¡ ¸ğ¼­¸®
+						else if (__left + __bottom + __top == 0)		//ì˜¤ë¥¸ìª½ ì•„ë˜ ëª¨ì„œë¦¬
 						{
 							//SetY(GetPos().y - (DEFAULT_BLOCK_SIZE - __bottom));
 							SetX(GetPos().x - (DEFAULT_BLOCK_SIZE - __right));
 						}
-						else if (__left + __bottom == 0)	//¿ŞÂÊ À§ ¸ğ¼­¸®
+						else if (__left + __bottom == 0)	//ì™¼ìª½ ìœ„ ëª¨ì„œë¦¬
 						{
 							SetY(GetPos().y + (DEFAULT_BLOCK_SIZE - __top));
 						}
-						else if (__left + __top == 0)	//¿ŞÂÊ ¾Æ·¡ ¸ğ¼­¸®
+						else if (__left + __top == 0)	//ì™¼ìª½ ì•„ë˜ ëª¨ì„œë¦¬
 						{
 							SetY(GetPos().y - (DEFAULT_BLOCK_SIZE - __bottom));
 						}
-						else if (__right + __bottom == 0)	//¿À¸¥ÂÊ À§ ¸ğ¼­¸®
+						else if (__right + __bottom == 0)	//ì˜¤ë¥¸ìª½ ìœ„ ëª¨ì„œë¦¬
 						{
 							SetY(GetPos().y + (DEFAULT_BLOCK_SIZE - __top));
 						}
 						continue;
 						//SetX(m_nOldX + m_nSpeedX);
 						//SetY(m_nOldY);
-						//if (CheckHitWallRect(blockRect))		//x¸¸ ÀÌµ¿ÇßÀ»¶§ Ãæµ¹ÇÏ´ÂÁö Ã¼Å©
+						//if (CheckHitWallRect(blockRect))		//xë§Œ ì´ë™í–ˆì„ë•Œ ì¶©ëŒí•˜ëŠ”ì§€ ì²´í¬
 						//	isX = true;
 
 						//SetX(m_nOldX);
 						//SetY(m_nOldY + m_nSpeedY);
-						//if (CheckHitWallRect(blockRect))		//y¸¸ ÀÌµ¿ÇßÀ»¶§ Ãæµ¹ÇÏ´ÂÁö Ã¼Å©
+						//if (CheckHitWallRect(blockRect))		//yë§Œ ì´ë™í–ˆì„ë•Œ ì¶©ëŒí•˜ëŠ”ì§€ ì²´í¬
 						//	isY = true;
 
-						//if (isX)		//xÃàÀ¸·Î ÀÌµ¿ ÈÄ Ãæµ¹ÀÌ ¹ß»ıÇßÀ»¶§
+						//if (isX)		//xì¶•ìœ¼ë¡œ ì´ë™ í›„ ì¶©ëŒì´ ë°œìƒí–ˆì„ë•Œ
 						//{
 						//	SetX(GetPos().x + (DEFAULT_BLOCK_SIZE - (__left == 0 ? __right : __left)) * (__left == 0 ? -1 : 1));
 						//	SetY(m_nOldY + m_nSpeedY);
 						//}
-						//else if (isY)		//yÃàÀ¸·Î ÀÌµ¿ ÈÄ Ãæµ¹ÀÌ ¹ß»ıÇßÀ»¶§
+						//else if (isY)		//yì¶•ìœ¼ë¡œ ì´ë™ í›„ ì¶©ëŒì´ ë°œìƒí–ˆì„ë•Œ
 						//{
 						//	SetX(m_nOldX + m_nSpeedX);
 						//	SetY(GetPos().y + (DEFAULT_BLOCK_SIZE - (__top == 0 ? __bottom : __top)) * (__top == 0 ? -1 : 1));
 						//}
 					}
 				}
-				collisionRect = GetHitRect2(blockRect);		//ÇÃ·¹ÀÌ¾î¶û ºí·°ÀÌ¶û Ãæµ¹µÈ ¿µ¿ª
+				collisionRect = GetHitRect2(blockRect);		//í”Œë ˆì´ì–´ë‘ ë¸”ëŸ­ì´ë‘ ì¶©ëŒëœ ì˜ì—­
 				int _left = abs(blockRect.left - collisionRect.left);
 				int _right = abs(blockRect.right - collisionRect.right);
 				int _top = abs(blockRect.top - collisionRect.top);
@@ -438,19 +438,19 @@ void CPlayer::CheckWallCollision()
 
 				SetX(m_nOldX + m_nSpeedX);
 				SetY(m_nOldY);
-				if (CheckHitWallRect(blockRect))		//x¸¸ ÀÌµ¿ÇßÀ»¶§ Ãæµ¹ÇÏ´ÂÁö Ã¼Å©
+				if (CheckHitWallRect(blockRect))		//xë§Œ ì´ë™í–ˆì„ë•Œ ì¶©ëŒí•˜ëŠ”ì§€ ì²´í¬
 					isX = true;
 
 				SetX(m_nOldX);
 				SetY(m_nOldY + m_nSpeedY);
-				if (CheckHitWallRect(blockRect))		//y¸¸ ÀÌµ¿ÇßÀ»¶§ Ãæµ¹ÇÏ´ÂÁö Ã¼Å©
+				if (CheckHitWallRect(blockRect))		//yë§Œ ì´ë™í–ˆì„ë•Œ ì¶©ëŒí•˜ëŠ”ì§€ ì²´í¬
 					isY = true;
 
-				if (!isX && !isY)		//¸ğ¼­¸®¿¡ ºÎµóÃÆÀ»¶§
+				if (!isX && !isY)		//ëª¨ì„œë¦¬ì— ë¶€ë”›ì³¤ì„ë•Œ
 				{
-					if (_left + _top == 0)		//¿ŞÂÊ À§ ¸ğ¼­¸®
+					if (_left + _top == 0)		//ì™¼ìª½ ìœ„ ëª¨ì„œë¦¬
 					{
-						if (_right <= _bottom)		//xÃàÀÌ ´õ ±æ¶§
+						if (_right <= _bottom)		//xì¶•ì´ ë” ê¸¸ë•Œ
 						{
 							SetX(m_nOldX + m_nSpeedX);
 							SetY(m_nOldY + m_nSpeedY - (DEFAULT_BLOCK_SIZE - _bottom));
@@ -461,9 +461,9 @@ void CPlayer::CheckWallCollision()
 							SetY(m_nOldY + m_nSpeedY);
 						}
 					}
-					if (_top + _right == 0)		//¿À¸¥ÂÊ À§ ¸ğ¼­¸®
+					if (_top + _right == 0)		//ì˜¤ë¥¸ìª½ ìœ„ ëª¨ì„œë¦¬
 					{
-						if (_left <= _bottom)		//xÃàÀÌ ´õ ±æ¶§
+						if (_left <= _bottom)		//xì¶•ì´ ë” ê¸¸ë•Œ
 						{
 							SetX(m_nOldX + m_nSpeedX);
 							SetY(m_nOldY + m_nSpeedY - (DEFAULT_BLOCK_SIZE - _bottom));
@@ -474,9 +474,9 @@ void CPlayer::CheckWallCollision()
 							SetY(m_nOldY + m_nSpeedY);
 						}
 					}
-					if (_right + _bottom == 0)	//¿À¸¥ÂÊ ¾Æ·¡ ¸ğ¼­¸®
+					if (_right + _bottom == 0)	//ì˜¤ë¥¸ìª½ ì•„ë˜ ëª¨ì„œë¦¬
 					{
-						if (_left <= _top)		//xÃàÀÌ ´õ ±æ¶§
+						if (_left <= _top)		//xì¶•ì´ ë” ê¸¸ë•Œ
 						{
 							SetX(m_nOldX + m_nSpeedX);
 							SetY(m_nOldY + m_nSpeedY + (DEFAULT_BLOCK_SIZE - _top));
@@ -487,9 +487,9 @@ void CPlayer::CheckWallCollision()
 							SetY(m_nOldY + m_nSpeedY);
 						}
 					}
-					if (_left + _bottom == 0)	//¿ŞÂÊ ¾Æ·¡ ¸ğ¼­¸®
+					if (_left + _bottom == 0)	//ì™¼ìª½ ì•„ë˜ ëª¨ì„œë¦¬
 					{
-						if (_right <= _top)		//xÃàÀÌ ´õ ±æ¶§
+						if (_right <= _top)		//xì¶•ì´ ë” ê¸¸ë•Œ
 						{
 							SetX(m_nOldX + m_nSpeedX);
 							SetY(m_nOldY + m_nSpeedY + (DEFAULT_BLOCK_SIZE - _top));
@@ -501,12 +501,12 @@ void CPlayer::CheckWallCollision()
 						}
 					}
 				}
-				else if (isX)		//xÃàÀ¸·Î ÀÌµ¿ ÈÄ Ãæµ¹ÀÌ ¹ß»ıÇßÀ»¶§
+				else if (isX)		//xì¶•ìœ¼ë¡œ ì´ë™ í›„ ì¶©ëŒì´ ë°œìƒí–ˆì„ë•Œ
 				{
 					SetX(m_nOldX + m_nSpeedX + (DEFAULT_BLOCK_SIZE - (_left == 0 ? _right : _left)) * (_left == 0 ? -1 : 1));
 					SetY(m_nOldY + m_nSpeedY);
 				}
-				else if (isY)		//yÃàÀ¸·Î ÀÌµ¿ ÈÄ Ãæµ¹ÀÌ ¹ß»ıÇßÀ»¶§
+				else if (isY)		//yì¶•ìœ¼ë¡œ ì´ë™ í›„ ì¶©ëŒì´ ë°œìƒí–ˆì„ë•Œ
 				{
 					SetX(m_nOldX + m_nSpeedX);
 					SetY(m_nOldY + m_nSpeedY + (DEFAULT_BLOCK_SIZE - (_top == 0 ? _bottom : _top)) * (_top == 0 ? -1 : 1));
@@ -526,13 +526,13 @@ void CPlayer::Draw(LPDIRECTDRAWSURFACE7 surface)
 	if (m_bIsSkill)
 		CGObject::SkillDraw(draw_x, draw_y, surface);
 	else
-		CGObject::Draw(curPlayerActionState == ACTION_STATE::MOVE || curPlayerActionState == ACTION_STATE::RUN 
-			|| curPlayerActionState == ACTION_STATE::ROLL, draw_x, draw_y, surface);
+		CGObject::Draw(curPlayerActionState == ACTION_TYPE::MOVE || curPlayerActionState == ACTION_TYPE::RUN 
+			|| curPlayerActionState == ACTION_TYPE::ROLL, draw_x, draw_y, surface);
 }
 
 void CPlayer::Skill()
 {
-	if (curPlayerActionState != ACTION_STATE::DEAD)
+	if (curPlayerActionState != ACTION_TYPE::DEAD)
 	{
 		if (g_Timer.elapsed(m_nSkillCoolTime, 10000))
 		{
@@ -566,7 +566,7 @@ bool CPlayer::GetIsRoll()
 
 void CPlayer::Roll()
 {
-	curPlayerActionState = ACTION_STATE::ROLL;
+	curPlayerActionState = ACTION_TYPE::ROLL;
 	m_nFrameInterval = 70;
 }
 
@@ -608,7 +608,7 @@ void CPlayer::Hit()
 	}
 	if (m_nHp == 0)
 	{
-		curPlayerActionState = ACTION_STATE::DEAD;
+		curPlayerActionState = ACTION_TYPE::DEAD;
 	}
 }
 
@@ -633,23 +633,23 @@ float CPlayer::GetSpeedY()
 
 void CPlayer::MoveANDCheckState()
 {
-	if (curPlayerActionState == ACTION_STATE::DEAD)
+	if (curPlayerActionState == ACTION_TYPE::DEAD)
 		m_bIsRoll = false;
-	if (!(curPlayerActionState == ACTION_STATE::ROLL) && !(curPlayerActionState == ACTION_STATE::DEAD))
+	if (!(curPlayerActionState == ACTION_TYPE::ROLL) && !(curPlayerActionState == ACTION_TYPE::DEAD))
 	{
 		m_bIsRoll = false;
-		if (camera.GetExpansion() == 1)			//È­¸éÀÌ È®´ë°¡ ¾ÈµÇ¾îÀÖÀ»°æ¿ì
+		if (camera.GetExpansion() == 1)			//í™”ë©´ì´ í™•ëŒ€ê°€ ì•ˆë˜ì–´ìˆì„ê²½ìš°
 		{
-			if (curPlayerActionState != ACTION_STATE::FAINT)
+			if (curPlayerActionState != ACTION_TYPE::FAINT)
 			{
-				curPlayerActionState = ACTION_STATE::IDLE;		//Ä³¸¯ÅÍÀÇ Çàµ¿À» ±âº»À¸·Î ÃÊ±âÈ­
+				curPlayerActionState = ACTION_TYPE::IDLE;		//ìºë¦­í„°ì˜ í–‰ë™ì„ ê¸°ë³¸ìœ¼ë¡œ ì´ˆê¸°í™”
 			}
 		}
 		else
-			curPlayerActionState = ACTION_STATE::ATTACK;		//Ä³¸¯ÅÍÀÇ Çàµ¿À» °ø°İÁßÀ¸·Î ÃÊ±âÈ­
+			curPlayerActionState = ACTION_TYPE::ATTACK;		//ìºë¦­í„°ì˜ í–‰ë™ì„ ê³µê²©ì¤‘ìœ¼ë¡œ ì´ˆê¸°í™”
 
-		if (!(curPlayerActionState == ACTION_STATE::ATTACK) && (m_nSpeedX != 0 || m_nSpeedY != 0))
-			curPlayerActionState = ACTION_STATE::MOVE;
+		if (!(curPlayerActionState == ACTION_TYPE::ATTACK) && (m_nSpeedX != 0 || m_nSpeedY != 0))
+			curPlayerActionState = ACTION_TYPE::MOVE;
 	}
 
 	if (m_bIsRoll)
@@ -657,43 +657,43 @@ void CPlayer::MoveANDCheckState()
 		m_nMoveSpeedFold = 4;
 		switch (curPlayerDistanceState)
 		{
-		case DISTANCE_STATE::LEFT:
+		case DISTANCE_TYPE::LEFT:
 			m_nSpeedX = -(moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime);
 			m_nSpeedY = 0;
 			break;
-		case DISTANCE_STATE::RIGHT:
+		case DISTANCE_TYPE::RIGHT:
 			m_nSpeedX = moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime;
 			m_nSpeedY = 0;
 			break;
-		case DISTANCE_STATE::UP:
+		case DISTANCE_TYPE::UP:
 			m_nSpeedX = 0;
 			m_nSpeedY = -(moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime);
 			break;
-		case DISTANCE_STATE::DOWN:
+		case DISTANCE_TYPE::DOWN:
 			m_nSpeedX = 0;
 			m_nSpeedY = moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime;
 			break;
-		case DISTANCE_STATE::LEFTUP:
+		case DISTANCE_TYPE::LEFTUP:
 			m_nSpeedX = -(moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime);
 			m_nSpeedY = -(moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime);
 			break;
-		case DISTANCE_STATE::RIGHTUP:
+		case DISTANCE_TYPE::RIGHTUP:
 			m_nSpeedX = moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime;
 			m_nSpeedY = -(moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime);
 			break;
-		case DISTANCE_STATE::LEFTDOWN:
+		case DISTANCE_TYPE::LEFTDOWN:
 			m_nSpeedX = -(moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime);
 			m_nSpeedY = moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime;
 			break;
-		case DISTANCE_STATE::RIGHTDOWN:
+		case DISTANCE_TYPE::RIGHTDOWN:
 			m_nSpeedX = moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime;
 			m_nSpeedY = moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime;
 			break;
 		}
 	}
 
-	if (!(curPlayerActionState == ACTION_STATE::ATTACK) && 
-		!(curPlayerActionState == ACTION_STATE::IDLE) && !(curPlayerActionState == ACTION_STATE::DEAD))	//°ø°İÁßÀÌ°Å³ª ±âº»»óÅÂ°¡ ¾Æ´Ò°æ¿ì Ä³¸¯ÅÍ¸¦ ¿òÁ÷¿©ÁØ´Ù
+	if (!(curPlayerActionState == ACTION_TYPE::ATTACK) && 
+		!(curPlayerActionState == ACTION_TYPE::IDLE) && !(curPlayerActionState == ACTION_TYPE::DEAD))	//ê³µê²©ì¤‘ì´ê±°ë‚˜ ê¸°ë³¸ìƒíƒœê°€ ì•„ë‹ê²½ìš° ìºë¦­í„°ë¥¼ ì›€ì§ì—¬ì¤€ë‹¤
 	{
 		m_nOldX = GetPos().x;
 		m_nOldY = GetPos().y;
@@ -729,27 +729,27 @@ void CPlayer::MoveANDCheckState()
 		if (m_nSpeedX == 0)
 		{
 			if (m_nSpeedY < 0)		//up
-				curPlayerDistanceState = DISTANCE_STATE::UP;
+				curPlayerDistanceState = DISTANCE_TYPE::UP;
 			else if (m_nSpeedY > 0)		//down
-				curPlayerDistanceState = DISTANCE_STATE::DOWN;
+				curPlayerDistanceState = DISTANCE_TYPE::DOWN;
 		}
 		else if (m_nSpeedX < 0)
 		{
 			if (m_nSpeedY == 0)				//left
-				curPlayerDistanceState = DISTANCE_STATE::LEFT;
+				curPlayerDistanceState = DISTANCE_TYPE::LEFT;
 			else if (m_nSpeedY < 0)		//leftup
-				curPlayerDistanceState = DISTANCE_STATE::LEFTUP;
+				curPlayerDistanceState = DISTANCE_TYPE::LEFTUP;
 			else if (m_nSpeedY > 0)		//leftdown
-				curPlayerDistanceState = DISTANCE_STATE::LEFTDOWN;
+				curPlayerDistanceState = DISTANCE_TYPE::LEFTDOWN;
 		}
 		else if (m_nSpeedX > 0)
 		{
 			if (m_nSpeedY == 0)				//right
-				curPlayerDistanceState = DISTANCE_STATE::RIGHT;
+				curPlayerDistanceState = DISTANCE_TYPE::RIGHT;
 			else if (m_nSpeedY < 0)		//rightup
-				curPlayerDistanceState = DISTANCE_STATE::RIGHTUP;
+				curPlayerDistanceState = DISTANCE_TYPE::RIGHTUP;
 			else if (m_nSpeedY > 0)		//rightdown
-				curPlayerDistanceState = DISTANCE_STATE::RIGHTDOWN;
+				curPlayerDistanceState = DISTANCE_TYPE::RIGHTDOWN;
 		}
 
 		if (curPlayerActionState == 4)
@@ -757,120 +757,120 @@ void CPlayer::MoveANDCheckState()
 			if (attackDirection.y < 0)
 			{
 				if ((attackDirection.x > -0.3f) && (attackDirection.x < 0.3f))
-					curPlayerDistanceState = DISTANCE_STATE::UP;
+					curPlayerDistanceState = DISTANCE_TYPE::UP;
 				else if (attackDirection.x < -0.3f)
-					curPlayerDistanceState = DISTANCE_STATE::LEFTUP;
+					curPlayerDistanceState = DISTANCE_TYPE::LEFTUP;
 				else if (attackDirection.x > 0.3f)
-					curPlayerDistanceState = DISTANCE_STATE::RIGHTUP;
+					curPlayerDistanceState = DISTANCE_TYPE::RIGHTUP;
 			}
 			else
 			{
 				if ((attackDirection.x > -0.3f) && (attackDirection.x < 0.3f))
-					curPlayerDistanceState = DISTANCE_STATE::DOWN;
+					curPlayerDistanceState = DISTANCE_TYPE::DOWN;
 				else if (attackDirection.x < -0.3f)
-					curPlayerDistanceState = DISTANCE_STATE::LEFTDOWN;
+					curPlayerDistanceState = DISTANCE_TYPE::LEFTDOWN;
 				else if (attackDirection.x > 0.3f)
-					curPlayerDistanceState = DISTANCE_STATE::RIGHTDOWN;
+					curPlayerDistanceState = DISTANCE_TYPE::RIGHTDOWN;
 			}
 			if (attackDirection.x < 0)
 			{
 				if ((attackDirection.y > -0.3f) && (attackDirection.y < 0.3f))
-					curPlayerDistanceState = DISTANCE_STATE::LEFT;
+					curPlayerDistanceState = DISTANCE_TYPE::LEFT;
 			}
 			else
 			{
 				if ((attackDirection.y > -0.3f) && (attackDirection.y < 0.3f))
-					curPlayerDistanceState = DISTANCE_STATE::RIGHT;
+					curPlayerDistanceState = DISTANCE_TYPE::RIGHT;
 			}
 		}
 
 
 		switch (curPlayerDistanceState)
 		{
-		case DISTANCE_STATE::LEFT:
-			m_pCurSprite = !(curPlayerActionState == ACTION_STATE::ROLL) ? m_pWalk_LeftSprite : m_pRoll_LeftSprite;
-			m_pCurBowSprite = !(curPlayerActionState == ACTION_STATE::ROLL) ? m_pBow_WalkSprite->GetLeft() : m_pBow_RollSprite->GetLeft();
-			if (curPlayerActionState == ACTION_STATE::ATTACK)
+		case DISTANCE_TYPE::LEFT:
+			m_pCurSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pWalk_LeftSprite : m_pRoll_LeftSprite;
+			m_pCurBowSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pBow_WalkSprite->GetLeft() : m_pBow_RollSprite->GetLeft();
+			if (curPlayerActionState == ACTION_TYPE::ATTACK)
 				m_pCurBowSprite = m_pBow_AttackSprite->GetLeft();
 			break;
-		case DISTANCE_STATE::RIGHT:
-			m_pCurSprite = !(curPlayerActionState == ACTION_STATE::ROLL) ? m_pWalk_RightSprite : m_pRoll_RightSprite;
-			m_pCurBowSprite = !(curPlayerActionState == ACTION_STATE::ROLL) ? m_pBow_WalkSprite->GetRight() : m_pBow_RollSprite->GetRight();
-			if (curPlayerActionState == ACTION_STATE::ATTACK)
+		case DISTANCE_TYPE::RIGHT:
+			m_pCurSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pWalk_RightSprite : m_pRoll_RightSprite;
+			m_pCurBowSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pBow_WalkSprite->GetRight() : m_pBow_RollSprite->GetRight();
+			if (curPlayerActionState == ACTION_TYPE::ATTACK)
 				m_pCurBowSprite = m_pBow_AttackSprite->GetRight();
 			break;
-		case DISTANCE_STATE::UP:
-			m_pCurSprite = !(curPlayerActionState == ACTION_STATE::ROLL) ? m_pWalk_UpSprite : m_pRoll_UpSprite;
-			m_pCurBowSprite = !(curPlayerActionState == ACTION_STATE::ROLL) ? m_pBow_WalkSprite->GetUp() : m_pBow_RollSprite->GetUp();
-			if (curPlayerActionState == ACTION_STATE::ATTACK)
+		case DISTANCE_TYPE::UP:
+			m_pCurSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pWalk_UpSprite : m_pRoll_UpSprite;
+			m_pCurBowSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pBow_WalkSprite->GetUp() : m_pBow_RollSprite->GetUp();
+			if (curPlayerActionState == ACTION_TYPE::ATTACK)
 				m_pCurBowSprite = m_pBow_AttackSprite->GetUp();
 			break;
-		case DISTANCE_STATE::DOWN:
-			m_pCurSprite = !(curPlayerActionState == ACTION_STATE::ROLL) ? m_pWalk_DownSprite : m_pRoll_DownSprite;
-			m_pCurBowSprite = !(curPlayerActionState == ACTION_STATE::ROLL) ? m_pBow_WalkSprite->GetDown() : m_pBow_RollSprite->GetDown();
-			if (curPlayerActionState == ACTION_STATE::ATTACK)
+		case DISTANCE_TYPE::DOWN:
+			m_pCurSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pWalk_DownSprite : m_pRoll_DownSprite;
+			m_pCurBowSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pBow_WalkSprite->GetDown() : m_pBow_RollSprite->GetDown();
+			if (curPlayerActionState == ACTION_TYPE::ATTACK)
 				m_pCurBowSprite = m_pBow_AttackSprite->GetDown();
 			break;
-		case DISTANCE_STATE::LEFTUP:
-			m_pCurSprite = !(curPlayerActionState == ACTION_STATE::ROLL) ? m_pWalk_LeftUpSprite : m_pRoll_LeftUpSprite;
-			m_pCurBowSprite = !(curPlayerActionState == ACTION_STATE::ROLL) ? m_pBow_WalkSprite->GetLeftUp() : m_pBow_RollSprite->GetLeftUp();
-			if (curPlayerActionState == ACTION_STATE::ATTACK)
+		case DISTANCE_TYPE::LEFTUP:
+			m_pCurSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pWalk_LeftUpSprite : m_pRoll_LeftUpSprite;
+			m_pCurBowSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pBow_WalkSprite->GetLeftUp() : m_pBow_RollSprite->GetLeftUp();
+			if (curPlayerActionState == ACTION_TYPE::ATTACK)
 				m_pCurBowSprite = m_pBow_AttackSprite->GetLeftUp();
 			break;
-		case DISTANCE_STATE::RIGHTUP:
-			m_pCurSprite = !(curPlayerActionState == ACTION_STATE::ROLL) ? m_pWalk_RightUpSprite : m_pRoll_RightUpSprite;
-			m_pCurBowSprite = !(curPlayerActionState == ACTION_STATE::ROLL) ? m_pBow_WalkSprite->GetRightUp() : m_pBow_RollSprite->GetRightUp();
-			if (curPlayerActionState == ACTION_STATE::ATTACK)
+		case DISTANCE_TYPE::RIGHTUP:
+			m_pCurSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pWalk_RightUpSprite : m_pRoll_RightUpSprite;
+			m_pCurBowSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pBow_WalkSprite->GetRightUp() : m_pBow_RollSprite->GetRightUp();
+			if (curPlayerActionState == ACTION_TYPE::ATTACK)
 				m_pCurBowSprite = m_pBow_AttackSprite->GetRightUp();
 			break;
-		case DISTANCE_STATE::LEFTDOWN:
-			m_pCurSprite = !(curPlayerActionState == ACTION_STATE::ROLL) ? m_pWalk_LeftDownSprite : m_pRoll_LeftDownSprite;
-			m_pCurBowSprite = !(curPlayerActionState == ACTION_STATE::ROLL) ? m_pBow_WalkSprite->GetLeftDown() : m_pBow_RollSprite->GetLeftDown();
-			if (curPlayerActionState == ACTION_STATE::ATTACK)
+		case DISTANCE_TYPE::LEFTDOWN:
+			m_pCurSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pWalk_LeftDownSprite : m_pRoll_LeftDownSprite;
+			m_pCurBowSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pBow_WalkSprite->GetLeftDown() : m_pBow_RollSprite->GetLeftDown();
+			if (curPlayerActionState == ACTION_TYPE::ATTACK)
 				m_pCurBowSprite = m_pBow_AttackSprite->GetLeftDown();
 			break;
-		case DISTANCE_STATE::RIGHTDOWN:
-			m_pCurSprite = !(curPlayerActionState == ACTION_STATE::ROLL) ? m_pWalk_RightDownSprite : m_pRoll_RightDownSprite;
-			m_pCurBowSprite = !(curPlayerActionState == ACTION_STATE::ROLL) ? m_pBow_WalkSprite->GetRightDown() : m_pBow_RollSprite->GetRightDown();
-			if (curPlayerActionState == ACTION_STATE::ATTACK)
+		case DISTANCE_TYPE::RIGHTDOWN:
+			m_pCurSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pWalk_RightDownSprite : m_pRoll_RightDownSprite;
+			m_pCurBowSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pBow_WalkSprite->GetRightDown() : m_pBow_RollSprite->GetRightDown();
+			if (curPlayerActionState == ACTION_TYPE::ATTACK)
 				m_pCurBowSprite = m_pBow_AttackSprite->GetRightDown();
 			break;
 		}
 	}
 
-	SetHitRect((curPlayerActionState != ACTION_STATE::ROLL) ? walkHitRect[(int)curPlayerDistanceState-1] : rollHitRect[(int)curPlayerDistanceState-1][m_nCurrentFrame]);
+	SetHitRect((curPlayerActionState != ACTION_TYPE::ROLL) ? walkHitRect[(int)curPlayerDistanceState-1] : rollHitRect[(int)curPlayerDistanceState-1][m_nCurrentFrame]);
 
-	if (curPlayerActionState == ACTION_STATE::FAINT)
+	if (curPlayerActionState == ACTION_TYPE::FAINT)
 	{
 		m_pCurSprite = m_pDeadSprite->GetRight();
 	}
 
-	if (curPlayerActionState == ACTION_STATE::DEAD)
+	if (curPlayerActionState == ACTION_TYPE::DEAD)
 	{
 		switch (curPlayerDistanceState)
 		{
-		case DISTANCE_STATE::LEFT:
+		case DISTANCE_TYPE::LEFT:
 			m_pCurSprite = m_pDeadSprite->GetLeft();
 			break;
-		case DISTANCE_STATE::RIGHT:
+		case DISTANCE_TYPE::RIGHT:
 			m_pCurSprite = m_pDeadSprite->GetRight();
 			break;
-		case DISTANCE_STATE::UP:
+		case DISTANCE_TYPE::UP:
 			m_pCurSprite = m_pDeadSprite->GetUp();
 			break;
-		case DISTANCE_STATE::DOWN:
+		case DISTANCE_TYPE::DOWN:
 			m_pCurSprite = m_pDeadSprite->GetDown();
 			break;
-		case DISTANCE_STATE::LEFTUP:
+		case DISTANCE_TYPE::LEFTUP:
 			m_pCurSprite = m_pDeadSprite->GetLeftUp();
 			break;
-		case DISTANCE_STATE::RIGHTUP:
+		case DISTANCE_TYPE::RIGHTUP:
 			m_pCurSprite = m_pDeadSprite->GetRightUp();
 			break;
-		case DISTANCE_STATE::LEFTDOWN:
+		case DISTANCE_TYPE::LEFTDOWN:
 			m_pCurSprite = m_pDeadSprite->GetLeftDown();
 			break;
-		case DISTANCE_STATE::RIGHTDOWN:
+		case DISTANCE_TYPE::RIGHTDOWN:
 			m_pCurSprite = m_pDeadSprite->GetRightDown();
 			break;
 		}
@@ -885,7 +885,7 @@ void CPlayer::MoveANDCheckState()
 		m_pOldSprite = m_pCurSprite;
 		m_pOldBowSprite = m_pCurBowSprite;
 		CGObject::SetSprite(m_pCurSprite, m_pCurBowSprite);
-		if (curPlayerActionState == ACTION_STATE::ROLL)
+		if (curPlayerActionState == ACTION_TYPE::ROLL)
 		{
 			m_bIsRoll = true;
 			//curBossActionState = (ACTION_STATE)3;
@@ -897,7 +897,7 @@ void CPlayer::MoveInit()
 {
 	m_nSpeedX = 0;
 	m_nSpeedY = 0;
-	if (curPlayerActionState != ACTION_STATE::ROLL)
+	if (curPlayerActionState != ACTION_TYPE::ROLL)
 	{
 		m_nMoveSpeedFold = 2;
 		m_nFrameInterval = 140;

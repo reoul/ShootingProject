@@ -23,6 +23,7 @@ void Gui::Initialize(int x, int y, CSprite* sprite, CTimer* timer, int frameInte
 	m_pSprite = sprite;
 	m_pTimer = timer;
 	m_nFrameInterval = frameInterval;
+	m_nCurrentFrame = 0;
 }
 
 void Gui::Drawing(LPDIRECTDRAWSURFACE7 lpsurface)
@@ -34,7 +35,7 @@ void Gui::Drawing(LPDIRECTDRAWSURFACE7 lpsurface)
 
 void Gui::DrawingBossHp(LPDIRECTDRAWSURFACE7 lpsurface)
 {
-	if(m_pTimer->elapsed(m_nLastFrameTime,m_nFrameInterval))
+	if (m_pTimer->elapsed(m_nLastFrameTime, m_nFrameInterval))
 		m_nCurrentFrame = ++m_nCurrentFrame % m_pSprite->GetNumberOfFrame();
 	m_pSprite->DrawingBossHp(m_nCurrentFrame, m_x, m_y, lpsurface, true);
 }

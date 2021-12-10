@@ -126,13 +126,13 @@ void IntroMain(void)
 	switch (curSelect)
 	{
 	case START:
-		introButton.Drawing2(0, 601, 392, g_lpSecondarySurface, true);		//1280 = (567,368)     1152 = (512,440)
+		introButton.Drawing2(0, 605, 392, g_lpSecondarySurface, true);		//1280 = (567,368)     1152 = (512,440)
 		break;
 	case OPTION:
-		introButton.Drawing2(1, 601, 417, g_lpSecondarySurface, true);		//1280 = (567,390)     1152 = (512,467)
+		introButton.Drawing2(1, 605, 417, g_lpSecondarySurface, true);		//1280 = (567,390)     1152 = (512,467)
 		break;
 	case QUIT:
-		introButton.Drawing2(2, 601, 439, g_lpSecondarySurface, true);		//1280 = (567,411)     1152 = (512,492)
+		introButton.Drawing2(2, 605, 439, g_lpSecondarySurface, true);		//1280 = (567,411)     1152 = (512,492)
 		break;
 	}
 
@@ -147,7 +147,7 @@ void IntroMain(void)
 	}
 
 	HRESULT hResult;
-	if (FAILED(hResult = g_lpPrimarySurface->Flip(NULL, DDFLIP_WAIT)))	//´õºí¹öÆÛ¸µ È­¸éÀüÈ¯
+	if (FAILED(hResult = g_lpPrimarySurface->Flip(NULL, DDFLIP_WAIT)))	//ë”ë¸”ë²„í¼ë§ í™”ë©´ì „í™˜
 	{
 		if (hResult == DDERR_SURFACELOST)
 			g_lpPrimarySurface->Restore();
@@ -162,7 +162,7 @@ void InitIntro()
 	SndObjStop(Sound[0]);
 	SndObjStop(Sound[1]);
 	SndObjStop(Sound[4]);
-	//SndObjPlay(Sound[1], DSBPLAY_LOOPING);
+	SndObjPlay(Sound[1], DSBPLAY_LOOPING);
 	//SetVolume(Sound[1]->Buffers[0], SoundSize);
 	camera.Initialize(&g_Timer);
 	camera.SetIsFirstAlpha(false);

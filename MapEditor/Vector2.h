@@ -17,8 +17,8 @@ public:
 	void SetRect(float _x, float _y);
 	Vector2 operator- (Vector2 vec);
 	float Length();
-	float Distance(Vector2 v1, Vector2 v2);
-	double norm();			//º¤ÅÍÀÇ ±æÀÌ ¹İÈ¯
+	static float Distance(Vector2 v1, Vector2 v2);
+	double norm();			//ë²¡í„°ì˜ ê¸¸ì´ ë°˜í™˜
 	Vector2 normalize();
 	void Rotate(float degrees);
 	int VectorToAngle();

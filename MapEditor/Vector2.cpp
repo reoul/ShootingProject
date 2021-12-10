@@ -84,19 +84,19 @@ int Vector2::VectorToAngle()
 
 	Vector2 toDir = Vector2(1,0) - Vector2(x,y);
 	toDir = toDir.normalize();
-	float cross = (toDir.x * 0) - (toDir.y * 1);		//æÓ¥¿πÊ«‚¿∏∑Œ µπ¡ˆ ∞ËªÍ
+	float cross = (toDir.x * 0) - (toDir.y * 1);		//Ïñ¥ÎäêÎ∞©Ìñ•ÏúºÎ°ú ÎèåÏßÄ Í≥ÑÏÇ∞
 
-	//float angle = acosf((toDir.x * m_direction.x) + (toDir.y * m_direction.y));		//µŒ ∫§≈Õ¿« ≥ª∞¢(0~180 æÁºˆ)
+	//float angle = acosf((toDir.x * m_direction.x) + (toDir.y * m_direction.y));		//Îëê Î≤°ÌÑ∞Ïùò ÎÇ¥Í∞Å(0~180 ÏñëÏàò)
 	//if (isnan(angle))
 	//	angle = 0;
-	if (cross > 0)		//ø‹¿˚ ∞™¿Ã ¿Ωºˆ∏È Ω√∞ËπÊ«‚¿∏∑Œ »∏¿¸
+	if (cross > 0)		//Ïô∏Ï†Å Í∞íÏù¥ ÏùåÏàòÎ©¥ ÏãúÍ≥ÑÎ∞©Ìñ•ÏúºÎ°ú ÌöåÏ†Ñ
 	{
 		angle = 360-angle;
 	}
 
 	//float fAng = acos((a.x * 0 + a.y * 0) / (sqrt(a.x * a.x + a.y * a.y) * sqrt(0))) * 360 / PI;
 
-	//fAng¿« ≈©±‚ø° µ˚∂Û µŒ¡°ªÁ¿Ã¿« ∞¢µµ∏¶ ¥Ÿ∏• πÊΩƒ¿∏∑Œ ±∏«‘.
+	//fAngÏùò ÌÅ¨Í∏∞Ïóê Îî∞Îùº ÎëêÏ†êÏÇ¨Ïù¥Ïùò Í∞ÅÎèÑÎ•º Îã§Î•∏ Î∞©ÏãùÏúºÎ°ú Íµ¨Ìï®.
 	//if (fAng > 90)
 	//	return (int)(360 - fAng);
 
@@ -105,7 +105,7 @@ int Vector2::VectorToAngle()
 
 
 
-//√‚√≥: https://3dmpengines.tistory.com/174 [3DMP]
+//Ï∂úÏ≤ò: https://3dmpengines.tistory.com/174 [3DMP]
 
 	return (int)angle;
 }

@@ -10,18 +10,18 @@ private:
 	int m_x;
 	int m_y;
 	int stage;
-	CWorldMap* m_pbassWorldMap;			//±âº» º¸½º ¸Ê ¹è°æ ÀÌ¹ÌÁö
-	CWorldMap* m_pBossWorldMap;			//±âº» º¸½º ¸Ê ¹è°æ ÀÌ¹ÌÁö
-	CWorldMap* m_pBossWorldMapRoof;		//±âº» ¹è°æ À§¿¡ µ¤´Â ÀÌ¹ÌÁö
+	CWorldMap* m_pbassWorldMap;			//ê¸°ë³¸ ë³´ìŠ¤ ë§µ ë°°ê²½ ì´ë¯¸ì§€
+	CWorldMap* m_pBossWorldMap;			//ê¸°ë³¸ ë³´ìŠ¤ ë§µ ë°°ê²½ ì´ë¯¸ì§€
+	CWorldMap* m_pBossWorldMapRoof;		//ê¸°ë³¸ ë°°ê²½ ìœ„ì— ë®ëŠ” ì´ë¯¸ì§€
 public:
 	Map();
 	~Map();
 	void SetWorldMap(CWorldMap* baseMap, CWorldMap* bossWorldMap, CWorldMap* bossWorldMapRoof);
 	void SetPos(int x, int y);
 	void SetStage(int _stage);
-	int GetStage();
-	void Drawing(LPDIRECTDRAWSURFACE7 lpsurface, LPDIRECTDRAW7 lpDirectDrawObject);			//±âº» ¹è°æ
-	void DrawingRoof(LPDIRECTDRAWSURFACE7 lpsurface, LPDIRECTDRAW7 lpDirectDrawObject);		//¹è°æ À§¿¡ µ¤´Â ÀÌ¹ÌÁö ±×·ÁÁÙ¶§
+	int GetStageNum();
+	void Drawing(LPDIRECTDRAWSURFACE7 lpsurface, LPDIRECTDRAW7 lpDirectDrawObject);			//ê¸°ë³¸ ë°°ê²½
+	void DrawingRoof(LPDIRECTDRAWSURFACE7 lpsurface, LPDIRECTDRAW7 lpDirectDrawObject);		//ë°°ê²½ ìœ„ì— ë®ëŠ” ì´ë¯¸ì§€ ê·¸ë ¤ì¤„ë•Œ
 	void NextStage();
 };
 

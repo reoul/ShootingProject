@@ -11,8 +11,8 @@
 class CPlayer : public CGObject
 {
 private:
-	bool m_bIsSkill;		//½ºÅ³ »ç¿ë Ã¼Å©
-	bool m_bIsMove;			//ÀÌµ¿Áß Ã¼Å©
+	bool m_bIsSkill;		//ìŠ¤í‚¬ ì‚¬ìš© ì²´í¬
+	bool m_bIsMove;			//ì´ë™ì¤‘ ì²´í¬
 	bool m_bIsUseBow;
 	bool m_bIsRoll;
 	int m_nLastMoveTime;
@@ -23,9 +23,9 @@ private:
 	float m_nSpeedY;
 	float m_nOldX;
 	float m_nOldY;
-	float m_nMoveSpeedFold;		//¿òÁ÷ÀÓ ¼ÓµµÀÇ ¹èÀ²(1ÀÌ ±âº», 2´Â 2¹è)
-	int draw_x;		//Ä³¸¯ÅÍ¸¦ È­¸é¿¡ ±×·ÁÁÙ¶§ ±×·ÁÁÖ´Â xÁÂÇ¥
-	int draw_y;		//Ä³¸¯ÅÍ¸¦ È­¸é¿¡ ±×·ÁÁÙ¶§ ±×·ÁÁÖ´Â yÁÂÇ¥
+	float m_nMoveSpeedFold;		//ì›€ì§ì„ ì†ë„ì˜ ë°°ìœ¨(1ì´ ê¸°ë³¸, 2ëŠ” 2ë°°)
+	int draw_x;		//ìºë¦­í„°ë¥¼ í™”ë©´ì— ê·¸ë ¤ì¤„ë•Œ ê·¸ë ¤ì£¼ëŠ” xì¢Œí‘œ
+	int draw_y;		//ìºë¦­í„°ë¥¼ í™”ë©´ì— ê·¸ë ¤ì¤„ë•Œ ê·¸ë ¤ì£¼ëŠ” yì¢Œí‘œ
 	int m_nHp;
 	RECT walkHitRect[8];
 	RECT rollHitRect[8][6];
@@ -76,12 +76,12 @@ public:
 	void CheckUseSkill();
 	void Skill();
 	void Roll();
-	void Left();	//ÇÃ·¹ÀÌ¾î ¿ŞÂÊÀÌµ¿
-	void Right();	//ÇÃ·¹ÀÌ¾î ¿À¸¥ÂÊÀÌµ¿
-	void Up();		//ÇÃ·¹ÀÌ¾î À§·ÎÀÌµ¿
-	void Down();	//ÇÃ·¹ÀÌ¾î ¾Æ·¡ÂÊÀÌµ¿
-	void Hit();		//ÇÃ·¹ÀÌ¾î ÇÇ°İ
-	bool CanMove();	//ÀÌµ¿ °¡´É ¿©ºÎ È®ÀÎ
+	void Left();	//í”Œë ˆì´ì–´ ì™¼ìª½ì´ë™
+	void Right();	//í”Œë ˆì´ì–´ ì˜¤ë¥¸ìª½ì´ë™
+	void Up();		//í”Œë ˆì´ì–´ ìœ„ë¡œì´ë™
+	void Down();	//í”Œë ˆì´ì–´ ì•„ë˜ìª½ì´ë™
+	void Hit();		//í”Œë ˆì´ì–´ í”¼ê²©
+	bool CanMove();	//ì´ë™ ê°€ëŠ¥ ì—¬ë¶€ í™•ì¸
 	void MoveANDCheckState();
 	void MoveInit();
 	bool IsArrowReady();
@@ -89,7 +89,7 @@ public:
 	float GetSpeedY();
 	bool IsArrowNull();
 	bool IsUsingSkill();
-	void CheckWallCollision();		//Ãæµ¹°Ë»ç
+	void CheckWallCollision();		//ì¶©ëŒê²€ì‚¬
 	int GetHp();
 };
 

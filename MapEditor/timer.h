@@ -5,6 +5,7 @@ class CTimer
 {
 private:
 	int m_nStartTime;
+	int GetTime();
 
 public:
 	float deltaTime;
@@ -12,7 +13,6 @@ public:
 	~CTimer();
 	void start();
 	int time();
-	int GetTime();
 	bool elapsed(int &time, int interval);
 };
 

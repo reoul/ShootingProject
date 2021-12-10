@@ -170,5 +170,8 @@
     <ClInclude Include="enemy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

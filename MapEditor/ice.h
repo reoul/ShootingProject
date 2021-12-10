@@ -1,5 +1,5 @@
-#ifndef __boss_h__
-#define __boss_h__
+#ifndef __ice_h__
+#define __ice_h__
 
 #include <ddraw.h>
 #include "gobject.h"
@@ -8,10 +8,8 @@
 #include "sprite8.h"
 #include "Vector2.h"
 
-class CBoss : public CGObject
+class CIce : public CGObject
 {
-public:
-	int m_nHp;
 private:
 	bool m_bIsRoll;
 	bool m_bIsHitWall;
@@ -39,36 +37,15 @@ private:
 
 	CSprite* m_pCurSprite;
 	CSprite* m_pOldSprite;
-	CSprite* m_pBoss_SleepSprite;
-
-	CSprite8* m_pBoss_IdleSprite;
-	CSprite8* m_pBoss_RollSprite;
-	CSprite8* m_pBoss_AttackSprite;
-	CSprite8* m_pBoss_DeadSprite;
-	
 
 public:
-	CBoss();
-	~CBoss();
-	bool GetIsRoll();
+	CIce();
+	~CIce();
 	void Initialize(int x, int y, CTimer* timer, int currentFrame, int frameInterval, int moveInterval);
-	void SetSprite(CSprite* _sleep,CSprite8* _idle, CSprite8* _roll, CSprite8* _attack,CSprite8* _dead);
+	void SetSprite(CSprite* _sleep, CSprite8* _idle, CSprite8* _roll, CSprite8* _attack, CSprite8* _dead);
 	void Draw(LPDIRECTDRAWSURFACE7 surface);
-	bool CanMove();
 	void MoveANDCheckState();
-	void MoveInit();
-	void NextPattern();
-	float GetSpeedX();
-	float GetSpeedY();
 	void Attack();
-	void Hit(int damege);
-	void CheckPlayerDirection();
-	void CheckDirectionState();
-	void CheckSpeedXY();
-	void CheckSprite();
-	int GetCntAttack();
-	int GetHp();
-	Vector2 GetPlayerDirection();
 };
 
 #endif

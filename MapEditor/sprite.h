@@ -13,13 +13,13 @@ private:
 	int m_nHeight;
 	int draw_Width;
 	int draw_Height;
-	bool IsDrawWidthEven;		//Â¦¼öÀÎÁö
-	bool IsDrawHeightEven;		//Â¦¼öÀÎÁö
+	bool IsDrawWidthEven;		//ì§ìˆ˜ì¸ì§€
+	bool IsDrawHeightEven;		//ì§ìˆ˜ì¸ì§€
 	float m_nSize;
 	int number;
 
-	LPDIRECTDRAWSURFACE7* m_ppSurface;			//¿øº» ÀÌ¹ÌÁö surface
-	LPDIRECTDRAWSURFACE7* m_ppDrawSurface;		//Ãâ·Â ÀÌ¹ÌÁö surface
+	LPDIRECTDRAWSURFACE7* m_ppSurface;			//ì›ë³¸ ì´ë¯¸ì§€ surface
+	LPDIRECTDRAWSURFACE7* m_ppDrawSurface;		//ì¶œë ¥ ì´ë¯¸ì§€ surface
 
 	CBMP* m_pBMPArray;
 public:
@@ -42,6 +42,6 @@ public:
 	int GetNumber();
 	int GetWidth();
 	int GetHeight();
-	void Rotate(double Degree, int _curFrame);		//Degree´Â È¸Àü°ª, ½Ã°è ¹İ´ë¹æÇâÀ¸·Î µ·´Ù
+	void Rotate(double Degree, int _curFrame);		//DegreeëŠ” íšŒì „ê°’, ì‹œê³„ ë°˜ëŒ€ë°©í–¥ìœ¼ë¡œ ëˆë‹¤
 };
 #endif

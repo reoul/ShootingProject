@@ -75,7 +75,7 @@ CCamera camera;
 CBLOCK curBlock;
 CSprite grassSprite;
 
-CSprite player_walk_left;		//«√∑π¿ÃæÓ ∞»±‚
+CSprite player_walk_left;		//ÌîåÎ†àÏù¥Ïñ¥ Í±∑Í∏∞
 CSprite player_walk_leftup;
 CSprite player_walk_leftdown;
 CSprite player_walk_right;
@@ -84,7 +84,7 @@ CSprite player_walk_rightdown;
 CSprite player_walk_up;
 CSprite player_walk_down;
 
-CSprite player_roll_left;		//«√∑π¿ÃæÓ ±∏∏£±‚
+CSprite player_roll_left;		//ÌîåÎ†àÏù¥Ïñ¥ Íµ¨Î•¥Í∏∞
 CSprite player_roll_leftup;
 CSprite player_roll_leftdown;
 CSprite player_roll_right;
@@ -145,19 +145,19 @@ Gui playerHp2;
 Gui playerHp3;
 Gui playerHp4;
 
-MOD curMod;			//«ˆ¿Á ∏µÂ
+MOD curMod;			//ÌòÑÏû¨ Î™®Îìú
 
-DISTANCE_STATE curPlayerDistanceState;
-DISTANCE_STATE curBossDistanceState;
+DISTANCE_TYPE curPlayerDistanceState;
+DISTANCE_TYPE curBossDistanceState;
 
-ACTION_STATE curPlayerActionState;
-ACTION_STATE curBossActionState;
+ACTION_TYPE curPlayerActionState;
+ACTION_TYPE curBossActionState;
 
 EDIT_STATE curEditState;
 
-EDIT_WINDOW curEditWindow;		//«ˆ¿Á ø°µ≈Õ √¢
+EDIT_WINDOW curEditWindow;		//ÌòÑÏû¨ ÏóêÎîîÌÑ∞ Ï∞Ω
 
-MAPEDITOR g_editor;		//∏ ø°µ≈Õ ∫Øºˆ
+MAPEDITOR g_editor;		//ÎßµÏóêÎîîÌÑ∞ Î≥ÄÏàò
 
 CTimer g_Timer;
 bool g_bActiveApp = false;
@@ -172,7 +172,7 @@ int cameraPositionY;
 int arrow_distance;
 float x, y;
 int StartTime = 0;
-CBLOCK *wallBlock;
+CBLOCK* wallBlock;
 
 extern BOOL _InitDirectSound(void);
 BOOL m_bEditorFirst = TRUE;
@@ -200,7 +200,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		return 0;
 	g_hwnd = CreateWindowEx(WS_EX_TOPMOST, CLASS_NAME, CLASS_NAME, WS_POPUP | WS_VISIBLE,
 		GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN),
-		SCREEN_WIDTH, SCREEN_HEIGHT, NULL,NULL,hInstance, NULL);
+		SCREEN_WIDTH, SCREEN_HEIGHT, NULL, NULL, hInstance, NULL);
 
 	if (g_hwnd == NULL) return 0;
 	g_hInstance = hInstance;
@@ -218,7 +218,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	g_Timer.start();
 
-	srand(g_Timer.GetTime());
+	srand(g_Timer.time());
 
 	if (!LoadBMPandInitSurface())
 		return 0;
@@ -279,7 +279,7 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 					bossMapRoof.CopyBufferToSurface3(g_lpDirectDrawObject);
 
 					grassSprite.Restore();
-					player_walk_left.Restore();		//«√∑π¿ÃæÓ ∞»±‚
+					player_walk_left.Restore();		//ÌîåÎ†àÏù¥Ïñ¥ Í±∑Í∏∞
 					player_walk_leftup.Restore();
 					player_walk_leftdown.Restore();
 					player_walk_right.Restore();
@@ -287,7 +287,7 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 					player_walk_rightdown.Restore();
 					player_walk_up.Restore();
 					player_walk_down.Restore();
-					player_roll_left.Restore();		//«√∑π¿ÃæÓ ±∏∏£±‚
+					player_roll_left.Restore();		//ÌîåÎ†àÏù¥Ïñ¥ Íµ¨Î•¥Í∏∞
 					player_roll_leftup.Restore();
 					player_roll_leftdown.Restore();
 					player_roll_right.Restore();
@@ -324,8 +324,8 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		case MOD_INTRO:
 			break;
 		case MOD_GAME:
-			if (!(curPlayerActionState == ACTION_STATE::ROLL))
-				if (!player.IsArrowNull() && !(curPlayerActionState == ACTION_STATE::DEAD) && !camera.GetIsFirstAlpha())
+			if (!(curPlayerActionState == ACTION_TYPE::ROLL))
+				if (!player.IsArrowNull() && !(curPlayerActionState == ACTION_TYPE::DEAD) && !camera.GetIsFirstAlpha())
 				{
 					firstPosition.SetRect(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1), HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
 					curMousePosition.SetRect(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1), HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
@@ -414,7 +414,7 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 				g_lpPrimarySurface->Release();
 
 			grassSprite.ReleaseAll();
-			player_walk_left.ReleaseAll();		//«√∑π¿ÃæÓ ∞»±‚
+			player_walk_left.ReleaseAll();		//ÌîåÎ†àÏù¥Ïñ¥ Í±∑Í∏∞
 			player_walk_leftup.ReleaseAll();
 			player_walk_leftdown.ReleaseAll();
 			player_walk_right.ReleaseAll();
@@ -423,7 +423,7 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 			player_walk_up.ReleaseAll();
 			player_walk_down.ReleaseAll();
 
-			player_roll_left.ReleaseAll();		//«√∑π¿ÃæÓ ±∏∏£±‚
+			player_roll_left.ReleaseAll();		//ÌîåÎ†àÏù¥Ïñ¥ Íµ¨Î•¥Í∏∞
 			player_roll_leftup.ReleaseAll();
 			player_roll_leftdown.ReleaseAll();
 			player_roll_right.ReleaseAll();
@@ -448,6 +448,18 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 			bossMapRoof.ReleaseAll();
 			introSprite.ReleaseAll();
 			introButton.ReleaseAll();
+
+			player_dead.ReleaseAll();
+			boss_dead.ReleaseAll();
+			fireSprite.ReleaseAll();
+
+			boss_sleep.ReleaseAll();
+			boss_snowball.ReleaseAll();
+
+			boss_hp_window.ReleaseAll();
+			boss_hp.ReleaseAll();
+
+			player_hp.ReleaseAll();
 
 			/*for (int i = 0; i < TOTAL_BLOCK_SPRITE; i++)
 			{
@@ -503,14 +515,14 @@ bool LoadWorldMapBlock()
 		return false;
 	}
 
-	unsigned char *MapData;
+	unsigned char* MapData;
 
-	MapData = new unsigned char[BLOCK_X*BLOCK_Y*2];
+	MapData = new unsigned char[BLOCK_X * BLOCK_Y * 2];
 
-	if (!ReadFile(hfile, MapData, BLOCK_X*BLOCK_Y * 2, &actualRead, NULL))		//∫Ò∆Æ∏ ∆ƒ¿œ ¿⁄√º¿« ¡§∫∏∏¶ ¿–¿ªºˆ æ¯¥Ÿ∏È
+	if (!ReadFile(hfile, MapData, BLOCK_X * BLOCK_Y * 2, &actualRead, NULL))		//ÎπÑÌä∏ÎßµÌååÏùº ÏûêÏ≤¥Ïùò Ï†ïÎ≥¥Î•º ÏùΩÏùÑÏàò ÏóÜÎã§Î©¥
 	{
-		CloseHandle(hfile);		//«⁄µÈ¿ª π›≥≥«ÿ¡÷∞Ì
-		return false;			//false∏¶ π›»Ø«ÿ¡ÿ¥Ÿ
+		CloseHandle(hfile);		//Ìï∏Îì§ÏùÑ Î∞òÎÇ©Ìï¥Ï£ºÍ≥†
+		return false;			//falseÎ•º Î∞òÌôòÌï¥Ï§ÄÎã§
 	}
 
 	char tmp[2];
@@ -519,12 +531,12 @@ bool LoadWorldMapBlock()
 	{
 		for (int j = 0; j < BLOCK_X; j++)
 		{
-			memcpy(tmp, MapData + (i*BLOCK_X * 2) + j * 2, 2);
+			memcpy(tmp, MapData + (i * BLOCK_X * 2) + j * 2, 2);
 			tmp2 = atoi(tmp);
 			Block[i][j].SetBlockNumber(tmp2);
 		}
 	}
-	memcpy(g_editor.GetBlockData(), MapData, BLOCK_X*BLOCK_Y * 2);
+	memcpy(g_editor.GetBlockData(), MapData, BLOCK_X * BLOCK_Y * 2);
 
 	delete[] MapData;
 
@@ -539,23 +551,23 @@ bool LoadWorldMapBlock()
 		return false;
 	}
 
-	MapData = new unsigned char[BLOCK_X*BLOCK_Y * 2];
+	MapData = new unsigned char[BLOCK_X * BLOCK_Y * 2];
 
-	if (!ReadFile(hfile, MapData, BLOCK_X*BLOCK_Y * 2, &actualRead, NULL))		//∫Ò∆Æ∏ ∆ƒ¿œ ¿⁄√º¿« ¡§∫∏∏¶ ¿–¿ªºˆ æ¯¥Ÿ∏È
+	if (!ReadFile(hfile, MapData, BLOCK_X * BLOCK_Y * 2, &actualRead, NULL))		//ÎπÑÌä∏ÎßµÌååÏùº ÏûêÏ≤¥Ïùò Ï†ïÎ≥¥Î•º ÏùΩÏùÑÏàò ÏóÜÎã§Î©¥
 	{
-		CloseHandle(hfile);		//«⁄µÈ¿ª π›≥≥«ÿ¡÷∞Ì
-		return false;			//false∏¶ π›»Ø«ÿ¡ÿ¥Ÿ
+		CloseHandle(hfile);		//Ìï∏Îì§ÏùÑ Î∞òÎÇ©Ìï¥Ï£ºÍ≥†
+		return false;			//falseÎ•º Î∞òÌôòÌï¥Ï§ÄÎã§
 	}
 	for (int i = 0; i < BLOCK_Y; i++)
 	{
 		for (int j = 0; j < BLOCK_X; j++)
 		{
-			memcpy(tmp, MapData + (i*BLOCK_X * 2) + j * 2, 2);
+			memcpy(tmp, MapData + (i * BLOCK_X * 2) + j * 2, 2);
 			tmp2 = atoi(tmp);
 			Block[i][j].SetBlockNumber(tmp2);
 		}
 	}
-	memcpy(g_editor.GetBlockData2(), MapData, BLOCK_X*BLOCK_Y * 2);
+	memcpy(g_editor.GetBlockData2(), MapData, BLOCK_X * BLOCK_Y * 2);
 
 	delete[] MapData;
 
@@ -574,7 +586,7 @@ bool LoadBMPandInitSurface()
 
 	g_bIsFirst = true;
 #pragma region intro
-	if (!introSprite.LoadBMPFile("image\\intro\\background4.bmp"))
+	if (!introSprite.LoadBMPFile("image\\intro\\background5.bmp"))
 		return false;
 	if (!introSprite.CopyBufferToSurface(g_lpDirectDrawObject))
 		return false;
@@ -1082,13 +1094,13 @@ bool LoadBMPandInitSurface()
 			path = "image\\mapblock\\mapblock2\\";
 			path.append(_index);
 			path.append(_bmp);
-			char* c = new char[path.size() + 1];		//string¿ª char∑Œ πŸ≤„¡÷¥¬ ∞˙¡§
-			std:copy(path.begin(), path.end(), c);
+			char* c = new char[path.size() + 1];		//stringÏùÑ charÎ°ú Î∞îÍøîÏ£ºÎäî Í≥ºÏ†ï
+		std:copy(path.begin(), path.end(), c);
 			c[path.size()] = '\0';
 			if (!blockSprite2[y][x].LoadFrame(0, c))
 				return false;
 			delete[] c;
-			blockSprite2[y][x].SetNumber(x+y*TOTAL_BLOCK_SPRITE_X);
+			blockSprite2[y][x].SetNumber(x + y * TOTAL_BLOCK_SPRITE_X);
 		}
 	}
 

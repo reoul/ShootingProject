@@ -84,7 +84,7 @@ void CChoiceWindow::CheckBlockClick(int x, int y)
 	RECT rect2;
 	RECT rect3;
 	SetRect(&rect, m_x - windowRect.left, m_y - windowRect.top, m_x - windowRect.left + 10, m_y - windowRect.top + 10);
-	if (rect.left < x && rect.top < y && rect.right > x && rect.bottom > y)		//ºí·°Ã¢À» Å¬¸¯ÇßÀ»¶§
+	if (rect.left < x && rect.top < y && rect.right > x && rect.bottom > y)		//ë¸”ëŸ­ì°½ì„ í´ë¦­í–ˆì„ë•Œ
 	{
 		canMove = true;
 		moveXY.SetRect(rect.left - x, rect.top - y);

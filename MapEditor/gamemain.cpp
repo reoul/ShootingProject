@@ -47,7 +47,7 @@ extern CSprite					player_walk_rightup;
 extern CSprite					player_walk_rightdown;
 extern CSprite					player_walk_up;
 extern CSprite					player_walk_down;
-extern CSprite					player_roll_left;		//«√∑π¿ÃæÓ ±∏∏£±‚
+extern CSprite					player_roll_left;		//ÌîåÎ†àÏù¥Ïñ¥ Íµ¨Î•¥Í∏∞
 extern CSprite					player_roll_leftup;
 extern CSprite					player_roll_leftdown;
 extern CSprite					player_roll_right;
@@ -88,11 +88,11 @@ extern Map						map;
 extern CSprite					fireSprite;
 extern FireBlock				fireBlock;
 
-extern DISTANCE_STATE		curPlayerDistanceState;
-extern DISTANCE_STATE		curBossDistanceState;
+extern DISTANCE_TYPE		curPlayerDistanceState;
+extern DISTANCE_TYPE		curBossDistanceState;
 
-extern ACTION_STATE		curPlayerActionState;
-extern ACTION_STATE		curBossActionState;
+extern ACTION_TYPE		curPlayerActionState;
+extern ACTION_TYPE		curBossActionState;
 
 extern CArrow					arrow[TOTAL_ARROW];
 extern CSnowBall				snowball[TOTAL_SNOWBALL];
@@ -133,26 +133,24 @@ int time3 = 0;
 int player_lastRollTime;
 int cntVibes;
 bool boss_HitWall;
-bool Player_NoHit;
+bool IsPlayerNoHit;
 
 int lastFrameTime = 0;
-int aaaa = 0;
-int bbb = 0;
-int ccc = 0;
+int lastSkillShootTime = 0;
+int lastPlayerHitTime = 0;
 
 void GameMain(void)
 {
 
 	if (m_bGameFirst)
 		InitGame();
-
 	if (!player.IsArrowNull())
 	{
 		//sprintf_s(buffer, TEXT("player ( %4.2f , %4.2f )"), player.GetPos().x, player.GetPos().y);
-		sprintf_s(buffer, TEXT("deltaTime ( %f )"), g_Timer.deltaTime);
+		/*sprintf_s(buffer, TEXT("deltaTime ( %f )"), g_Timer.deltaTime);
 		TextOut(hdc, 900, 100, buffer, 40);
 		sprintf_s(buffer3, TEXT("boss hp : %d"), boss.GetHp());
-		TextOut(hdc, 900, 200, buffer3, 80);
+		TextOut(hdc, 900, 200, buffer3, 80);*/
 	}
 
 	if (FrameRate())
@@ -163,6 +161,14 @@ void GameMain(void)
 		if (player.IsArrowNull())
 			if (!arrow[0].IsZeroArrow())
 				player.SetArrow(arrow[0].FindNotUseArrow());
+
+		if (!IsPlayerNoHit)
+		{
+			if (g_Timer.elapsed(lastPlayerHitTime, 400))
+			{
+				IsPlayerNoHit = true;
+			}
+		}
 
 		//if (DirectInputKeyboardDown(g_lpDirectInputKeyboard, DIK_J))
 		//{
@@ -185,7 +191,8 @@ void GameMain(void)
 		{
 			if (player.GetCurArrow()->GetIsCharging())
 			{
-				if (!camera.IsExpansion())		//»∞¿ª Ω˙¿ª∂ß
+				//ÌôúÏùÑ ÏêàÏùÑ Îïå
+				if (!camera.IsExpansion())
 				{
 					player.GetCurArrow()->SetIsUse(true);
 					player.GetCurArrow()->SetCharging(false);
@@ -218,10 +225,10 @@ void GameMain(void)
 		map.SetPos(camera.GetX(), camera.GetY());
 		map.Drawing(g_lpSecondarySurface, g_lpDirectDrawObject);
 
-		if (player.CanMove())		//¿Ãµø
+		if (player.CanMove())		//Ïù¥Îèô
 		{
 			player.MoveInit();
-			if (((int)curPlayerActionState != ACTION_STATE::DEAD) && !camera.GetIsFirstAlpha())
+			if (((int)curPlayerActionState != ACTION_TYPE::DEAD) && !camera.GetIsFirstAlpha())
 			{
 				if (!player.GetIsRoll())
 				{
@@ -257,6 +264,12 @@ void GameMain(void)
 				}
 			}
 			player.MoveANDCheckState();
+			Vector2 curPlayerPos = player.GetPos();
+			if (map.GetStageNum() == 0 && curPlayerPos.x > 1540 && curPlayerPos.x < 1630 && curPlayerPos.y > 680 && curPlayerPos.y < 712)
+			{
+				map.NextStage();
+				player.SetXY(1600, 2500);
+			}
 		}
 
 		if (!player.IsArrowNull())
@@ -268,30 +281,26 @@ void GameMain(void)
 					SndObjPlay(Sound[2], NULL);
 					isSound = true;
 				}
-				if ((int)curPlayerDistanceState == ACTION_STATE::ROLL ||
-					(int)curPlayerDistanceState == ACTION_STATE::SLEEP || (int)curPlayerDistanceState == ACTION_STATE::DEAD)
-				{
-					player.GetCurArrow()->SetX(player.GetPos().x - 1);
-					player.GetCurArrow()->SetY(player.GetPos().y + 6);
-					player.GetCurArrow()->SetSpeedXY(20 - (30 * (camera.GetExpansion() - 1)), attackDirection);
-					player.GetCurArrow()->CheckMove();
-					player.GetCurArrow()->CheckSprite();
-					if (!(curPlayerActionState == ACTION_STATE::ROLL) && (curPlayerActionState != ACTION_STATE::DEAD))
-						player.GetCurArrow()->Draw(g_lpSecondarySurface);
-				}
+				player.GetCurArrow()->SetX(player.GetPos().x - 1);
+				player.GetCurArrow()->SetY(player.GetPos().y + 6);
+				player.GetCurArrow()->SetSpeedXY(20 - (30 * (camera.GetExpansion() - 1)), attackDirection);
+				player.GetCurArrow()->CheckMove();
+				player.GetCurArrow()->CheckSprite();
+				if (!(curPlayerActionState == ACTION_TYPE::ROLL) && (curPlayerActionState != ACTION_TYPE::DEAD))
+					player.GetCurArrow()->Draw(g_lpSecondarySurface);
 			}
 		}
 
 		if (DirectInputKeyboardDown(g_lpDirectInputKeyboard, DIK_U))
 		{
-			Player_NoHit = true;
+			IsPlayerNoHit = true;
 		}
 
 		player.CheckUseSkill();
 
 		if (player.IsUsingSkill())
 		{
-			if (g_Timer.elapsed(aaaa, 100))
+			if (g_Timer.elapsed(lastSkillShootTime, 100))
 			{
 				player.GetCurArrow()->SetIsUse(true);
 				player.GetCurArrow()->SetCharging(false);
@@ -299,8 +308,8 @@ void GameMain(void)
 				player.GetCurArrow()->SetY(player.GetPos().y + 6);
 				int randomX = 8 + (rand() % 5);
 				int randomY = 8 + (rand() % 5);
-				int PosiOrNegaX = rand() % 2;		//∑£¥˝«— ∞™¿ª ªÃæ∆ xπÊ«‚∞™¿ª æÁºˆ »§¿∫ ¿Ωºˆ∑Œ ∫Ø»Ø
-				int PosiOrNegaY = rand() % 2;		//∑£¥˝«— ∞™¿ª ªÃæ∆ yπÊ«‚∞™¿ª æÁºˆ »§¿∫ ¿Ωºˆ∑Œ ∫Ø»Ø
+				int PosiOrNegaX = rand() % 2;		//ÎûúÎç§Ìïú Í∞íÏùÑ ÎΩëÏïÑ xÎ∞©Ìñ•Í∞íÏùÑ ÏñëÏàò ÌòπÏùÄ ÏùåÏàòÎ°ú Î≥ÄÌôò
+				int PosiOrNegaY = rand() % 2;		//ÎûúÎç§Ìïú Í∞íÏùÑ ÎΩëÏïÑ yÎ∞©Ìñ•Í∞íÏùÑ ÏñëÏàò ÌòπÏùÄ ÏùåÏàòÎ°ú Î≥ÄÌôò
 				randomX = randomX * (PosiOrNegaX == 0 ? 1 : -1);
 				randomY = randomY * (PosiOrNegaY == 0 ? 1 : -1);
 				player.GetCurArrow()->SetSpeedXY(10, Vector2(0.1f * randomX, 0.1f * randomY));
@@ -316,25 +325,19 @@ void GameMain(void)
 		//sprintf_s(buffer3, TEXT("%d"), camera.GetAlpha());
 		//TextOut(hdc, 0, 0, buffer3, 40);
 
-		if (!player.IsArrowNull())
+		/*if (!player.IsArrowNull())
 		{
 			if (player.GetCurArrow()->GetIsCharging())
 			{
-				if ((int)curPlayerDistanceState == ACTION_STATE::ROLL ||
-					(int)curPlayerDistanceState == ACTION_STATE::SLEEP || (int)curPlayerDistanceState == ACTION_STATE::DEAD)
-				{
-					//player.GetCurArrow()->SetX(player.GetX() - 1 + 20 - (30 * (camera.GetExpansion() - 1) * attackDirection.GetX()));
-					//player.GetCurArrow()->SetY(player.GetY() + 6 + 20 - (30 * (camera.GetExpansion() - 1) * attackDirection.GetY()));
-					player.GetCurArrow()->SetX(player.GetPos().x - 1);
-					player.GetCurArrow()->SetY(player.GetPos().y + 6);
-					player.GetCurArrow()->SetSpeedXY(20 - (30 * (camera.GetExpansion() - 1)), attackDirection);
-					player.GetCurArrow()->CheckMove();
-					player.GetCurArrow()->CheckSprite();
-					if (!(curPlayerActionState == ACTION_STATE::ROLL))
-						player.GetCurArrow()->Draw(g_lpSecondarySurface);
-				}
+				player.GetCurArrow()->SetX(player.GetPos().x - 1);
+				player.GetCurArrow()->SetY(player.GetPos().y + 6);
+				player.GetCurArrow()->SetSpeedXY(20 - (30 * (camera.GetExpansion() - 1)), attackDirection);
+				player.GetCurArrow()->CheckMove();
+				player.GetCurArrow()->CheckSprite();
+				if (!(curPlayerActionState == ACTION_STATE::ROLL))
+					player.GetCurArrow()->Draw(g_lpSecondarySurface);
 			}
-		}
+		}*/
 
 		for (i = 0; i < TOTAL_ARROW; i++)
 		{
@@ -342,7 +345,7 @@ void GameMain(void)
 			{
 				if (arrow[i].IsHoming())
 				{
-					if (map.GetStage() == 1)
+					if (map.GetStageNum() == 1)
 					{
 						if (abs(arrow[i].GetPos().x - boss.GetPos().x) < 45)
 							if (abs(arrow[i].GetPos().y - boss.GetPos().y) < 45)
@@ -354,7 +357,7 @@ void GameMain(void)
 				}
 				if (!arrow[i].IsSpeedZero())
 				{
-					if (map.GetStage() == 1)
+					if (map.GetStageNum() == 1)
 					{
 						if (!arrow[i].GetIsHit() && !arrow[i].GetIsCharging())
 						{
@@ -363,7 +366,7 @@ void GameMain(void)
 								arrow[i].IsHit();
 								boss.Hit(arrow[i].GetPower());
 
-								if ((int)curBossActionState == 5)
+								if (curBossActionState == ACTION_TYPE::SLEEP)
 								{
 									//boss.CheckDirectionState();
 									boss.NextPattern();
@@ -424,15 +427,19 @@ void GameMain(void)
 
 		fireBlock.Draw(g_lpSecondarySurface);
 
-		if (curBossActionState == ACTION_STATE::ROLL)
+		//Î≥¥Ïä§Í∞Ä Íµ¨Î•¥Í∏∞ Ìå®ÌÑ¥ Í≥µÍ≤©ÏùÑ Ìï†Îïå
+		if (curBossActionState == ACTION_TYPE::ROLL)
 		{
-			if (curPlayerActionState != ACTION_STATE::DEAD)
+			if (curPlayerActionState != ACTION_TYPE::DEAD)
 			{
-				if (!Player_NoHit)
+				//ÌîåÎ†àÏù¥Ïñ¥Í∞Ä Í≥µÍ≤©ÎãπÌïòÏßÄ ÏïäÏïòÎã§Î©¥
+				if (IsPlayerNoHit)
 				{
 					if (player.CheckHit(boss.GetHitRect()))
 					{
-						//curPlayerActionState = ACTION_STATE::DEAD;
+						player.Hit();
+						IsPlayerNoHit = false;
+						lastPlayerHitTime = g_Timer.time();
 					}
 				}
 			}
@@ -443,11 +450,12 @@ void GameMain(void)
 			if (snowball[i].IsUse())
 			{
 				snowball[i].CheckMove();
-				if (!Player_NoHit)
+				if (IsPlayerNoHit)
 				{
 					if (player.CheckHit(snowball[i].GetHitRect()))
 					{
 						player.Hit();
+						IsPlayerNoHit = false;
 						snowball[i].SetUse(false);
 					}
 				}
@@ -462,7 +470,7 @@ void GameMain(void)
 			}
 		}
 
-		if (map.GetStage() == 1)
+		if (map.GetStageNum() == 1)
 		{
 			if (boss.CanMove())
 				boss.MoveANDCheckState();
@@ -473,9 +481,10 @@ void GameMain(void)
 			boss.CheckSprite();
 			boss.Draw(g_lpSecondarySurface);
 		}
-		
-		Vector2 *vec = &Vector2(0,0);
-		SetVolume(Sound[8]->Buffers[0], -2000 - ((int)vec->Distance(player.GetPos(),Vector2(1152,2656))*8));//∏¥⁄∫“ø°º≠ «√∑π¿ÃæÓ∞° ∏÷æÓ¡˙ºˆ∑œ º“∏Æ∞° ¿€æ∆¡¸ 
+
+		float distanceFromFireBlock = Vector2::Distance(player.GetPos(), Vector2(1152, 2656));
+		SetVolume(Sound[8]->Buffers[0], -2000 - (int)distanceFromFireBlock * 4);//Î™®Îã•Î∂àÏóêÏÑú ÌîåÎ†àÏù¥Ïñ¥Í∞Ä Î©ÄÏñ¥ÏßàÏàòÎ°ù ÏÜåÎ¶¨Í∞Ä ÏûëÏïÑÏßê
+
 
 		if (!player.IsArrowNull())
 		{
@@ -526,7 +535,7 @@ void GameMain(void)
 		TextOut(hdc, 900, 200 + k * 30, buffer3, 80);
 		k++;*/
 
-		//sprintf_s(buffer4, TEXT("πÊ«‚ x : %f, y : %f"), snowball[0].GetDirection().x, snowball[0].GetDirection().y);
+		//sprintf_s(buffer4, TEXT("Î∞©Ìñ• x : %f, y : %f"), snowball[0].GetDirection().x, snowball[0].GetDirection().y);
 		//TextOut(hdc, 900, 250, buffer4, 40);
 
 		//worldmap2.Drawing2(camera.GetX(), camera.GetY(), g_lpSecondarySurface, true, g_lpDirectDrawObject);
@@ -536,13 +545,13 @@ void GameMain(void)
 		//boss_hp_window.Drawing(0,1250,SCREEN_HEIGHT>>1,g_lpSecondarySurface,true);
 		//boss_hp.Drawing(bbb,1250,SCREEN_HEIGHT>>1,g_lpSecondarySurface,true);
 
-		if (map.GetStage() == 1)
+		if (map.GetStageNum() == 1)
 		{
 			bossHpBarBack.Drawing(g_lpSecondarySurface);
 			bossHpBar.DrawingBossHp(g_lpSecondarySurface);
 		}
 
-		for ( i = 0; i < TOTAL_ENEMY; i++)
+		for (i = 0; i < TOTAL_ENEMY; i++)
 		{
 			enemy[i].Draw(g_lpSecondarySurface);
 		}
@@ -556,7 +565,7 @@ void GameMain(void)
 		{
 			bbb = ++bbb % boss_hp.GetNumberOfFrame();
 		}*/
-		if ((curPlayerActionState == ACTION_STATE::DEAD) || (curBossActionState == ACTION_STATE::DEAD) || camera.GetIsFirstAlpha())
+		if ((curPlayerActionState == ACTION_TYPE::DEAD) || (curBossActionState == ACTION_TYPE::DEAD) || camera.GetIsFirstAlpha())
 		{
 			camera.AlphaBlending2(g_lpSecondarySurface);
 			if (!camera.GetIsFirstAlpha())
@@ -574,7 +583,7 @@ void GameMain(void)
 		}
 
 		HRESULT hResult;
-		if (FAILED(hResult = g_lpPrimarySurface->Flip(NULL, DDFLIP_WAIT)))	//¥ı∫Ìπˆ∆€∏µ »≠∏È¿¸»Ø
+		if (FAILED(hResult = g_lpPrimarySurface->Flip(NULL, DDFLIP_WAIT)))	//ÎçîÎ∏îÎ≤ÑÌçºÎßÅ ÌôîÎ©¥Ï†ÑÌôò
 		{
 			if (hResult == DDERR_SURFACELOST)
 				g_lpPrimarySurface->Restore();
@@ -608,11 +617,11 @@ void InitGame()
 	int i, j, m, m2;
 	if (player.IsLive())
 		player.Kill();
-	//player.Initialize(1560, 1984, &g_Timer, 0, 140, 4, 90);		//«–±≥ ƒƒ±‚¡ÿ     ¡˝ƒƒ±‚¡ÿ  140,20
-	player.Initialize(1122, 2664, &g_Timer, 0, 140, 4, 90);		//«–±≥ ƒƒ±‚¡ÿ     ¡˝ƒƒ±‚¡ÿ  140,20
-	player.SetState(OBJECT_STATE::PLYAER);
+	//player.Initialize(1560, 1984, &g_Timer, 0, 140, 4, 90);		//ÌïôÍµê Ïª¥Í∏∞Ï§Ä     ÏßëÏª¥Í∏∞Ï§Ä  140,20
+	player.Initialize(1122, 2664, &g_Timer, 0, 140, 4, 90);		//ÌïôÍµê Ïª¥Í∏∞Ï§Ä     ÏßëÏª¥Í∏∞Ï§Ä  140,20
+	player.SetState(OBJECT_TYPE::PLYAER);
 	player.SetWalkSprite(&player_walk_left, &player_walk_leftup, &player_walk_leftdown, &player_walk_right, &player_walk_rightup,
-		&player_walk_rightdown, &player_walk_up, &player_walk_down,&player_dead);
+		&player_walk_rightdown, &player_walk_up, &player_walk_down, &player_dead);
 	player.SetRollSprite(&player_roll_left, &player_roll_leftup, &player_roll_leftdown, &player_roll_right, &player_roll_rightup,
 		&player_roll_rightdown, &player_roll_up, &player_roll_down);
 	player.SetBowSprite(&bow_walk, &bow_roll, &bow_attack);
@@ -622,24 +631,24 @@ void InitGame()
 		if (arrow[i].IsLive())
 			arrow[i].Kill();
 		arrow[i].Initialize(player.GetPos().x, player.GetPos().y, &g_Timer, 2, &arrowSprite);
-		arrow[i].SetState(OBJECT_STATE::ARROW);
+		arrow[i].SetState(OBJECT_TYPE::ARROW);
 	}
 	player.SetArrow(&arrow[0]);
 
 	if (boss.IsLive()) boss.Kill();
 	boss.Initialize(1560, 1590, &g_Timer, 0, 20, 4);
 	boss.SetSprite(&boss_sleep, &boss_idle, &boss_roll, &boss_attack, &boss_dead);
-	boss.SetState(OBJECT_STATE::BOSS);
+	boss.SetState(OBJECT_TYPE::BOSS);
 
 	fireBlock.Initialize(36 * DEFAULT_BLOCK_SIZE + 16, 83 * DEFAULT_BLOCK_SIZE, &g_Timer, 130, &fireSprite);
-	fireBlock.SetState(OBJECT_STATE::BLOCK);
+	fireBlock.SetState(OBJECT_TYPE::BLOCK);
 
 
 	for (i = 0; i < TOTAL_SNOWBALL; i++)
 	{
 		if (snowball[i].IsUse()) snowball[i].SetUse(false);
 		snowball[i].Initialize(boss.GetPos().x, boss.GetPos().y, &g_Timer, 4, &boss_snowball);
-		snowball[i].SetState(OBJECT_STATE::SNOWBALL);
+		snowball[i].SetState(OBJECT_TYPE::SNOWBALL);
 	}
 
 	bossHpBarBack.Initialize(1250, SCREEN_HEIGHT >> 1, &boss_hp_window, &g_Timer, 0);
@@ -655,22 +664,22 @@ void InitGame()
 	player_lastRollTime = 0;
 	boss_HitWall = false;
 	cntVibes = 0;
-	Player_NoHit = false;
-	
+	IsPlayerNoHit = true;
+
 	camera.Initialize(&g_Timer);
 	m_bIntroFirst = TRUE;
 	m_bGameFirst = FALSE;
 	m_bEditorFirst = TRUE;
 
-	for (i = 0; i < TOTAL_ENEMY; i++)
+	/*for (i = 0; i < TOTAL_ENEMY; i++)
 	{
 		enemy[i].Initialize(1300 + i * 50, 2600, &g_Timer, 0, 200, 50);
 		enemy[i].SetSprite(&enemy_idle_left, &enemy_idle_right, &enemy_up_left, &enemy_up_right,
 			&enemy_hide_left, &enemy_hide_right, &enemy_attack_left, &enemy_attack_right);
-		enemy[i].SetState(OBJECT_STATE::ENEMY);
-	}
+		enemy[i].SetState(OBJECT_TYPE::ENEMY);
+	}*/
 
-	map.SetWorldMap(&baseMap,&bossMap, &bossMapRoof);
+	map.SetWorldMap(&baseMap, &bossMap, &bossMapRoof);
 	map.SetStage(0);
 
 #pragma region wallInit
@@ -681,7 +690,7 @@ void InitGame()
 	tmp2 = 45;
 	for (i = 0; i < 26; i++)
 	{
-		wall[cnt].SetXY(tmp,tmp2);
+		wall[cnt].SetXY(tmp, tmp2);
 		cnt++;
 		tmp2++;
 	}
@@ -821,7 +830,7 @@ void InitGame()
 	}
 	wall[cnt].SetXY(37, 42);
 	cnt++;
-	tmp =36;
+	tmp = 36;
 	tmp2 = 41;
 	for (i = 0; i < 2; i++)
 	{

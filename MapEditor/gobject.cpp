@@ -4,9 +4,9 @@
 #include "camera.h"
 #include "gameEnum.h"
 
-extern enum ACTION_STATE;	//ÇÃ·¹ÀÌ¾î°¡ ¹«½¼ Çàµ¿À» ÃëÇÏ´ÂÁö
-extern ACTION_STATE curPlayerActionState;
-extern ACTION_STATE curBossActionState;
+extern enum ACTION_TYPE;	//í”Œë ˆì´ì–´ê°€ ë¬´ìŠ¨ í–‰ë™ì„ ì·¨í•˜ëŠ”ì§€
+extern ACTION_TYPE curPlayerActionState;
+extern ACTION_TYPE curBossActionState;
 
 extern CPlayer player;
 extern CBoss boss;
@@ -36,7 +36,7 @@ void CGObject::Initialize(CSprite* pSprite, int x, int y, CTimer* timer, int Cur
 	m_nSkillFrameInterval = SkillFrameInterval;
 	m_bIsLive = true;
 	m_pTimer = timer;
-	curState = OBJECT_STATE::PLYAER;
+	curState = OBJECT_TYPE::PLYAER;
 	m_nLastFrameTime = m_pTimer->time();
 }
 
@@ -55,7 +55,7 @@ void CGObject::Kill()
 	m_bIsLive = false;
 }
 
-void CGObject::SetState(OBJECT_STATE state)
+void CGObject::SetState(OBJECT_TYPE state)
 {
 	curState = state;
 }
@@ -68,7 +68,7 @@ void CGObject::SetSprite(CSprite* sprite)
 
 void CGObject::SetSprite(CSprite* sprite, CSprite* bowSprite)
 {
-	if(!player.IsUsingSkill())
+	if (!player.IsUsingSkill())
 		m_nCurrentFrame = 0;
 	m_pSprite = sprite;
 	m_pBowSprite = bowSprite;
@@ -80,12 +80,12 @@ void CGObject::Draw(bool isMove, int x, int y, LPDIRECTDRAWSURFACE7 lpSurface)
 		return;
 	switch (curState)
 	{
-	case OBJECT_STATE::PLYAER:		//ÇÃ·¹ÀÌ¾î
+	case OBJECT_TYPE::PLYAER:		//í”Œë ˆì´ì–´
 		if (m_pTimer->elapsed(m_nLastFrameTime, m_nFrameInterval))
 		{
-			if ((curPlayerActionState == ACTION_STATE::ROLL) && ((m_nCurrentFrame + 1) == m_pSprite->GetNumberOfFrame()))
+			if ((curPlayerActionState == ACTION_TYPE::ROLL) && ((m_nCurrentFrame + 1) == m_pSprite->GetNumberOfFrame()))
 			{
-				curPlayerActionState = ACTION_STATE::MOVE;
+				curPlayerActionState = ACTION_TYPE::MOVE;
 				isMove = true;
 				player.MoveANDCheckState();
 				m_nCurrentFrame = m_pSprite->GetNumberOfFrame() - 1;
@@ -99,22 +99,22 @@ void CGObject::Draw(bool isMove, int x, int y, LPDIRECTDRAWSURFACE7 lpSurface)
 		if (curPlayerActionState != 6)
 			m_pBowSprite->Drawing(m_nCurrentFrame, x, y, lpSurface);
 		break;
-	case OBJECT_STATE::ARROW:		//È­»ì
+	case OBJECT_TYPE::ARROW:		//í™”ì‚´
 		m_pSprite->Rotate(m_direction.VectorToAngle(), m_nCurrentFrame);
 		m_pSprite->Drawing(m_nCurrentFrame, x, y, lpSurface);
 		break;
-	case OBJECT_STATE::BOSS:		//º¸½º
+	case OBJECT_TYPE::BOSS:		//ë³´ìŠ¤
 		if (m_pTimer->elapsed(m_nLastFrameTime, m_nFrameInterval))
 		{
-			if (!(curBossActionState == ACTION_STATE::DEAD))
+			if (!(curBossActionState == ACTION_TYPE::DEAD))
 			{
-				if (curBossActionState == ACTION_STATE::ATTACK)
+				if (curBossActionState == ACTION_TYPE::ATTACK)
 				{
 					if (m_nCurrentFrame == 2)
 						boss.Attack();
 				}
 				m_nCurrentFrame = ++m_nCurrentFrame % m_pSprite->GetNumberOfFrame();
-				if (curBossActionState == ACTION_STATE::ATTACK)
+				if (curBossActionState == ACTION_TYPE::ATTACK)
 					if (m_nCurrentFrame == 0)
 						boss.CheckDirectionState();
 			}
@@ -122,29 +122,32 @@ void CGObject::Draw(bool isMove, int x, int y, LPDIRECTDRAWSURFACE7 lpSurface)
 			{
 				m_nCurrentFrame = ++m_nCurrentFrame;
 				if (m_nCurrentFrame == m_pSprite->GetNumberOfFrame())
-					m_nCurrentFrame = m_pSprite->GetNumberOfFrame()-1;
+					m_nCurrentFrame = m_pSprite->GetNumberOfFrame() - 1;
 			}
 		}
 		m_pSprite->Drawing(m_nCurrentFrame, x, y, lpSurface);
 		break;
-	case OBJECT_STATE::SNOWBALL:		//´«µ¢ÀÌ
+	case OBJECT_TYPE::SNOWBALL:		//ëˆˆë©ì´
 		m_pSprite->Drawing(m_nCurrentFrame, x, y, lpSurface);
 		break;
-	case OBJECT_STATE::BLOCK:		//ºí·°
+	case OBJECT_TYPE::BLOCK:		//ë¸”ëŸ­
 		if (m_pTimer->elapsed(m_nLastFrameTime, m_nFrameInterval))
 		{
 			m_nCurrentFrame = ++m_nCurrentFrame % m_pSprite->GetNumberOfFrame();
 		}
 		m_pSprite->Drawing(m_nCurrentFrame, x, y, lpSurface);
 		break;
-	case OBJECT_STATE::EDITOR_BLOCK:	//¿¡µðÅÍ ºí·Ï
+	case OBJECT_TYPE::EDITOR_BLOCK:	//ì—ë””í„° ë¸”ë¡
 		m_pSprite->BlockDrawing(x, y, lpSurface);
 		break;
-	case OBJECT_STATE::ENEMY:		//Àû
+	case OBJECT_TYPE::ENEMY:		//ì 
 		if (m_pTimer->elapsed(m_nLastFrameTime, m_nFrameInterval))
 		{
 			m_nCurrentFrame = ++m_nCurrentFrame % m_pSprite->GetNumberOfFrame();
 		}
+		m_pSprite->Drawing(m_nCurrentFrame, x, y, lpSurface);
+		break;
+	default:
 		m_pSprite->Drawing(m_nCurrentFrame, x, y, lpSurface);
 		break;
 	}
@@ -155,7 +158,7 @@ void CGObject::SkillDraw(int x, int y, LPDIRECTDRAWSURFACE7 lpSurface)
 	if (!m_bIsLive)
 		return;
 	if (m_pTimer->elapsed(m_nLastSkillFrameTime, m_nSkillFrameInterval))
-			m_nCurrentFrame = ++m_nCurrentFrame % m_pSprite->GetNumberOfFrame();
+		m_nCurrentFrame = ++m_nCurrentFrame % m_pSprite->GetNumberOfFrame();
 	m_pSprite->Drawing(m_nCurrentFrame, x, y, lpSurface);
 }
 
@@ -185,7 +188,7 @@ void CGObject::SetFrameInterval(int frame)
 	m_nFrameInterval = frame;
 }
 
-void CGObject::SetHitRect(int left,int top,int right,int bottom)
+void CGObject::SetHitRect(int left, int top, int right, int bottom)
 {
 	SetRect(&hitRect, left, top, right, bottom);
 }

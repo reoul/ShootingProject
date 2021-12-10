@@ -5,7 +5,7 @@
 #include <ddraw.h>
 #include "Vector2.h"
 
-extern enum OBJECT_STATE;
+extern enum OBJECT_TYPE;
 class CGObject{
 private:
 	float m_x;
@@ -20,11 +20,11 @@ protected:
 	int m_nLastSkillFrameTime;
 	CTimer* m_pTimer;
 	bool m_bIsLive;
-	OBJECT_STATE curState;
-	RECT hitRect;		//¹°Ã¼ Ãæµ¹ ¿µ¿ª
-	RECT hitWallRect;	//º® Ãæµ¹ ¿µ¿ª
-	double Degree; //È¸Àü °¢µµ
-	Vector2 m_direction; //ÇöÀç ¹æÇâ
+	OBJECT_TYPE curState;
+	RECT hitRect;		//ë¬¼ì²´ ì¶©ëŒ ì˜ì—­
+	RECT hitWallRect;	//ë²½ ì¶©ëŒ ì˜ì—­
+	double Degree; //íšŒì „ ê°ë„
+	Vector2 m_direction; //í˜„ì¬ ë°©í–¥
 	int moveSpeed;
 public:
 	CGObject();
@@ -37,7 +37,7 @@ public:
 	void SetSprite(CSprite* sprite, CSprite* bowSprite);
 	bool IsLive();
 	void Kill();
-	void SetState(OBJECT_STATE state);
+	void SetState(OBJECT_TYPE state);
 	Vector2 GetPos();
 	void SetX(float x);
 	void SetY(float y);
@@ -47,12 +47,12 @@ public:
 	void SetHitRect(RECT rect);
 	void SetHitWallRect();
 	RECT GetHitRect();
-	RECT GetHitRectImageRect();		//ÀÚ½ÅÀÇ ÀÌ¹ÌÁö ¿µ¿ªÀ¸·Î Ãæµ¹¿µ¿ª °è»êÈÄ ¹İÈ¯
-	RECT GetHitRectWallRect();		//º® ¿µ¿ªÀ¸·Î Ãæµ¹¿µ¿ª °è»êÈÄ ¹İÈ¯(ÇÃ·¹ÀÌ¾î Àü¿ë)
+	RECT GetHitRectImageRect();		//ìì‹ ì˜ ì´ë¯¸ì§€ ì˜ì—­ìœ¼ë¡œ ì¶©ëŒì˜ì—­ ê³„ì‚°í›„ ë°˜í™˜
+	RECT GetHitRectWallRect();		//ë²½ ì˜ì—­ìœ¼ë¡œ ì¶©ëŒì˜ì—­ ê³„ì‚°í›„ ë°˜í™˜(í”Œë ˆì´ì–´ ì „ìš©)
 	RECT GetHitRect2(RECT rect);
 	bool CheckHit(RECT rect);
-	bool CheckHitImageRect(RECT rect);		//ÀÌ¹ÌÁö ¿µ¿ªÀ¸·Î Ãæµ¹ °è»ê
-	bool CheckHitWallRect(RECT rect);		//º® ¿µ¿ª Ãæµ¹ °è»ê
+	bool CheckHitImageRect(RECT rect);		//ì´ë¯¸ì§€ ì˜ì—­ìœ¼ë¡œ ì¶©ëŒ ê³„ì‚°
+	bool CheckHitWallRect(RECT rect);		//ë²½ ì˜ì—­ ì¶©ëŒ ê³„ì‚°
 	void SetDirection(Vector2 _direction);
 	Vector2 GetDirection();
 };

@@ -12,7 +12,7 @@
 
 using namespace std;
 
-extern DISTANCE_STATE curPlayerDistanceState;
+extern DISTANCE_TYPE curPlayerDistanceState;
 
 extern CArrow arrow[TOTAL_ARROW];
 extern CCamera camera;
@@ -130,34 +130,7 @@ void CArrow::SetSpeedXY(float power, Vector2 direction)
 
 void CArrow::CheckSprite()
 {
-	switch (curPlayerDistanceState)
-	{
-	case DISTANCE_STATE::LEFT:
-		SetSprite(m_pArrowSprite->GetLeft());
-		break;
-	case DISTANCE_STATE::RIGHT:
-		SetSprite(m_pArrowSprite->GetRight());
-		break;
-	case DISTANCE_STATE::UP:
-		SetSprite(m_pArrowSprite->GetUp());
-		break;
-	case DISTANCE_STATE::DOWN:
-		SetSprite(m_pArrowSprite->GetDown());
-		break;
-	case DISTANCE_STATE::LEFTUP:
-		SetSprite(m_pArrowSprite->GetLeftUp());
-		break;
-	case DISTANCE_STATE::RIGHTUP:
-		SetSprite(m_pArrowSprite->GetRightUp());
-		break;
-	case DISTANCE_STATE::LEFTDOWN:
-		SetSprite(m_pArrowSprite->GetLeftDown());
-		break;
-	case DISTANCE_STATE::RIGHTDOWN:
-		SetSprite(m_pArrowSprite->GetRightDown());
-		break;
-	}
-	SetSprite(m_pArrowSprite->GetRight());
+	SetSprite(m_pArrowSprite->GetSprite(DISTANCE_TYPE::RIGHT));
 	SetHitRect(arrowHitRect[(int)curPlayerDistanceState - 1]);
 }
 
@@ -185,7 +158,7 @@ void CArrow::CheckMove()
 		{
 			for (int i = 0; i < 139; i++)
 			{
-				if (map.GetStage() == 0)
+				if (map.GetStageNum() == 0)
 				{
 					SetRect(&rect, wallBlock[i].x * 32, wallBlock[i].y * 32, wallBlock[i].x * 32 + 32, wallBlock[i].y * 32 + 32);
 				}
@@ -345,31 +318,31 @@ void CArrow::HomingArrow()
 	curPos.SetRect(GetPos().x, GetPos().y);
 	Vector2 toDir = m_pTarget->GetPos() - curPos;
 	toDir = toDir.normalize();
-	float cross = (toDir.x * m_direction.y) - (toDir.y * m_direction.x);		//¾î´À¹æÇâÀ¸·Î µ¹Áö °è»ê
+	float cross = (toDir.x * m_direction.y) - (toDir.y * m_direction.x);		//ì–´ëŠë°©í–¥ìœ¼ë¡œ ëŒì§€ ê³„ì‚°
 
 	float tmp = (toDir.x * m_direction.x) + (toDir.y * m_direction.y);
 	if (tmp < -1)
 		tmp = -1;
 	if (tmp > 1)
 		tmp = 1;
-	float angle = acosf(tmp);		//µÎ º¤ÅÍÀÇ ³»°¢(0~180 ¾ç¼ö)
+	float angle = acosf(tmp);		//ë‘ ë²¡í„°ì˜ ë‚´ê°(0~180 ì–‘ìˆ˜)
 	//if (isnan(angle))
 	//	angle = 0;
-	if (cross > 0)		//¿ÜÀû °ªÀÌ À½¼ö¸é ½Ã°è¹æÇâÀ¸·Î È¸Àü
+	if (cross > 0)		//ì™¸ì  ê°’ì´ ìŒìˆ˜ë©´ ì‹œê³„ë°©í–¥ìœ¼ë¡œ íšŒì „
 		angle *= -1;
 
-	m_direction.Rotate(angle * m_nTurnRadian);   // È¸Àü
+	m_direction.Rotate(angle * m_nTurnRadian);   // íšŒì „
 
 	m_nTurnRadian += 1;
 
 	m_nSpeedX = m_direction.x * 5 * moveSpeed * g_Timer.deltaTime;
 	m_nSpeedY = m_direction.y * 5 * moveSpeed * g_Timer.deltaTime;
 
-    //turnRadian += 5.0f * dt;    // È¸Àü ¼Óµµ Áõ°¡
+    //turnRadian += 5.0f * dt;    // íšŒì „ ì†ë„ ì¦ê°€
 
 //	   if(turnRadian >= maxRadian)
 //        direction = toDir;
-//ÃâÃ³: https://eastroot1590.tistory.com/entry/À¯µµÅº-¸¸µé±âGuided-Missile [±Û±×¸® ºí·Î±×]
+//ì¶œì²˜: https://eastroot1590.tistory.com/entry/ìœ ë„íƒ„-ë§Œë“¤ê¸°Guided-Missile [ê¸€ê·¸ë¦¬ ë¸”ë¡œê·¸]
 
 }
 

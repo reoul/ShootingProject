@@ -31,7 +31,7 @@ void Map::SetStage(int _stage)
 	stage = _stage;
 }
 
-int Map::GetStage()
+int Map::GetStageNum()
 {
 	return stage;
 }

@@ -33,7 +33,7 @@ MAPEDITOR::MAPEDITOR()
 		{
 			std::getline(wallDataFile, wallData);
 		}
-		wallDataFile.close();    //ÆÄÀÏ ´Ý¾ÆÁÝ´Ï´Ù.
+		wallDataFile.close();    //íŒŒì¼ ë‹«ì•„ì¤ë‹ˆë‹¤.
 	}
 	if (wallData.size() > 0)
 	{
@@ -122,7 +122,7 @@ void MAPEDITOR::SetBlock(CBLOCK block[][BLOCK_X], CSprite* curBlock, CTimer *tim
 		{
 			block[j][i].Initialize(curBlock, (i * DEFAULT_BLOCK_SIZE), (j * DEFAULT_BLOCK_SIZE), timer, 0, 150);
 			block[j][i].SetSprite(curBlock);
-			block[j][i].SetState(OBJECT_STATE::EDITOR_BLOCK);
+			block[j][i].SetState(OBJECT_TYPE::EDITOR_BLOCK);
 			memcpy(m_pBlockData + (j*BLOCK_X) + i * 2, &tmp2, 2);
 			string aa = "";
 			aa += to_string(i);
