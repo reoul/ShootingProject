@@ -4,9 +4,9 @@
 #include "camera.h"
 #include "gameEnum.h"
 
-extern enum ACTION_TYPE;	//플레이어가 무슨 행동을 취하는지
-extern ACTION_TYPE curPlayerActionState;
-extern ACTION_TYPE curBossActionState;
+extern enum ACTION;	//플레이어가 무슨 행동을 취하는지
+extern ACTION curPlayerAction;
+extern ACTION curBossAction;
 
 extern CPlayer player;
 extern CBoss boss;
@@ -83,9 +83,9 @@ void CGObject::Draw(bool isMove, int x, int y, LPDIRECTDRAWSURFACE7 lpSurface)
 	case OBJECT_TYPE::PLYAER:		//플레이어
 		if (m_pTimer->elapsed(m_nLastFrameTime, m_nFrameInterval))
 		{
-			if ((curPlayerActionState == ACTION_TYPE::ROLL) && ((m_nCurrentFrame + 1) == m_pSprite->GetNumberOfFrame()))
+			if ((curPlayerAction == ACTION::ROLL) && ((m_nCurrentFrame + 1) == m_pSprite->GetNumberOfFrame()))
 			{
-				curPlayerActionState = ACTION_TYPE::MOVE;
+				curPlayerAction = ACTION::MOVE;
 				isMove = true;
 				player.MoveANDCheckState();
 				m_nCurrentFrame = m_pSprite->GetNumberOfFrame() - 1;
@@ -96,7 +96,7 @@ void CGObject::Draw(bool isMove, int x, int y, LPDIRECTDRAWSURFACE7 lpSurface)
 				m_nCurrentFrame = 0;
 		}
 		m_pSprite->Drawing(m_nCurrentFrame, x, y, lpSurface);
-		if (curPlayerActionState != 6)
+		if (curPlayerAction != 6)
 			m_pBowSprite->Drawing(m_nCurrentFrame, x, y, lpSurface);
 		break;
 	case OBJECT_TYPE::ARROW:		//화살
@@ -106,15 +106,15 @@ void CGObject::Draw(bool isMove, int x, int y, LPDIRECTDRAWSURFACE7 lpSurface)
 	case OBJECT_TYPE::BOSS:		//보스
 		if (m_pTimer->elapsed(m_nLastFrameTime, m_nFrameInterval))
 		{
-			if (!(curBossActionState == ACTION_TYPE::DEAD))
+			if (!(curBossAction == ACTION::DEAD))
 			{
-				if (curBossActionState == ACTION_TYPE::ATTACK)
+				if (curBossAction == ACTION::ATTACK)
 				{
 					if (m_nCurrentFrame == 2)
 						boss.Attack();
 				}
 				m_nCurrentFrame = ++m_nCurrentFrame % m_pSprite->GetNumberOfFrame();
-				if (curBossActionState == ACTION_TYPE::ATTACK)
+				if (curBossAction == ACTION::ATTACK)
 					if (m_nCurrentFrame == 0)
 						boss.CheckDirectionState();
 			}

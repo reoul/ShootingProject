@@ -26,10 +26,10 @@ CBoss::~CBoss()
 extern CCamera camera;
 extern CPlayer player;
 
-extern DISTANCE_TYPE curPlayerDistanceState;
-extern DISTANCE_TYPE curBossDistanceState;
-extern ACTION_TYPE curPlayerActionState;
-extern ACTION_TYPE curBossActionState;
+extern DIRECTION curPlayerDirection;
+extern DIRECTION curBossDirection;
+extern ACTION curPlayerAction;
+extern ACTION curBossAction;
 
 extern CArrow arrow[TOTAL_ARROW];
 
@@ -47,8 +47,8 @@ void CBoss::Initialize(int x, int y, CTimer* timer, int currentFrame, int frameI
 	pattern[7] = 0;
 	pattern[8] = 3;
 	curPattern = 0;
-	curBossDistanceState = DISTANCE_TYPE::DOWN;
-	curBossActionState = (ACTION_TYPE)pattern[curPattern];
+	curBossDirection = DIRECTION::DOWN;
+	curBossAction = (ACTION)pattern[curPattern];
 	m_nMoveSpeed = 1;
 	m_nMoveSpeedFold = 1;
 	m_bIsRoll = false;
@@ -98,7 +98,7 @@ void CBoss::SetSprite(CSprite* _sleep, CSprite8* _idle, CSprite8* _roll, CSprite
 	m_pBoss_AttackSprite = _attack;
 	m_pBoss_DeadSprite = _dead;
 	m_pCurSprite = _sleep;
-	m_pOldSprite = _idle->GetLeft();
+	m_pOldSprite = _idle->GetSprite(DIRECTION::LEFT);
 }
 
 void CBoss::Draw(LPDIRECTDRAWSURFACE7 surface)
@@ -154,7 +154,7 @@ void CBoss::Hit(int damege)
 	if (m_nHp < 0)
 	{
 		SndObjPlay(Sound[7], NULL);
-		curBossActionState = ACTION_TYPE::DEAD;
+		curBossAction = ACTION::DEAD;
 	}
 }
 
@@ -172,9 +172,9 @@ void CBoss::CheckPlayerDirection()
 {
 	float x = player.GetPos().x - GetPos().x;
 	float y = player.GetPos().y - GetPos().y;
-	int distance = (int)sqrtf(pow(x, 2) + pow(y,2));
+	int direction = (int)sqrtf(pow(x, 2) + pow(y, 2));
 
-	playerDirection.SetRect(x / distance, y / distance);
+	playerDirection.SetRect(x / direction, y / direction);
 }
 
 void CBoss::CheckDirectionState()
@@ -183,30 +183,30 @@ void CBoss::CheckDirectionState()
 	if (playerDirection.y < 0)
 	{
 		if ((playerDirection.x > -0.3f) && (playerDirection.x < 0.3f))
-			curBossDistanceState = DISTANCE_TYPE::UP;
+			curBossDirection = DIRECTION::UP;
 		else if (playerDirection.x < -0.3f)
-			curBossDistanceState = DISTANCE_TYPE::LEFTUP;
-		else if (playerDirection.x> 0.3f)
-			curBossDistanceState = DISTANCE_TYPE::RIGHTUP;
+			curBossDirection = DIRECTION::LEFTUP;
+		else if (playerDirection.x > 0.3f)
+			curBossDirection = DIRECTION::RIGHTUP;
 	}
 	else
 	{
 		if ((playerDirection.x > -0.3f) && (playerDirection.x < 0.3f))
-			curBossDistanceState = DISTANCE_TYPE::DOWN;
+			curBossDirection = DIRECTION::DOWN;
 		else if (playerDirection.x < -0.3f)
-			curBossDistanceState = DISTANCE_TYPE::LEFTDOWN;
+			curBossDirection = DIRECTION::LEFTDOWN;
 		else if (playerDirection.x > 0.3f)
-			curBossDistanceState = DISTANCE_TYPE::RIGHTDOWN;
+			curBossDirection = DIRECTION::RIGHTDOWN;
 	}
 	if (playerDirection.x < 0)
 	{
 		if ((playerDirection.y > -0.3f) && (playerDirection.y < 0.3f))
-			curBossDistanceState = DISTANCE_TYPE::LEFT;
+			curBossDirection = DIRECTION::LEFT;
 	}
 	else
 	{
 		if ((playerDirection.y > -0.3f) && (playerDirection.y < 0.3f))
-			curBossDistanceState = DISTANCE_TYPE::RIGHT;
+			curBossDirection = DIRECTION::RIGHT;
 	}
 }
 
@@ -218,124 +218,58 @@ void CBoss::CheckSpeedXY()
 
 void CBoss::CheckSprite()
 {
-	if (g_Timer.elapsed(m_nLastIdleTime, m_nIdleFrameInterval) && ((int)curBossActionState == 0)&& !((int)curBossActionState == 6))
+	if (g_Timer.elapsed(m_nLastIdleTime, m_nIdleFrameInterval) && ((int)curBossAction == 0) && !((int)curBossAction == 6))
 		NextPattern();
-	if ((int)curBossActionState == 6)
+	if ((int)curBossAction == 6)
 	{
-		switch (curBossDistanceState)
-		{
-		case DISTANCE_TYPE::LEFT:
-			m_pCurSprite = m_pBoss_DeadSprite->GetLeft();
-			break;
-		case DISTANCE_TYPE::RIGHT:
-			m_pCurSprite = m_pBoss_DeadSprite->GetRight();
-			break;
-		case DISTANCE_TYPE::UP:
-			m_pCurSprite = m_pBoss_DeadSprite->GetUp();
-			break;
-		case DISTANCE_TYPE::DOWN:
-			m_pCurSprite = m_pBoss_DeadSprite->GetDown();
-			break;
-		case DISTANCE_TYPE::LEFTUP:
-			m_pCurSprite = m_pBoss_DeadSprite->GetLeftUp();
-			break;
-		case DISTANCE_TYPE::RIGHTUP:
-			m_pCurSprite = m_pBoss_DeadSprite->GetRightUp();
-			break;
-		case DISTANCE_TYPE::LEFTDOWN:
-			m_pCurSprite = m_pBoss_DeadSprite->GetLeftDown();
-			break;
-		case DISTANCE_TYPE::RIGHTDOWN:
-			m_pCurSprite = m_pBoss_DeadSprite->GetRightDown();
-			break;
-		}
+		m_pCurSprite = m_pBoss_DeadSprite->GetSprite(curBossDirection);
 	}
 	else if (!m_bIsRoll)
 	{
-		if ((int)curBossActionState == 5)
+		if ((int)curBossAction == 5)
 			m_pCurSprite = m_pBoss_SleepSprite;
 		else
 		{
-			switch (curBossDistanceState)
-			{
-			case DISTANCE_TYPE::LEFT:
-				m_pCurSprite = !(curBossActionState == ACTION_TYPE::ROLL) ? m_pBoss_IdleSprite->GetLeft() : m_pBoss_RollSprite->GetLeft();
-				if ((int)curBossActionState == 4)
-					m_pCurSprite = m_pBoss_AttackSprite->GetLeft();
-				break;
-			case DISTANCE_TYPE::RIGHT:
-				m_pCurSprite = !(curBossActionState == ACTION_TYPE::ROLL) ? m_pBoss_IdleSprite->GetRight() : m_pBoss_RollSprite->GetRight();
-				if ((int)curBossActionState == 4)
-					m_pCurSprite = m_pBoss_AttackSprite->GetRight();
-				break;
-			case DISTANCE_TYPE::UP:
-				m_pCurSprite = !(curBossActionState == ACTION_TYPE::ROLL) ? m_pBoss_IdleSprite->GetUp() : m_pBoss_RollSprite->GetUp();
-				if ((int)curBossActionState == 4)
-					m_pCurSprite = m_pBoss_AttackSprite->GetUp();
-				break;
-			case DISTANCE_TYPE::DOWN:
-				m_pCurSprite = !(curBossActionState == ACTION_TYPE::ROLL) ? m_pBoss_IdleSprite->GetDown() : m_pBoss_RollSprite->GetDown();
-				if ((int)curBossActionState == 4)
-					m_pCurSprite = m_pBoss_AttackSprite->GetDown();
-				break;
-			case DISTANCE_TYPE::LEFTUP:
-				m_pCurSprite = !(curBossActionState == ACTION_TYPE::ROLL) ? m_pBoss_IdleSprite->GetLeftUp() : m_pBoss_RollSprite->GetLeftUp();
-				if ((int)curBossActionState == 4)
-					m_pCurSprite = m_pBoss_AttackSprite->GetLeftUp();
-				break;
-			case DISTANCE_TYPE::RIGHTUP:
-				m_pCurSprite = !(curBossActionState == ACTION_TYPE::ROLL) ? m_pBoss_IdleSprite->GetRightUp() : m_pBoss_RollSprite->GetRightUp();
-				if ((int)curBossActionState == 4)
-					m_pCurSprite = m_pBoss_AttackSprite->GetRightUp();
-				break;
-			case DISTANCE_TYPE::LEFTDOWN:
-				m_pCurSprite = !(curBossActionState == ACTION_TYPE::ROLL) ? m_pBoss_IdleSprite->GetLeftDown() : m_pBoss_RollSprite->GetLeftDown();
-				if ((int)curBossActionState == 4)
-					m_pCurSprite = m_pBoss_AttackSprite->GetLeftDown();
-				break;
-			case DISTANCE_TYPE::RIGHTDOWN:
-				m_pCurSprite = !(curBossActionState == ACTION_TYPE::ROLL) ? m_pBoss_IdleSprite->GetRightDown() : m_pBoss_RollSprite->GetRightDown();
-				if ((int)curBossActionState == 4)
-					m_pCurSprite = m_pBoss_AttackSprite->GetRightDown();
-				break;
-			}
+			m_pCurSprite = !(curBossAction == ACTION::ROLL) ? m_pBoss_IdleSprite->GetSprite(curBossDirection) : m_pBoss_RollSprite->GetSprite(curBossDirection);
+			if ((int)curBossAction == 4)
+				m_pCurSprite = m_pBoss_AttackSprite->GetSprite(curBossDirection);
 		}
 	}
-	if (m_pOldSprite != m_pCurSprite && (!m_bIsRoll || (curBossActionState == ACTION_TYPE::DEAD)))
+	if (m_pOldSprite != m_pCurSprite && (!m_bIsRoll || (curBossAction == ACTION::DEAD)))
 	{
 		m_pOldSprite = m_pCurSprite;
 		CGObject::SetSprite(m_pCurSprite);
-		switch (curBossActionState)
+		switch (curBossAction)
 		{
-		case ACTION_TYPE::IDLE:
+		case ACTION::IDLE:
 			SetFrameInterval(300);
 			break;
-		case ACTION_TYPE::ROLL:
+		case ACTION::ROLL:
 			SetFrameInterval(50);
 			break;
-		case ACTION_TYPE::ATTACK:
+		case ACTION::ATTACK:
 			SetFrameInterval(100);
 			break;
-		case ACTION_TYPE::DEAD:
+		case ACTION::DEAD:
 			SetFrameInterval(300);
 		}
 
-		if (curBossActionState == ACTION_TYPE::ROLL)
+		if (curBossAction == ACTION::ROLL)
 			m_bIsRoll = true;
 	}
 
-	switch (curBossActionState)
+	switch (curBossAction)
 	{
-	case ACTION_TYPE::IDLE:
+	case ACTION::IDLE:
 		SetHitRect(idleHitRect[m_nCurrentFrame]);
 		break;
-	case ACTION_TYPE::ROLL:
+	case ACTION::ROLL:
 		SetHitRect(rollHitRect);
 		break;
-	case ACTION_TYPE::ATTACK:
+	case ACTION::ATTACK:
 		SetHitRect(attackHitRect[m_nCurrentFrame]);
 		break;
-	case ACTION_TYPE::SLEEP:
+	case ACTION::SLEEP:
 		SetHitRect(sleepHitRect);
 		break;
 	}
@@ -364,7 +298,7 @@ void CBoss::MoveANDCheckState()
 
 	if ((abs((long)m_nSpeedX) < 0.1f) && (abs((long)m_nSpeedY) < 0.1f) && m_bIsHitWall)
 	{
- 		m_nSpeedX = 0;
+		m_nSpeedX = 0;
 		m_nSpeedY = 0;
 		NextPattern();
 		m_bIsHitWall = false;
@@ -379,7 +313,7 @@ void CBoss::MoveANDCheckState()
 		cntHitWall++;
 	}
 
-	if (curBossActionState == ACTION_TYPE::ROLL)		//공격중이거나 기본상태가 아닐경우 캐릭터를 움직여준다
+	if (curBossAction == ACTION::ROLL)		//공격중이거나 기본상태가 아닐경우 캐릭터를 움직여준다
 	{
 		SetX(GetPos().x + m_nSpeedX);
 		SetY(GetPos().y + m_nSpeedY);
@@ -438,8 +372,8 @@ void CBoss::MoveANDCheckState()
 	//	m_bIsHitWall = true;
 	//}
 
-	draw_x = (int)(-(camera.GetX() - GetPos().x) + (SCREEN_WIDTH*0.5f));
-	draw_y = (int)(-(camera.GetY() - GetPos().y) + (SCREEN_HEIGHT*0.5f));
+	draw_x = (int)(-(camera.GetX() - GetPos().x) + (SCREEN_WIDTH * 0.5f));
+	draw_y = (int)(-(camera.GetY() - GetPos().y) + (SCREEN_HEIGHT * 0.5f));
 
 	//if (!m_bIsRoll)
 	//{
@@ -479,7 +413,7 @@ void CBoss::MoveInit()
 
 void CBoss::NextPattern()
 {
-	if ((ACTION_TYPE)pattern[curPattern] == ACTION_TYPE::ROLL)
+	if ((ACTION)pattern[curPattern] == ACTION::ROLL)
 		m_nIdleFrameInterval = 1500;
 	else
 		m_nIdleFrameInterval = 300;
@@ -489,22 +423,22 @@ void CBoss::NextPattern()
 		curPattern = 1;
 		cntAttack = 0;
 	}
-	switch ((ACTION_TYPE)pattern[curPattern])
+	switch ((ACTION)pattern[curPattern])
 	{
-	case ACTION_TYPE::IDLE:
+	case ACTION::IDLE:
 		m_nLastIdleTime = g_Timer.time();
 		m_bIsRoll = false;
 		MoveInit();
 		break;
-	case ACTION_TYPE::ROLL:
+	case ACTION::ROLL:
 		CheckDirectionState();
 		CheckSpeedXY();
 		break;
-	case ACTION_TYPE::ATTACK:
+	case ACTION::ATTACK:
 		CheckDirectionState();
 		m_bIsRoll = false;
 		break;
 	}
-	
-	curBossActionState = (ACTION_TYPE)pattern[curPattern];
+
+	curBossAction = (ACTION)pattern[curPattern];
 }

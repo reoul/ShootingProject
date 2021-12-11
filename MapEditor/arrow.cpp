@@ -12,7 +12,7 @@
 
 using namespace std;
 
-extern DISTANCE_TYPE curPlayerDistanceState;
+extern DIRECTION curPlayerDirection;
 
 extern CArrow arrow[TOTAL_ARROW];
 extern CCamera camera;
@@ -71,7 +71,7 @@ void CArrow::Initialize(int x, int y, CTimer* timer, int moveFrame, CSprite8* ar
 	SetRect(&arrowHitRect[cnt++], 0, 8, 8, 0);
 	SetRect(&arrowHitRect[cnt++], 8, 0, 0, 8);
 	SetRect(&arrowHitRect[cnt], 0, 0, 8, 8);
-	CGObject::Initialize(arrowSprite->GetUp(), x, y, timer, 0, 0, 0);
+	CGObject::Initialize(arrowSprite->GetSprite(DIRECTION::UP), x, y, timer, 0, 0, 0);
 }
 
 void CArrow::SetSpeedXY(float power, Vector2 direction)
@@ -130,8 +130,8 @@ void CArrow::SetSpeedXY(float power, Vector2 direction)
 
 void CArrow::CheckSprite()
 {
-	SetSprite(m_pArrowSprite->GetSprite(DISTANCE_TYPE::RIGHT));
-	SetHitRect(arrowHitRect[(int)curPlayerDistanceState - 1]);
+	SetSprite(m_pArrowSprite->GetSprite(DIRECTION::RIGHT));
+	SetHitRect(arrowHitRect[(int)curPlayerDirection - 1]);
 }
 
 void CArrow::Draw(LPDIRECTDRAWSURFACE7 surface)

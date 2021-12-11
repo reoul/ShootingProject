@@ -9,9 +9,9 @@ using namespace std;
 
 extern MOD curMod;
 
-extern DISTANCE_TYPE curPlayerDistanceState;
+extern DIRECTION curPlayerDirection;
 
-extern ACTION_TYPE curPlayerActionState;
+extern ACTION curPlayerAction;
 
 extern CPlayer player;
 
@@ -218,7 +218,7 @@ void CCamera::Move()
 {
 	//m_x += (m_nFinishX - m_x)* !((int)curPlayerActionState == 4) ? 0.5f : 0.1f;
 	//m_y += (m_nFinishY - m_y)* !((int)curPlayerActionState == 4) ? 0.5f : 0.1f;
-	if ((int)curPlayerActionState == ACTION_TYPE::ATTACK)
+	if ((int)curPlayerAction == ACTION::ATTACK)
 		m_nMoveSpeed = 0.1f;
 	else
 		m_nMoveSpeed = 0.5f;
@@ -305,7 +305,7 @@ int CCamera::GetFinishY()
 int CCamera::GetFinishX2()
 {
 	int _x = 0;
-	if ((curPlayerActionState != ACTION_TYPE::ATTACK) && (curPlayerActionState != ACTION_TYPE::ROLL))		//공격중이 아닐때
+	if ((curPlayerAction != ACTION::ATTACK) && (curPlayerAction != ACTION::ROLL))		//공격중이 아닐때
 	{
 		_x = (int)player.GetPos().x;
 	}
@@ -320,7 +320,7 @@ int CCamera::GetFinishX2()
 int CCamera::GetFinishY2()
 {
 	int _y;
-	if ((curPlayerActionState != ACTION_TYPE::ATTACK) && (curPlayerActionState != ACTION_TYPE::ROLL))		//공격중이 아닐때
+	if ((curPlayerAction != ACTION::ATTACK) && (curPlayerAction != ACTION::ROLL))		//공격중이 아닐때
 	{
 		_y = (int)player.GetPos().y;
 	}
