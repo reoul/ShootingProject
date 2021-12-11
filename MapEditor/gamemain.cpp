@@ -39,22 +39,6 @@ extern CTimer					g_Timer;
 
 extern CSprite					grassSprite;
 extern CSprite					player_skill;
-extern CSprite					player_walk_left;
-extern CSprite					player_walk_leftup;
-extern CSprite					player_walk_leftdown;
-extern CSprite					player_walk_right;
-extern CSprite					player_walk_rightup;
-extern CSprite					player_walk_rightdown;
-extern CSprite					player_walk_up;
-extern CSprite					player_walk_down;
-extern CSprite					player_roll_left;		//플레이어 구르기
-extern CSprite					player_roll_leftup;
-extern CSprite					player_roll_leftdown;
-extern CSprite					player_roll_right;
-extern CSprite					player_roll_rightup;
-extern CSprite					player_roll_rightdown;
-extern CSprite					player_roll_up;
-extern CSprite					player_roll_down;
 extern CSprite					player_hp;
 extern CSprite					boss_sleep;
 extern CSprite					boss_snowball;
@@ -68,6 +52,8 @@ extern CSprite					enemy_hide_left;
 extern CSprite					enemy_hide_right;
 extern CSprite					enemy_attack_left;
 extern CSprite					enemy_attack_right;
+extern CSprite8					player_walk;
+extern CSprite8					player_roll;
 extern CSprite8					player_dead;
 extern CSprite8					bow_walk;
 extern CSprite8					bow_roll;
@@ -88,11 +74,11 @@ extern Map						map;
 extern CSprite					fireSprite;
 extern FireBlock				fireBlock;
 
-extern DISTANCE_TYPE		curPlayerDistanceState;
-extern DISTANCE_TYPE		curBossDistanceState;
+extern DIRECTION		curPlayerDirection;
+extern DIRECTION		curBossDirection;
 
-extern ACTION_TYPE		curPlayerActionState;
-extern ACTION_TYPE		curBossActionState;
+extern ACTION		curPlayerAction;
+extern ACTION		curBossAction;
 
 extern CArrow					arrow[TOTAL_ARROW];
 extern CSnowBall				snowball[TOTAL_SNOWBALL];
@@ -228,7 +214,7 @@ void GameMain(void)
 		if (player.CanMove())		//이동
 		{
 			player.MoveInit();
-			if (((int)curPlayerActionState != ACTION_TYPE::DEAD) && !camera.GetIsFirstAlpha())
+			if (((int)curPlayerAction != ACTION::DEAD) && !camera.GetIsFirstAlpha())
 			{
 				if (!player.GetIsRoll())
 				{
@@ -286,7 +272,7 @@ void GameMain(void)
 				player.GetCurArrow()->SetSpeedXY(20 - (30 * (camera.GetExpansion() - 1)), attackDirection);
 				player.GetCurArrow()->CheckMove();
 				player.GetCurArrow()->CheckSprite();
-				if (!(curPlayerActionState == ACTION_TYPE::ROLL) && (curPlayerActionState != ACTION_TYPE::DEAD))
+				if (!(curPlayerAction == ACTION::ROLL) && (curPlayerAction != ACTION::DEAD))
 					player.GetCurArrow()->Draw(g_lpSecondarySurface);
 			}
 		}
@@ -366,7 +352,7 @@ void GameMain(void)
 								arrow[i].IsHit();
 								boss.Hit(arrow[i].GetPower());
 
-								if (curBossActionState == ACTION_TYPE::SLEEP)
+								if (curBossAction == ACTION::SLEEP)
 								{
 									//boss.CheckDirectionState();
 									boss.NextPattern();
@@ -382,7 +368,7 @@ void GameMain(void)
 								arrow[i].IsHit();
 								boss.Hit(arrow[i].GetPower());
 
-								if ((int)curBossActionState == 5)
+								if ((int)curBossAction == 5)
 									boss.NextPattern();
 							}
 						}
@@ -428,9 +414,9 @@ void GameMain(void)
 		fireBlock.Draw(g_lpSecondarySurface);
 
 		//보스가 구르기 패턴 공격을 할때
-		if (curBossActionState == ACTION_TYPE::ROLL)
+		if (curBossAction == ACTION::ROLL)
 		{
-			if (curPlayerActionState != ACTION_TYPE::DEAD)
+			if (curPlayerAction != ACTION::DEAD)
 			{
 				//플레이어가 공격당하지 않았다면
 				if (IsPlayerNoHit)
@@ -565,7 +551,7 @@ void GameMain(void)
 		{
 			bbb = ++bbb % boss_hp.GetNumberOfFrame();
 		}*/
-		if ((curPlayerActionState == ACTION_TYPE::DEAD) || (curBossActionState == ACTION_TYPE::DEAD) || camera.GetIsFirstAlpha())
+		if ((curPlayerAction == ACTION::DEAD) || (curBossAction == ACTION::DEAD) || camera.GetIsFirstAlpha())
 		{
 			camera.AlphaBlending2(g_lpSecondarySurface);
 			if (!camera.GetIsFirstAlpha())
@@ -619,11 +605,10 @@ void InitGame()
 		player.Kill();
 	//player.Initialize(1560, 1984, &g_Timer, 0, 140, 4, 90);		//학교 컴기준     집컴기준  140,20
 	player.Initialize(1122, 2664, &g_Timer, 0, 140, 4, 90);		//학교 컴기준     집컴기준  140,20
-	player.SetState(OBJECT_TYPE::PLYAER);
-	player.SetWalkSprite(&player_walk_left, &player_walk_leftup, &player_walk_leftdown, &player_walk_right, &player_walk_rightup,
-		&player_walk_rightdown, &player_walk_up, &player_walk_down, &player_dead);
-	player.SetRollSprite(&player_roll_left, &player_roll_leftup, &player_roll_leftdown, &player_roll_right, &player_roll_rightup,
-		&player_roll_rightdown, &player_roll_up, &player_roll_down);
+	player.SetWalkSprite(&player_walk);
+	player.SetSpriteAndHitRect();
+	player.SetRollSprite(&player_roll);
+	player.SetDeadSprite(&player_dead);
 	player.SetBowSprite(&bow_walk, &bow_roll, &bow_attack);
 	player.SetSkillSprite(&player_skill);
 	for (i = 0; i < TOTAL_ARROW; i++)
@@ -670,6 +655,7 @@ void InitGame()
 	m_bIntroFirst = TRUE;
 	m_bGameFirst = FALSE;
 	m_bEditorFirst = TRUE;
+
 
 	/*for (i = 0; i < TOTAL_ENEMY; i++)
 	{

@@ -19,15 +19,8 @@ public:
 	CSprite8();
 	~CSprite8();
 	void Init();
-	CSprite* GetSprite(DISTANCE_TYPE type);
-	CSprite* GetLeft();
-	CSprite* GetLeftUp();
-	CSprite* GetLeftDown();
-	CSprite* GetRight();
-	CSprite* GetRightUp();
-	CSprite* GetRightDown();
-	CSprite* GetUp();
-	CSprite* GetDown();
+	CSprite* GetSprite(DIRECTION type);
+	void SetSizeAll(float size);
 	bool ReleaseAll();
 	void ReStoreAll();
 };

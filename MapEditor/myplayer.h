@@ -36,26 +36,11 @@ private:
 	CSprite* m_pCurBowSprite;
 	CSprite* m_pOldBowSprite;
 	CSprite* m_pSkillSprite;
-	CSprite* m_pWalk_LeftSprite;
-	CSprite* m_pWalk_LeftUpSprite;
-	CSprite* m_pWalk_LeftDownSprite;
-	CSprite* m_pWalk_RightSprite;
-	CSprite* m_pWalk_RightUpSprite;
-	CSprite* m_pWalk_RightDownSprite;
-	CSprite* m_pWalk_UpSprite;
-	CSprite* m_pWalk_DownSprite;
 
-	CSprite* m_pRoll_LeftSprite;
-	CSprite* m_pRoll_LeftUpSprite;
-	CSprite* m_pRoll_LeftDownSprite;
-	CSprite* m_pRoll_RightSprite;
-	CSprite* m_pRoll_RightUpSprite;
-	CSprite* m_pRoll_RightDownSprite;
-	CSprite* m_pRoll_UpSprite;
-	CSprite* m_pRoll_DownSprite;
-
+	CSprite8* m_pWalkSprite;
+	CSprite8* m_pRollSprite;
 	CSprite8* m_pDeadSprite;
-	CSprite8* m_pBow_WalkSprite;
+	CSprite8* m_pBowWalkSprite;
 	CSprite8* m_pBow_RollSprite;
 	CSprite8* m_pBow_AttackSprite;
 
@@ -66,20 +51,20 @@ public:
 	void SetArrow(CArrow* arrow);
 	CArrow* GetCurArrow();
 	void Initialize(int x, int y, CTimer* timer, int currentFrame, int frameInterval, int moveInterval, int skillFrameInterval);
-	void SetWalkSprite(CSprite* _walk_Left, CSprite* _walk_Leftup, CSprite* _walk_Leftdown, CSprite* _walk_Right, CSprite* _walk_RightUp, CSprite* _walk_RightDown,
-		CSprite* _walk_Up, CSprite* _walk_Down,CSprite8* _dead);
-	void SetRollSprite(CSprite* _Roll_Left, CSprite* _Roll_LeftUp, CSprite* _Roll_LeftDown, CSprite* _Roll_Right, CSprite* _Roll_RightUp, CSprite* _Roll_RightDown,
-		CSprite* _Roll_Up, CSprite* _Roll_Down);
+	void SetWalkSprite(CSprite8* sprite);
+	void SetRollSprite(CSprite8* sprite);
+	void SetDeadSprite(CSprite8* sprite);
+	void SetSpriteAndHitRect();
 	void SetBowSprite(CSprite8* _walk, CSprite8* _roll, CSprite8* _attack);
 	void SetSkillSprite(CSprite* _skill);
 	void Draw(LPDIRECTDRAWSURFACE7 surface);
 	void CheckUseSkill();
 	void Skill();
 	void Roll();
-	void Left();	//플레이어 왼쪽이동
-	void Right();	//플레이어 오른쪽이동
-	void Up();		//플레이어 위로이동
-	void Down();	//플레이어 아래쪽이동
+	void Left();
+	void Right();
+	void Up();
+	void Down();
 	void Hit();		//플레이어 피격
 	bool CanMove();	//이동 가능 여부 확인
 	void MoveANDCheckState();

@@ -29,7 +29,7 @@ void CSprite8::Init()
 	down = new CSprite();
 }
 
-CSprite* CSprite8::GetSprite(DISTANCE_TYPE type)
+CSprite* CSprite8::GetSprite(DIRECTION type)
 {
 	switch (type)
 	{
@@ -52,6 +52,18 @@ CSprite* CSprite8::GetSprite(DISTANCE_TYPE type)
 	default:
 		return left;
 	}
+}
+
+void CSprite8::SetSizeAll(float size)
+{
+	left->SetSize(size);
+	leftup->SetSize(size);
+	leftdown->SetSize(size);
+	right->SetSize(size);
+	rightup->SetSize(size);
+	rightdown->SetSize(size);
+	up->SetSize(size);
+	down->SetSize(size);
 }
 
 bool CSprite8::ReleaseAll()
@@ -86,37 +98,4 @@ void CSprite8::ReStoreAll()
 	rightdown->Restore();
 	up->Restore();
 	down->Restore();
-}
-
-CSprite* CSprite8::GetLeft()
-{
-	return left;
-}
-CSprite* CSprite8::GetLeftUp()
-{
-	return leftup;
-}
-CSprite* CSprite8::GetLeftDown()
-{
-	return leftdown;
-}
-CSprite* CSprite8::GetRight()
-{
-	return right;
-}
-CSprite* CSprite8::GetRightUp()
-{
-	return rightup;
-}
-CSprite* CSprite8::GetRightDown()
-{
-	return rightdown;
-}
-CSprite* CSprite8::GetUp()
-{
-	return up;
-}
-CSprite* CSprite8::GetDown()
-{
-	return down;
 }

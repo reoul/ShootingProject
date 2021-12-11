@@ -10,9 +10,9 @@ using namespace std;
 
 extern CCamera camera;
 
-extern DISTANCE_TYPE curPlayerDistanceState;
-extern ACTION_TYPE curPlayerActionState;
-extern ACTION_TYPE curBossActionState;
+extern DIRECTION curPlayerDirection;
+extern ACTION curPlayerAction;
+extern ACTION curBossAction;
 
 extern CArrow arrow[TOTAL_ARROW];
 extern CTimer g_Timer;
@@ -40,8 +40,9 @@ void CPlayer::Initialize(int x, int y, CTimer* timer, int currentFrame, int fram
 	draw_y = y;
 	m_nOldX = x;
 	m_nOldY = y;
-	curPlayerDistanceState = DISTANCE_TYPE::DOWN;
-	curPlayerActionState = ACTION_TYPE::FAINT;
+	curPlayerDirection = DIRECTION::DOWN;
+	curPlayerAction = ACTION::FAINT;
+	curState = OBJECT_TYPE::PLYAER;
 	moveSpeed = 60;
 	m_nMoveSpeedFold = 2;
 	m_bIsSkill = false;
@@ -131,40 +132,35 @@ void CPlayer::Initialize(int x, int y, CTimer* timer, int currentFrame, int fram
 	m_nMoveInterval = moveInterval;
 }
 
-void CPlayer::SetWalkSprite(CSprite* _walk_Left, CSprite* _walk_LeftUp, CSprite* _walk_LeftDown, CSprite* _walk_Right, CSprite* _walk_RightUp,
-	CSprite* _walk_RightDown, CSprite* _walk_Up, CSprite* _walk_Down, CSprite8* _dead)
+void CPlayer::SetWalkSprite(CSprite8* sprite)
 {
-	m_pWalk_LeftSprite = _walk_Left;
-	m_pWalk_LeftUpSprite = _walk_LeftUp;
-	m_pWalk_LeftDownSprite = _walk_LeftDown;
-	m_pWalk_RightSprite = _walk_Right;
-	m_pWalk_RightUpSprite = _walk_RightUp;
-	m_pWalk_RightDownSprite = _walk_RightDown;
-	m_pWalk_UpSprite = _walk_Up;
-	m_pWalk_DownSprite = _walk_Down;
-	m_pCurSprite = m_pWalk_DownSprite;
-	m_pOldSprite = m_pWalk_UpSprite;
-	m_pDeadSprite = _dead;
+	m_pWalkSprite = sprite;
+}
+
+void CPlayer::SetRollSprite(CSprite8* sprite)
+{
+	m_pRollSprite = sprite;
+}
+
+void CPlayer::SetDeadSprite(CSprite8* sprite)
+{
+	m_pDeadSprite = sprite;
+}
+
+/// <summary>
+/// 처음 스프라이트랑 충돌 영역을 설정해준다.
+/// </summary>
+void CPlayer::SetSpriteAndHitRect()
+{
+	m_pCurSprite = m_pWalkSprite->GetSprite(DIRECTION::DOWN);
+	m_pOldSprite = m_pWalkSprite->GetSprite(DIRECTION::UP);
 	SetSprite(m_pCurSprite);
 	SetHitWallRect();
 }
 
-void CPlayer::SetRollSprite(CSprite* _Roll_Left, CSprite* _Roll_LeftUp, CSprite* _Roll_LeftDown, CSprite* _Roll_Right, CSprite* _Roll_RightUp, CSprite* _Roll_RightDown,
-	CSprite* _Roll_Up, CSprite* _Roll_Down)
-{
-	m_pRoll_LeftSprite = _Roll_Left;
-	m_pRoll_LeftUpSprite = _Roll_LeftUp;
-	m_pRoll_LeftDownSprite = _Roll_LeftDown;
-	m_pRoll_RightSprite = _Roll_Right;
-	m_pRoll_RightUpSprite = _Roll_RightUp;
-	m_pRoll_RightDownSprite = _Roll_RightDown;
-	m_pRoll_UpSprite = _Roll_Up;
-	m_pRoll_DownSprite = _Roll_Down;
-}
-
 void CPlayer::SetBowSprite(CSprite8* _walk, CSprite8* _roll, CSprite8* _attack)
 {
-	m_pBow_WalkSprite = _walk;
+	m_pBowWalkSprite = _walk;
 	m_pBow_RollSprite = _roll;
 	m_pBow_AttackSprite = _attack;
 }
@@ -526,13 +522,13 @@ void CPlayer::Draw(LPDIRECTDRAWSURFACE7 surface)
 	if (m_bIsSkill)
 		CGObject::SkillDraw(draw_x, draw_y, surface);
 	else
-		CGObject::Draw(curPlayerActionState == ACTION_TYPE::MOVE || curPlayerActionState == ACTION_TYPE::RUN 
-			|| curPlayerActionState == ACTION_TYPE::ROLL, draw_x, draw_y, surface);
+		CGObject::Draw(curPlayerAction == ACTION::MOVE || curPlayerAction == ACTION::RUN 
+			|| curPlayerAction == ACTION::ROLL, draw_x, draw_y, surface);
 }
 
 void CPlayer::Skill()
 {
-	if (curPlayerActionState != ACTION_TYPE::DEAD)
+	if (curPlayerAction != ACTION::DEAD)
 	{
 		if (g_Timer.elapsed(m_nSkillCoolTime, 10000))
 		{
@@ -566,7 +562,7 @@ bool CPlayer::GetIsRoll()
 
 void CPlayer::Roll()
 {
-	curPlayerActionState = ACTION_TYPE::ROLL;
+	curPlayerAction = ACTION::ROLL;
 	m_nFrameInterval = 70;
 }
 
@@ -608,7 +604,7 @@ void CPlayer::Hit()
 	}
 	if (m_nHp == 0)
 	{
-		curPlayerActionState = ACTION_TYPE::DEAD;
+		curPlayerAction = ACTION::DEAD;
 	}
 }
 
@@ -633,67 +629,67 @@ float CPlayer::GetSpeedY()
 
 void CPlayer::MoveANDCheckState()
 {
-	if (curPlayerActionState == ACTION_TYPE::DEAD)
+	if (curPlayerAction == ACTION::DEAD)
 		m_bIsRoll = false;
-	if (!(curPlayerActionState == ACTION_TYPE::ROLL) && !(curPlayerActionState == ACTION_TYPE::DEAD))
+	if (!(curPlayerAction == ACTION::ROLL) && !(curPlayerAction == ACTION::DEAD))
 	{
 		m_bIsRoll = false;
 		if (camera.GetExpansion() == 1)			//화면이 확대가 안되어있을경우
 		{
-			if (curPlayerActionState != ACTION_TYPE::FAINT)
+			if (curPlayerAction != ACTION::FAINT)
 			{
-				curPlayerActionState = ACTION_TYPE::IDLE;		//캐릭터의 행동을 기본으로 초기화
+				curPlayerAction = ACTION::IDLE;		//캐릭터의 행동을 기본으로 초기화
 			}
 		}
 		else
-			curPlayerActionState = ACTION_TYPE::ATTACK;		//캐릭터의 행동을 공격중으로 초기화
+			curPlayerAction = ACTION::ATTACK;		//캐릭터의 행동을 공격중으로 초기화
 
-		if (!(curPlayerActionState == ACTION_TYPE::ATTACK) && (m_nSpeedX != 0 || m_nSpeedY != 0))
-			curPlayerActionState = ACTION_TYPE::MOVE;
+		if (!(curPlayerAction == ACTION::ATTACK) && (m_nSpeedX != 0 || m_nSpeedY != 0))
+			curPlayerAction = ACTION::MOVE;
 	}
 
 	if (m_bIsRoll)
 	{
 		m_nMoveSpeedFold = 4;
-		switch (curPlayerDistanceState)
+		switch (curPlayerDirection)
 		{
-		case DISTANCE_TYPE::LEFT:
+		case DIRECTION::LEFT:
 			m_nSpeedX = -(moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime);
 			m_nSpeedY = 0;
 			break;
-		case DISTANCE_TYPE::RIGHT:
+		case DIRECTION::RIGHT:
 			m_nSpeedX = moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime;
 			m_nSpeedY = 0;
 			break;
-		case DISTANCE_TYPE::UP:
+		case DIRECTION::UP:
 			m_nSpeedX = 0;
 			m_nSpeedY = -(moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime);
 			break;
-		case DISTANCE_TYPE::DOWN:
+		case DIRECTION::DOWN:
 			m_nSpeedX = 0;
 			m_nSpeedY = moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime;
 			break;
-		case DISTANCE_TYPE::LEFTUP:
+		case DIRECTION::LEFTUP:
 			m_nSpeedX = -(moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime);
 			m_nSpeedY = -(moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime);
 			break;
-		case DISTANCE_TYPE::RIGHTUP:
+		case DIRECTION::RIGHTUP:
 			m_nSpeedX = moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime;
 			m_nSpeedY = -(moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime);
 			break;
-		case DISTANCE_TYPE::LEFTDOWN:
+		case DIRECTION::LEFTDOWN:
 			m_nSpeedX = -(moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime);
 			m_nSpeedY = moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime;
 			break;
-		case DISTANCE_TYPE::RIGHTDOWN:
+		case DIRECTION::RIGHTDOWN:
 			m_nSpeedX = moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime;
 			m_nSpeedY = moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime;
 			break;
 		}
 	}
 
-	if (!(curPlayerActionState == ACTION_TYPE::ATTACK) && 
-		!(curPlayerActionState == ACTION_TYPE::IDLE) && !(curPlayerActionState == ACTION_TYPE::DEAD))	//공격중이거나 기본상태가 아닐경우 캐릭터를 움직여준다
+	if (!(curPlayerAction == ACTION::ATTACK) && 
+		!(curPlayerAction == ACTION::IDLE) && !(curPlayerAction == ACTION::DEAD))	//공격중이거나 기본상태가 아닐경우 캐릭터를 움직여준다
 	{
 		m_nOldX = GetPos().x;
 		m_nOldY = GetPos().y;
@@ -728,152 +724,79 @@ void CPlayer::MoveANDCheckState()
 	{
 		if (m_nSpeedX == 0)
 		{
-			if (m_nSpeedY < 0)		//up
-				curPlayerDistanceState = DISTANCE_TYPE::UP;
-			else if (m_nSpeedY > 0)		//down
-				curPlayerDistanceState = DISTANCE_TYPE::DOWN;
+			if (m_nSpeedY < 0)
+				curPlayerDirection = DIRECTION::UP;
+			else if (m_nSpeedY > 0)
+				curPlayerDirection = DIRECTION::DOWN;
 		}
 		else if (m_nSpeedX < 0)
 		{
-			if (m_nSpeedY == 0)				//left
-				curPlayerDistanceState = DISTANCE_TYPE::LEFT;
-			else if (m_nSpeedY < 0)		//leftup
-				curPlayerDistanceState = DISTANCE_TYPE::LEFTUP;
-			else if (m_nSpeedY > 0)		//leftdown
-				curPlayerDistanceState = DISTANCE_TYPE::LEFTDOWN;
+			if (m_nSpeedY == 0)
+				curPlayerDirection = DIRECTION::LEFT;
+			else if (m_nSpeedY < 0)
+				curPlayerDirection = DIRECTION::LEFTUP;
+			else if (m_nSpeedY > 0)
+				curPlayerDirection = DIRECTION::LEFTDOWN;
 		}
 		else if (m_nSpeedX > 0)
 		{
-			if (m_nSpeedY == 0)				//right
-				curPlayerDistanceState = DISTANCE_TYPE::RIGHT;
-			else if (m_nSpeedY < 0)		//rightup
-				curPlayerDistanceState = DISTANCE_TYPE::RIGHTUP;
-			else if (m_nSpeedY > 0)		//rightdown
-				curPlayerDistanceState = DISTANCE_TYPE::RIGHTDOWN;
+			if (m_nSpeedY == 0)
+				curPlayerDirection = DIRECTION::RIGHT;
+			else if (m_nSpeedY < 0)
+				curPlayerDirection = DIRECTION::RIGHTUP;
+			else if (m_nSpeedY > 0)
+				curPlayerDirection = DIRECTION::RIGHTDOWN;
 		}
 
-		if (curPlayerActionState == 4)
+		if (curPlayerAction == 4)
 		{
 			if (attackDirection.y < 0)
 			{
 				if ((attackDirection.x > -0.3f) && (attackDirection.x < 0.3f))
-					curPlayerDistanceState = DISTANCE_TYPE::UP;
+					curPlayerDirection = DIRECTION::UP;
 				else if (attackDirection.x < -0.3f)
-					curPlayerDistanceState = DISTANCE_TYPE::LEFTUP;
+					curPlayerDirection = DIRECTION::LEFTUP;
 				else if (attackDirection.x > 0.3f)
-					curPlayerDistanceState = DISTANCE_TYPE::RIGHTUP;
+					curPlayerDirection = DIRECTION::RIGHTUP;
 			}
 			else
 			{
 				if ((attackDirection.x > -0.3f) && (attackDirection.x < 0.3f))
-					curPlayerDistanceState = DISTANCE_TYPE::DOWN;
+					curPlayerDirection = DIRECTION::DOWN;
 				else if (attackDirection.x < -0.3f)
-					curPlayerDistanceState = DISTANCE_TYPE::LEFTDOWN;
+					curPlayerDirection = DIRECTION::LEFTDOWN;
 				else if (attackDirection.x > 0.3f)
-					curPlayerDistanceState = DISTANCE_TYPE::RIGHTDOWN;
+					curPlayerDirection = DIRECTION::RIGHTDOWN;
 			}
 			if (attackDirection.x < 0)
 			{
 				if ((attackDirection.y > -0.3f) && (attackDirection.y < 0.3f))
-					curPlayerDistanceState = DISTANCE_TYPE::LEFT;
+					curPlayerDirection = DIRECTION::LEFT;
 			}
 			else
 			{
 				if ((attackDirection.y > -0.3f) && (attackDirection.y < 0.3f))
-					curPlayerDistanceState = DISTANCE_TYPE::RIGHT;
+					curPlayerDirection = DIRECTION::RIGHT;
 			}
 		}
 
+		m_pCurSprite = !(curPlayerAction == ACTION::ROLL) ? m_pWalkSprite->GetSprite(curPlayerDirection) : m_pRollSprite->GetSprite(curPlayerDirection);
+		m_pCurBowSprite = !(curPlayerAction == ACTION::ROLL) ? m_pBowWalkSprite->GetSprite(curPlayerDirection) : m_pBow_RollSprite->GetSprite(curPlayerDirection);
 
-		switch (curPlayerDistanceState)
-		{
-		case DISTANCE_TYPE::LEFT:
-			m_pCurSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pWalk_LeftSprite : m_pRoll_LeftSprite;
-			m_pCurBowSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pBow_WalkSprite->GetLeft() : m_pBow_RollSprite->GetLeft();
-			if (curPlayerActionState == ACTION_TYPE::ATTACK)
-				m_pCurBowSprite = m_pBow_AttackSprite->GetLeft();
-			break;
-		case DISTANCE_TYPE::RIGHT:
-			m_pCurSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pWalk_RightSprite : m_pRoll_RightSprite;
-			m_pCurBowSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pBow_WalkSprite->GetRight() : m_pBow_RollSprite->GetRight();
-			if (curPlayerActionState == ACTION_TYPE::ATTACK)
-				m_pCurBowSprite = m_pBow_AttackSprite->GetRight();
-			break;
-		case DISTANCE_TYPE::UP:
-			m_pCurSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pWalk_UpSprite : m_pRoll_UpSprite;
-			m_pCurBowSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pBow_WalkSprite->GetUp() : m_pBow_RollSprite->GetUp();
-			if (curPlayerActionState == ACTION_TYPE::ATTACK)
-				m_pCurBowSprite = m_pBow_AttackSprite->GetUp();
-			break;
-		case DISTANCE_TYPE::DOWN:
-			m_pCurSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pWalk_DownSprite : m_pRoll_DownSprite;
-			m_pCurBowSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pBow_WalkSprite->GetDown() : m_pBow_RollSprite->GetDown();
-			if (curPlayerActionState == ACTION_TYPE::ATTACK)
-				m_pCurBowSprite = m_pBow_AttackSprite->GetDown();
-			break;
-		case DISTANCE_TYPE::LEFTUP:
-			m_pCurSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pWalk_LeftUpSprite : m_pRoll_LeftUpSprite;
-			m_pCurBowSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pBow_WalkSprite->GetLeftUp() : m_pBow_RollSprite->GetLeftUp();
-			if (curPlayerActionState == ACTION_TYPE::ATTACK)
-				m_pCurBowSprite = m_pBow_AttackSprite->GetLeftUp();
-			break;
-		case DISTANCE_TYPE::RIGHTUP:
-			m_pCurSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pWalk_RightUpSprite : m_pRoll_RightUpSprite;
-			m_pCurBowSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pBow_WalkSprite->GetRightUp() : m_pBow_RollSprite->GetRightUp();
-			if (curPlayerActionState == ACTION_TYPE::ATTACK)
-				m_pCurBowSprite = m_pBow_AttackSprite->GetRightUp();
-			break;
-		case DISTANCE_TYPE::LEFTDOWN:
-			m_pCurSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pWalk_LeftDownSprite : m_pRoll_LeftDownSprite;
-			m_pCurBowSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pBow_WalkSprite->GetLeftDown() : m_pBow_RollSprite->GetLeftDown();
-			if (curPlayerActionState == ACTION_TYPE::ATTACK)
-				m_pCurBowSprite = m_pBow_AttackSprite->GetLeftDown();
-			break;
-		case DISTANCE_TYPE::RIGHTDOWN:
-			m_pCurSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pWalk_RightDownSprite : m_pRoll_RightDownSprite;
-			m_pCurBowSprite = !(curPlayerActionState == ACTION_TYPE::ROLL) ? m_pBow_WalkSprite->GetRightDown() : m_pBow_RollSprite->GetRightDown();
-			if (curPlayerActionState == ACTION_TYPE::ATTACK)
-				m_pCurBowSprite = m_pBow_AttackSprite->GetRightDown();
-			break;
-		}
+		if (curPlayerAction == ACTION::ATTACK)
+			m_pCurBowSprite = m_pBow_AttackSprite->GetSprite(curPlayerDirection);
 	}
 
-	SetHitRect((curPlayerActionState != ACTION_TYPE::ROLL) ? walkHitRect[(int)curPlayerDistanceState-1] : rollHitRect[(int)curPlayerDistanceState-1][m_nCurrentFrame]);
+	SetHitRect((curPlayerAction != ACTION::ROLL) ? walkHitRect[(int)curPlayerDirection-1] : rollHitRect[(int)curPlayerDirection-1][m_nCurrentFrame]);
 
-	if (curPlayerActionState == ACTION_TYPE::FAINT)
+	if (curPlayerAction == ACTION::FAINT)
 	{
-		m_pCurSprite = m_pDeadSprite->GetRight();
+		m_pCurSprite = m_pDeadSprite->GetSprite(DIRECTION::RIGHT);
 	}
 
-	if (curPlayerActionState == ACTION_TYPE::DEAD)
+	if (curPlayerAction == ACTION::DEAD)
 	{
-		switch (curPlayerDistanceState)
-		{
-		case DISTANCE_TYPE::LEFT:
-			m_pCurSprite = m_pDeadSprite->GetLeft();
-			break;
-		case DISTANCE_TYPE::RIGHT:
-			m_pCurSprite = m_pDeadSprite->GetRight();
-			break;
-		case DISTANCE_TYPE::UP:
-			m_pCurSprite = m_pDeadSprite->GetUp();
-			break;
-		case DISTANCE_TYPE::DOWN:
-			m_pCurSprite = m_pDeadSprite->GetDown();
-			break;
-		case DISTANCE_TYPE::LEFTUP:
-			m_pCurSprite = m_pDeadSprite->GetLeftUp();
-			break;
-		case DISTANCE_TYPE::RIGHTUP:
-			m_pCurSprite = m_pDeadSprite->GetRightUp();
-			break;
-		case DISTANCE_TYPE::LEFTDOWN:
-			m_pCurSprite = m_pDeadSprite->GetLeftDown();
-			break;
-		case DISTANCE_TYPE::RIGHTDOWN:
-			m_pCurSprite = m_pDeadSprite->GetRightDown();
-			break;
-		}
+		m_pCurSprite = m_pDeadSprite->GetSprite(curPlayerDirection);
 	}
 
 	if(m_bIsSkill)
@@ -885,7 +808,7 @@ void CPlayer::MoveANDCheckState()
 		m_pOldSprite = m_pCurSprite;
 		m_pOldBowSprite = m_pCurBowSprite;
 		CGObject::SetSprite(m_pCurSprite, m_pCurBowSprite);
-		if (curPlayerActionState == ACTION_TYPE::ROLL)
+		if (curPlayerAction == ACTION::ROLL)
 		{
 			m_bIsRoll = true;
 			//curBossActionState = (ACTION_STATE)3;
@@ -897,7 +820,7 @@ void CPlayer::MoveInit()
 {
 	m_nSpeedX = 0;
 	m_nSpeedY = 0;
-	if (curPlayerActionState != ACTION_TYPE::ROLL)
+	if (curPlayerAction != ACTION::ROLL)
 	{
 		m_nMoveSpeedFold = 2;
 		m_nFrameInterval = 140;
