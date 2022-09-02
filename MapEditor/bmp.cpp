@@ -1,43 +1,43 @@
-#include <Windows.h>
+ï»¿#include <Windows.h>
 #include <windowsx.h>
-#include "bmp.h"
-#include "define.h"
+#include "Bmp.h"
 
 extern bool g_bIsFirst;
 
-CBMP::CBMP()			//¸â¹öº¯¼ö¸¦ ÃÊ±âÈ­ÇØÁØ´Ù
+Bmp::Bmp() //ë©¤ë²„ë³€ìˆ˜ë¥¼ ì´ˆê¸°í™”í•´ì¤€ë‹¤
 {
 	m_pBuffer = NULL;
 	m_nWidth = 0;
 	m_nHeight = 0;
 }
-CBMP::~CBMP()
+
+Bmp::~Bmp()
 {
-	if (m_pBuffer)				//¹öÆÛ°¡ ÀÖ´Ù¸é
-		delete[] m_pBuffer;		//¹öÆÛ¸¦ »èÁ¦½ÃÄÑÁØ´Ù
+	if (m_pBuffer) //ë²„í¼ê°€ ìˆë‹¤ë©´
+		delete[] m_pBuffer; //ë²„í¼ë¥¼ ì‚­ì œì‹œì¼œì¤€ë‹¤
 }
 
-int CBMP::GetHeight()			//³ôÀÌ¸¦ °¡Á®¿ÍÁØ´Ù
+int Bmp::GetHeight() //ë†’ì´ë¥¼ ê°€ì ¸ì™€ì¤€ë‹¤
 {
 	return (m_nHeight);
 }
 
-unsigned char* CBMP::GetBMPBuffer()
+unsigned char* Bmp::GetBMPBuffer()
 {
 	return m_pBuffer;
 }
 
-int CBMP::GetWidth()			//°¡·ÎÀÇ ±æÀÌ¸¦ °¡Á®¿ÍÁØ´Ù
+int Bmp::GetWidth() //ê°€ë¡œì˜ ê¸¸ì´ë¥¼ ê°€ì ¸ì™€ì¤€ë‹¤
 {
 	return (m_nWidth);
 }
 
-bool CBMP::LoadBMPFile(char *filename)		//ºñÆ®¸ÊÀÇ Á¤º¸¸¦ ºÒ·¯¿Í ¹öÆÛ¿¡ »ö»óÁ¤º¸¸¦ ´ã¾ÆÁÖ°í 24bitÀÌ¹ÌÁö¸¦ 32bitÀÌ¹ÌÁö·Î ¹Ù²ãÁÜ
+bool Bmp::LoadBMPFile(char* filename) //ë¹„íŠ¸ë§µì˜ ì •ë³´ë¥¼ ë¶ˆëŸ¬ì™€ ë²„í¼ì— ìƒ‰ìƒì •ë³´ë¥¼ ë‹´ì•„ì£¼ê³  24bitì´ë¯¸ì§€ë¥¼ 32bitì´ë¯¸ì§€ë¡œ ë°”ê¿”ì¤Œ
 {
 	HANDLE hfile;
 	DWORD actualRead;
 	hfile = CreateFile(TEXT(filename), GENERIC_READ, FILE_SHARE_READ, (LPSECURITY_ATTRIBUTES)NULL, OPEN_EXISTING,
-		FILE_ATTRIBUTE_NORMAL, (HANDLE)NULL);
+	                   FILE_ATTRIBUTE_NORMAL, (HANDLE)NULL);
 
 	if (hfile == INVALID_HANDLE_VALUE)
 	{
@@ -45,70 +45,70 @@ bool CBMP::LoadBMPFile(char *filename)		//ºñÆ®¸ÊÀÇ Á¤º¸¸¦ ºÒ·¯¿Í ¹öÆÛ¿¡ »ö»óÁ¤º¸
 		return false;
 	}
 
-	BITMAPFILEHEADER bmpfilehead;		//ºñÆ®¸ÊÆÄÀÏ ÀÚÃ¼ÀÇ Á¤º¸¸¦ ÀúÀåÇÒ º¯¼ö ¼±¾ğ
-	if (!ReadFile(hfile, &bmpfilehead, sizeof(bmpfilehead), &actualRead, NULL))		//ºñÆ®¸ÊÆÄÀÏ ÀÚÃ¼ÀÇ Á¤º¸¸¦ ÀĞÀ»¼ö ¾ø´Ù¸é
+	BITMAPFILEHEADER bmpfilehead; //ë¹„íŠ¸ë§µíŒŒì¼ ìì²´ì˜ ì •ë³´ë¥¼ ì €ì¥í•  ë³€ìˆ˜ ì„ ì–¸
+	if (!ReadFile(hfile, &bmpfilehead, sizeof(bmpfilehead), &actualRead, NULL)) //ë¹„íŠ¸ë§µíŒŒì¼ ìì²´ì˜ ì •ë³´ë¥¼ ì½ì„ìˆ˜ ì—†ë‹¤ë©´
 	{
-		CloseHandle(hfile);		//ÇÚµéÀ» ¹İ³³ÇØÁÖ°í
-		return false;			//false¸¦ ¹İÈ¯ÇØÁØ´Ù
+		CloseHandle(hfile); //í•¸ë“¤ì„ ë°˜ë‚©í•´ì£¼ê³ 
+		return false; //falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
 	}
-	if (bmpfilehead.bfType != 0x4D42)		//ºñÆ®¸ÊÆÄÀÏÀÌ ¾Æ´Ò°æ¿ì
+	if (bmpfilehead.bfType != 0x4D42) //ë¹„íŠ¸ë§µíŒŒì¼ì´ ì•„ë‹ê²½ìš°
 	{
-		CloseHandle(hfile);		//ÇÚµéÀ» ¹İ³³ÇØÁÖ°í
-		return false;			//false¸¦ ¹İÈ¯ÇØÁØ´Ù
-	}
-
-	BITMAPINFOHEADER bmpinfohead;		//ºñÆ®¸Ê¿µ»ó ÀÚÃ¼ÀÇ Á¤º¸¸¦ ÀúÀåÇÒ º¯¼ö ¼±¾ğ
-	if (!ReadFile(hfile, &bmpinfohead, sizeof(bmpinfohead), &actualRead, NULL))		//ºñÆ®¸Ê¿µ»ó ÀÚÃ¼ÀÇ Á¤º¸¸¦ ÀĞÀ»¼ö ¾ø´Ù¸é
-	{
-		CloseHandle(hfile);		//ÇÚµéÀ» ¹İ³³ÇØÁÖ°í
-		return false;			//false¸¦ ¹İÈ¯ÇØÁØ´Ù
+		CloseHandle(hfile); //í•¸ë“¤ì„ ë°˜ë‚©í•´ì£¼ê³ 
+		return false; //falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
 	}
 
-	if (bmpinfohead.biBitCount != 24)		//ÇÈ¼¿´ç ºñÆ®¼ö°¡ 24°³°¡ ¾Æ´Ï¸é 
+	BITMAPINFOHEADER bmpinfohead; //ë¹„íŠ¸ë§µì˜ìƒ ìì²´ì˜ ì •ë³´ë¥¼ ì €ì¥í•  ë³€ìˆ˜ ì„ ì–¸
+	if (!ReadFile(hfile, &bmpinfohead, sizeof(bmpinfohead), &actualRead, NULL)) //ë¹„íŠ¸ë§µì˜ìƒ ìì²´ì˜ ì •ë³´ë¥¼ ì½ì„ìˆ˜ ì—†ë‹¤ë©´
 	{
-		CloseHandle(hfile);		//ÇÚµéÀ» ¹İ³³ÇØÁÖ°í
-		return false;			//false¸¦ ¹İÈ¯ÇØÁØ´Ù
+		CloseHandle(hfile); //í•¸ë“¤ì„ ë°˜ë‚©í•´ì£¼ê³ 
+		return false; //falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
 	}
 
-	int nHeight = bmpinfohead.biHeight;		//ºñÆ®¸ÊÀÇ ³ôÀÌ¸¦ ºÒ·¯¿Í nHeight¿¡ ÃÊ±âÈ­
-	bool bBottomUp;			//ÀÌ¹ÌÁö°¡ µÚÁı¾îÁ®ÀÖ´ÂÁö È®ÀÎÇÏ´Â boolÇü º¯¼ö, true¸é ÀÌ¹ÌÁö°¡ µÚÁı¾îÁ®ÀÖÀ½
-
-	if (nHeight > 0)		//ºñÆ®¸ÊÀÇ ³ôÀÌ°¡ 0º¸´Ù Å©¸é
+	if (bmpinfohead.biBitCount != 24) //í”½ì…€ë‹¹ ë¹„íŠ¸ìˆ˜ê°€ 24ê°œê°€ ì•„ë‹ˆë©´ 
 	{
-		bBottomUp = true;	//ÀÌ¹ÌÁö°¡ µÚÁı¾îÁ®ÀÖÀ½
+		CloseHandle(hfile); //í•¸ë“¤ì„ ë°˜ë‚©í•´ì£¼ê³ 
+		return false; //falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
 	}
-	else					//ºñÆ®¸ÊÀÇ ³ôÀÌ°¡ 0º¸´Ù Å©Áö¾ÊÀ»°æ¿ì
+
+	int nHeight = bmpinfohead.biHeight; //ë¹„íŠ¸ë§µì˜ ë†’ì´ë¥¼ ë¶ˆëŸ¬ì™€ nHeightì— ì´ˆê¸°í™”
+	bool bBottomUp; //ì´ë¯¸ì§€ê°€ ë’¤ì§‘ì–´ì ¸ìˆëŠ”ì§€ í™•ì¸í•˜ëŠ” boolí˜• ë³€ìˆ˜, trueë©´ ì´ë¯¸ì§€ê°€ ë’¤ì§‘ì–´ì ¸ìˆìŒ
+
+	if (nHeight > 0) //ë¹„íŠ¸ë§µì˜ ë†’ì´ê°€ 0ë³´ë‹¤ í¬ë©´
 	{
-		bBottomUp = false;		//ÀÌ¹ÌÁö°¡ Á¤»óÀûÀ¸·Î ÀÖÀ½
-		nHeight = -nHeight;		//³ôÀÌ¸¦ ¾ç¼ö·Î ¹Ù²ãÁÜ
+		bBottomUp = true; //ì´ë¯¸ì§€ê°€ ë’¤ì§‘ì–´ì ¸ìˆìŒ
+	}
+	else //ë¹„íŠ¸ë§µì˜ ë†’ì´ê°€ 0ë³´ë‹¤ í¬ì§€ì•Šì„ê²½ìš°
+	{
+		bBottomUp = false; //ì´ë¯¸ì§€ê°€ ì •ìƒì ìœ¼ë¡œ ìˆìŒ
+		nHeight = -nHeight; //ë†’ì´ë¥¼ ì–‘ìˆ˜ë¡œ ë°”ê¿”ì¤Œ
 	}
 
 	m_nHeight = nHeight;
 	m_nWidth = bmpinfohead.biWidth;
 
-	if (m_pBuffer)				//¹öÆÛ°¡ ÀÖ´Ù¸é
-		delete[] m_pBuffer;		//¹öÆÛ¸¦ »èÁ¦ÇØÁØ´Ù
+	if (m_pBuffer) //ë²„í¼ê°€ ìˆë‹¤ë©´
+		delete[] m_pBuffer; //ë²„í¼ë¥¼ ì‚­ì œí•´ì¤€ë‹¤
 
-	m_pBuffer = new unsigned char[m_nHeight *m_nWidth * 4];		//»õ·Î¿î ¹öÆÛ¸¦ 32ºñÆ®·Î Ç¥ÇöÇØÁÖ±âÀ§ÇØ¼­ ÃÑÇÈ¼¿°¹¼ö*4¸¦ ÇØÁØ´Ù
+	m_pBuffer = new unsigned char[m_nHeight * m_nWidth * 4]; //ìƒˆë¡œìš´ ë²„í¼ë¥¼ 32ë¹„íŠ¸ë¡œ í‘œí˜„í•´ì£¼ê¸°ìœ„í•´ì„œ ì´í”½ì…€ê°¯ìˆ˜*4ë¥¼ í•´ì¤€ë‹¤
 
-	struct RBGstruct			//ºñÆ®¸ÊÀº RGBÀÇ ¼ø¼­°¡ ¾Æ´Ñ BGR¼ø¼­·Î ÀúÀåµÊ
+	struct RBGstruct //ë¹„íŠ¸ë§µì€ RGBì˜ ìˆœì„œê°€ ì•„ë‹Œ BGRìˆœì„œë¡œ ì €ì¥ë¨
 	{
 		unsigned char B;
 		unsigned char G;
 		unsigned char R;
 	};
 
-	//struct RBGstruct rgb24;		//ÇÈ¼¿»ö»ó Á¤º¸ ´ãÀ» º¯¼ö ¼±¾ğ
-	struct RBGstruct *rgb24 = new RBGstruct[m_nWidth];
+	//struct RBGstruct rgb24;		//í”½ì…€ìƒ‰ìƒ ì •ë³´ ë‹´ì„ ë³€ìˆ˜ ì„ ì–¸
+	struct RBGstruct* rgb24 = new RBGstruct[m_nWidth];
 
 
-	int nStoredLine = (m_nWidth * 3 + 3)&~3;
+	int nStoredLine = (m_nWidth * 3 + 3) & ~3;
 	unsigned char temp[4];
 	int nRemainder = nStoredLine - (m_nWidth * 3);
 
-	int nDestY, nDeltaY;		//ÇöÀç ³ôÀÌ,ÀÌ¹ÌÁö°¡ µÚÁıÈû »óÅÂ¿¡µû¶ó ´ÙÀ½¶óÀÎÀ¸·Î ¹Ù²Ü¶§ ³ôÀÌ¿¡ ´õÇØÁÖ´Â°ª
+	int nDestY, nDeltaY; //í˜„ì¬ ë†’ì´,ì´ë¯¸ì§€ê°€ ë’¤ì§‘í˜ ìƒíƒœì—ë”°ë¼ ë‹¤ìŒë¼ì¸ìœ¼ë¡œ ë°”ê¿€ë•Œ ë†’ì´ì— ë”í•´ì£¼ëŠ”ê°’
 
-	if (bBottomUp)				//ÀÌ¹ÌÁö°¡ µÚÁı¾îÁ®ÀÖÀ¸¸é
+	if (bBottomUp) //ì´ë¯¸ì§€ê°€ ë’¤ì§‘ì–´ì ¸ìˆìœ¼ë©´
 	{
 		nDestY = nHeight - 1;
 		nDeltaY = -1;
@@ -119,21 +119,22 @@ bool CBMP::LoadBMPFile(char *filename)		//ºñÆ®¸ÊÀÇ Á¤º¸¸¦ ºÒ·¯¿Í ¹öÆÛ¿¡ »ö»óÁ¤º¸
 		nDeltaY = 1;
 	}
 
-	for (int y = 0; y < nHeight; y++)				//ÀÌ¹ÌÁöÀÇ ³ôÀÌÇÈ¼¿¼ö¸¸Å­
+	for (int y = 0; y < nHeight; y++) //ì´ë¯¸ì§€ì˜ ë†’ì´í”½ì…€ìˆ˜ë§Œí¼
 	{
-		if (!ReadFile(hfile, rgb24, 3 * m_nWidth, &actualRead, NULL))		//ÆÄÀÏ¿¡ 3¹ÙÀÌÆ® Å©±â¸¸Å­ ÀĞ¾î¿Í¼­ rgb24¿¡ ÀúÀå½ÃÄÑÁÜ
-		{														//ÆÄÀÏÀ» ¸ø ÀĞ¾î¿Ô´Ù¸é
-			CloseHandle(hfile);									//ÇÚµéÀ» ¹İ³³ÇØÁÖ°í
-			delete[] m_pBuffer;									//¹öÆÛ¸¦ »èÁ¦ÇØÁÖ°í
-			return false;										//false¸¦ ¹İÈ¯ÇØÁØ´Ù
-		}
-		for (int x = 0; x < m_nWidth; x++)			//ÀÌ¹ÌÁöÀÇ °¡·ÎÇÈ¼¿¼ö¸¸Å­
+		if (!ReadFile(hfile, rgb24, 3 * m_nWidth, &actualRead, NULL)) //íŒŒì¼ì— 3ë°”ì´íŠ¸ í¬ê¸°ë§Œí¼ ì½ì–´ì™€ì„œ rgb24ì— ì €ì¥ì‹œì¼œì¤Œ
 		{
-			CopyMemory(m_pBuffer + (x << 2) + nDestY*(m_nWidth << 2), rgb24+x, 3);		//°¢ ÇÈ¼¿¸¶´Ù 4¹ÙÀÌÆ®¾¿ ³ª´²Á®ÀÖ°í 3¹ÙÀÌÆ®´Â ÇÈ¼¿ÀÇ rgb°ª
-			*(m_pBuffer + (x << 2) + nDestY*(m_nWidth << 2) + 3) = 0;					//¸¶Áö¸· 1¹ÙÀÌÆ®´Â ¾ËÆÄ°ªÀ» ÁÖ¾î¼­ Åõ¸íµµ¸¦ Á¶Àı
+			//íŒŒì¼ì„ ëª» ì½ì–´ì™”ë‹¤ë©´
+			CloseHandle(hfile); //í•¸ë“¤ì„ ë°˜ë‚©í•´ì£¼ê³ 
+			delete[] m_pBuffer; //ë²„í¼ë¥¼ ì‚­ì œí•´ì£¼ê³ 
+			return false; //falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
+		}
+		for (int x = 0; x < m_nWidth; x++) //ì´ë¯¸ì§€ì˜ ê°€ë¡œí”½ì…€ìˆ˜ë§Œí¼
+		{
+			CopyMemory(m_pBuffer + (x << 2) + nDestY*(m_nWidth << 2), rgb24+x, 3); //ê° í”½ì…€ë§ˆë‹¤ 4ë°”ì´íŠ¸ì”© ë‚˜ëˆ ì ¸ìˆê³  3ë°”ì´íŠ¸ëŠ” í”½ì…€ì˜ rgbê°’
+			*(m_pBuffer + (x << 2) + nDestY * (m_nWidth << 2) + 3) = 0; //ë§ˆì§€ë§‰ 1ë°”ì´íŠ¸ëŠ” ì•ŒíŒŒê°’ì„ ì£¼ì–´ì„œ íˆ¬ëª…ë„ë¥¼ ì¡°ì ˆ
 		}
 
-		nDestY += nDeltaY;			//ÇöÀç¶óÀÎÀ» ´ÙÀ½¶óÀÎÀ¸·Î ¹Ù²ãÁÜ
+		nDestY += nDeltaY; //í˜„ì¬ë¼ì¸ì„ ë‹¤ìŒë¼ì¸ìœ¼ë¡œ ë°”ê¿”ì¤Œ
 
 		if (!ReadFile(hfile, temp, nRemainder, &actualRead, NULL))
 		{
@@ -151,71 +152,71 @@ bool CBMP::LoadBMPFile(char *filename)		//ºñÆ®¸ÊÀÇ Á¤º¸¸¦ ºÒ·¯¿Í ¹öÆÛ¿¡ »ö»óÁ¤º¸
 	return true;
 }
 
-bool CBMP::CopyBufferToSurface(LPDIRECTDRAWSURFACE7 lpSurface)		//¹öÆÛ¿¡¼­ Ç¥¸éÀ¸·Î º¹»çÇÏ´Â ÇÔ¼ö
+bool Bmp::CopyBufferToSurface(LPDIRECTDRAWSURFACE7 lpSurface) //ë²„í¼ì—ì„œ í‘œë©´ìœ¼ë¡œ ë³µì‚¬í•˜ëŠ” í•¨ìˆ˜
 {
-	if (!m_pBuffer)			//¹öÆÛ°¡ ¾øÀ¸¸é
-		return false;		//false¸¦ ¹İÈ¯
+	if (!m_pBuffer) //ë²„í¼ê°€ ì—†ìœ¼ë©´
+		return false; //falseë¥¼ ë°˜í™˜
 
-	DDSURFACEDESC2 ddsd;					//Ç¥¸éÀÇ Á¤º¸¸¦ È®ÀÎÇÒ¼ö ÀÖ´Â º¯¼ö¸¦ ¼±¾ğ
-	ZeroMemory(&ddsd, sizeof(ddsd));		//ddsdÁÖ¼Ò¿¡¼­ ddsdÅ©±â¸¸Å­ ¸Ş¸ğ¸®¿µ¿ªÀ» 0À¸·Î Ã¤¿öÁÜ
-	ddsd.dwSize = sizeof(ddsd);				//dwSize¸¦ ddsdÅ©±â¸¸Å­ ÃÊ±âÈ­ ÇØÁØ´Ù
+	DDSURFACEDESC2 ddsd; //í‘œë©´ì˜ ì •ë³´ë¥¼ í™•ì¸í• ìˆ˜ ìˆëŠ” ë³€ìˆ˜ë¥¼ ì„ ì–¸
+	ZeroMemory(&ddsd, sizeof(ddsd)); //ddsdì£¼ì†Œì—ì„œ ddsdí¬ê¸°ë§Œí¼ ë©”ëª¨ë¦¬ì˜ì—­ì„ 0ìœ¼ë¡œ ì±„ì›Œì¤Œ
+	ddsd.dwSize = sizeof(ddsd); //dwSizeë¥¼ ddsdí¬ê¸°ë§Œí¼ ì´ˆê¸°í™” í•´ì¤€ë‹¤
 
-	if (FAILED(lpSurface->Lock(NULL, &ddsd, DDLOCK_WAIT, NULL)))		//Ç¥¸é¿¡ Á¢±ÙÇÏ¿© ÀĞ°Å³ª ¾²´Â ÀÛ¾÷À» ÇÏ±â À§ÇØ¼­ Ç¥¸éÀº Àá±Ù´Ù
-		return false;						//¸¸¾à Ç¥¸éÀ» Àá±İÇÏ´Âµ¥ ½ÇÆĞÇÒ°æ¿ì false¸¦ ¹İÈ¯ÇØÁØ´Ù
+	if (FAILED(lpSurface->Lock(NULL, &ddsd, DDLOCK_WAIT, NULL))) //í‘œë©´ì— ì ‘ê·¼í•˜ì—¬ ì½ê±°ë‚˜ ì“°ëŠ” ì‘ì—…ì„ í•˜ê¸° ìœ„í•´ì„œ í‘œë©´ì€ ì ê·¼ë‹¤
+		return false; //ë§Œì•½ í‘œë©´ì„ ì ê¸ˆí•˜ëŠ”ë° ì‹¤íŒ¨í• ê²½ìš° falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
 
-	unsigned char *pDest, *pSrc;			//Ç¥¸éÀÇÁÖ¼Ò¸¦ ´ãÀ»¼ö ÀÖ´Â º¯¼ö, ¹öÆÛÀÇ ÁÖ¼Ò¸¦ ´ãÀ»¼ö ÀÖ´Â º¯¼ö
+	unsigned char *pDest, *pSrc; //í‘œë©´ì˜ì£¼ì†Œë¥¼ ë‹´ì„ìˆ˜ ìˆëŠ” ë³€ìˆ˜, ë²„í¼ì˜ ì£¼ì†Œë¥¼ ë‹´ì„ìˆ˜ ìˆëŠ” ë³€ìˆ˜
 
-	pDest = (unsigned char*)ddsd.lpSurface;		//Ç¥¸éÀÇ ÁÖ¼Ò°ªÀ» ºÒ·¯¿È
-	pSrc = m_pBuffer;						//¹öÆÛÀÇ ÁÖ¼Ò¸¦ ºÒ·¯¿È
+	pDest = (unsigned char*)ddsd.lpSurface; //í‘œë©´ì˜ ì£¼ì†Œê°’ì„ ë¶ˆëŸ¬ì˜´
+	pSrc = m_pBuffer; //ë²„í¼ì˜ ì£¼ì†Œë¥¼ ë¶ˆëŸ¬ì˜´
 
-	for (int y = 0; y < m_nHeight; y++)			//³ôÀÌ¸¸Å­ for¹®À» µ¹¸°´Ù
+	for (int y = 0; y < m_nHeight; y++) //ë†’ì´ë§Œí¼ forë¬¸ì„ ëŒë¦°ë‹¤
 	{
-		CopyMemory(pDest, pSrc, m_nWidth<<2);	//Ç¥¸é¿¡´Ù°¡ pSrc¿¡¼­ °¡·Î±æÀÌ * 4ÇÑ Å©±â¸¸Å­ ¸Ş¸ğ¸®¸¦ º¹»çÇÑ´Ù
-		pDest += ddsd.lPitch;					//pDest ½ÃÀÛÁÖ¼Ò¸¦ ´ÙÀ½¶óÀÎ½ÃÀÛÁÖ¼Ò·Î ¹Ù²Û´Ù
-		pSrc += (m_nWidth << 2);				//pSrc ½ÃÀÛÁÖ¼Ò¸¦ ´ÙÀ½¶óÀÎ½ÃÀÛÁÖ¼Ò·Î ¹Ù²Û´Ù
+		CopyMemory(pDest, pSrc, m_nWidth<<2); //í‘œë©´ì—ë‹¤ê°€ pSrcì—ì„œ ê°€ë¡œê¸¸ì´ * 4í•œ í¬ê¸°ë§Œí¼ ë©”ëª¨ë¦¬ë¥¼ ë³µì‚¬í•œë‹¤
+		pDest += ddsd.lPitch; //pDest ì‹œì‘ì£¼ì†Œë¥¼ ë‹¤ìŒë¼ì¸ì‹œì‘ì£¼ì†Œë¡œ ë°”ê¾¼ë‹¤
+		pSrc += (m_nWidth << 2); //pSrc ì‹œì‘ì£¼ì†Œë¥¼ ë‹¤ìŒë¼ì¸ì‹œì‘ì£¼ì†Œë¡œ ë°”ê¾¼ë‹¤
 	}
 
-	lpSurface->Unlock(NULL);			//Àá±İÀ» ÇØÃ¼ÇØÁØ´Ù
+	lpSurface->Unlock(NULL); //ì ê¸ˆì„ í•´ì²´í•´ì¤€ë‹¤
 
 	return true;
 }
 
-bool CBMP::CopyBufferToSurface(LPDIRECTDRAWSURFACE7 lpSurface, unsigned char* _buffer)		//¹öÆÛ¿¡¼­ Ç¥¸éÀ¸·Î º¹»çÇÏ´Â ÇÔ¼ö
+bool Bmp::CopyBufferToSurface(LPDIRECTDRAWSURFACE7 lpSurface, unsigned char* _buffer) //ë²„í¼ì—ì„œ í‘œë©´ìœ¼ë¡œ ë³µì‚¬í•˜ëŠ” í•¨ìˆ˜
 {
-	if (!_buffer)			//¹öÆÛ°¡ ¾øÀ¸¸é
-		return false;		//false¸¦ ¹İÈ¯
+	if (!_buffer) //ë²„í¼ê°€ ì—†ìœ¼ë©´
+		return false; //falseë¥¼ ë°˜í™˜
 
-	DDSURFACEDESC2 ddsd;					//Ç¥¸éÀÇ Á¤º¸¸¦ È®ÀÎÇÒ¼ö ÀÖ´Â º¯¼ö¸¦ ¼±¾ğ
-	ZeroMemory(&ddsd, sizeof(ddsd));		//ddsdÁÖ¼Ò¿¡¼­ ddsdÅ©±â¸¸Å­ ¸Ş¸ğ¸®¿µ¿ªÀ» 0À¸·Î Ã¤¿öÁÜ
-	ddsd.dwSize = sizeof(ddsd);				//dwSize¸¦ ddsdÅ©±â¸¸Å­ ÃÊ±âÈ­ ÇØÁØ´Ù
+	DDSURFACEDESC2 ddsd; //í‘œë©´ì˜ ì •ë³´ë¥¼ í™•ì¸í• ìˆ˜ ìˆëŠ” ë³€ìˆ˜ë¥¼ ì„ ì–¸
+	ZeroMemory(&ddsd, sizeof(ddsd)); //ddsdì£¼ì†Œì—ì„œ ddsdí¬ê¸°ë§Œí¼ ë©”ëª¨ë¦¬ì˜ì—­ì„ 0ìœ¼ë¡œ ì±„ì›Œì¤Œ
+	ddsd.dwSize = sizeof(ddsd); //dwSizeë¥¼ ddsdí¬ê¸°ë§Œí¼ ì´ˆê¸°í™” í•´ì¤€ë‹¤
 
-	if (FAILED(lpSurface->Lock(NULL, &ddsd, DDLOCK_WAIT, NULL)))		//Ç¥¸é¿¡ Á¢±ÙÇÏ¿© ÀĞ°Å³ª ¾²´Â ÀÛ¾÷À» ÇÏ±â À§ÇØ¼­ Ç¥¸éÀº Àá±Ù´Ù
-		return false;						//¸¸¾à Ç¥¸éÀ» Àá±İÇÏ´Âµ¥ ½ÇÆĞÇÒ°æ¿ì false¸¦ ¹İÈ¯ÇØÁØ´Ù
+	if (FAILED(lpSurface->Lock(NULL, &ddsd, DDLOCK_WAIT, NULL))) //í‘œë©´ì— ì ‘ê·¼í•˜ì—¬ ì½ê±°ë‚˜ ì“°ëŠ” ì‘ì—…ì„ í•˜ê¸° ìœ„í•´ì„œ í‘œë©´ì€ ì ê·¼ë‹¤
+		return false; //ë§Œì•½ í‘œë©´ì„ ì ê¸ˆí•˜ëŠ”ë° ì‹¤íŒ¨í• ê²½ìš° falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
 
-	unsigned char* pDest, * pSrc;			//Ç¥¸éÀÇÁÖ¼Ò¸¦ ´ãÀ»¼ö ÀÖ´Â º¯¼ö, ¹öÆÛÀÇ ÁÖ¼Ò¸¦ ´ãÀ»¼ö ÀÖ´Â º¯¼ö
+	unsigned char *pDest, *pSrc; //í‘œë©´ì˜ì£¼ì†Œë¥¼ ë‹´ì„ìˆ˜ ìˆëŠ” ë³€ìˆ˜, ë²„í¼ì˜ ì£¼ì†Œë¥¼ ë‹´ì„ìˆ˜ ìˆëŠ” ë³€ìˆ˜
 
-	pDest = (unsigned char*)ddsd.lpSurface;		//Ç¥¸éÀÇ ÁÖ¼Ò°ªÀ» ºÒ·¯¿È
-	pSrc = _buffer;						//¹öÆÛÀÇ ÁÖ¼Ò¸¦ ºÒ·¯¿È
+	pDest = (unsigned char*)ddsd.lpSurface; //í‘œë©´ì˜ ì£¼ì†Œê°’ì„ ë¶ˆëŸ¬ì˜´
+	pSrc = _buffer; //ë²„í¼ì˜ ì£¼ì†Œë¥¼ ë¶ˆëŸ¬ì˜´
 
-	for (int y = 0; y < m_nHeight; y++)			//³ôÀÌ¸¸Å­ for¹®À» µ¹¸°´Ù
+	for (int y = 0; y < m_nHeight; y++) //ë†’ì´ë§Œí¼ forë¬¸ì„ ëŒë¦°ë‹¤
 	{
-		CopyMemory(pDest, pSrc, m_nWidth << 2);	//Ç¥¸é¿¡´Ù°¡ pSrc¿¡¼­ °¡·Î±æÀÌ * 4ÇÑ Å©±â¸¸Å­ ¸Ş¸ğ¸®¸¦ º¹»çÇÑ´Ù
-		pDest += ddsd.lPitch;					//pDest ½ÃÀÛÁÖ¼Ò¸¦ ´ÙÀ½¶óÀÎ½ÃÀÛÁÖ¼Ò·Î ¹Ù²Û´Ù
-		pSrc += (m_nWidth << 2);				//pSrc ½ÃÀÛÁÖ¼Ò¸¦ ´ÙÀ½¶óÀÎ½ÃÀÛÁÖ¼Ò·Î ¹Ù²Û´Ù
+		CopyMemory(pDest, pSrc, m_nWidth << 2); //í‘œë©´ì—ë‹¤ê°€ pSrcì—ì„œ ê°€ë¡œê¸¸ì´ * 4í•œ í¬ê¸°ë§Œí¼ ë©”ëª¨ë¦¬ë¥¼ ë³µì‚¬í•œë‹¤
+		pDest += ddsd.lPitch; //pDest ì‹œì‘ì£¼ì†Œë¥¼ ë‹¤ìŒë¼ì¸ì‹œì‘ì£¼ì†Œë¡œ ë°”ê¾¼ë‹¤
+		pSrc += (m_nWidth << 2); //pSrc ì‹œì‘ì£¼ì†Œë¥¼ ë‹¤ìŒë¼ì¸ì‹œì‘ì£¼ì†Œë¡œ ë°”ê¾¼ë‹¤
 	}
 
-	lpSurface->Unlock(NULL);			//Àá±İÀ» ÇØÃ¼ÇØÁØ´Ù
+	lpSurface->Unlock(NULL); //ì ê¸ˆì„ í•´ì²´í•´ì¤€ë‹¤
 
 	return true;
 }
 
-bool CBMP::SaveWorldBMP(int _x, int _y, unsigned char *buffer, unsigned char *buffer2)
+bool Bmp::SaveWorldBMP(int _x, int _y, unsigned char* buffer, unsigned char* buffer2)
 {
-	char *filename = "image\\map\\bossmap.bmp";
+	char* filename = "image\\map\\bossmap.bmp";
 	HANDLE hfile;
 	DWORD actualRead;
 	hfile = CreateFile(TEXT(filename), GENERIC_READ, FILE_SHARE_READ, (LPSECURITY_ATTRIBUTES)NULL, OPEN_EXISTING,
-		FILE_ATTRIBUTE_NORMAL, (HANDLE)NULL);
+	                   FILE_ATTRIBUTE_NORMAL, (HANDLE)NULL);
 
 	if (hfile == INVALID_HANDLE_VALUE)
 	{
@@ -223,35 +224,35 @@ bool CBMP::SaveWorldBMP(int _x, int _y, unsigned char *buffer, unsigned char *bu
 		return false;
 	}
 
-	BITMAPFILEHEADER bmpfilehead;		//ºñÆ®¸ÊÆÄÀÏ ÀÚÃ¼ÀÇ Á¤º¸¸¦ ÀúÀåÇÒ º¯¼ö ¼±¾ğ
-	if (!ReadFile(hfile, &bmpfilehead, sizeof(bmpfilehead), &actualRead, NULL))		//ºñÆ®¸ÊÆÄÀÏ ÀÚÃ¼ÀÇ Á¤º¸¸¦ ÀĞÀ»¼ö ¾ø´Ù¸é
+	BITMAPFILEHEADER bmpfilehead; //ë¹„íŠ¸ë§µíŒŒì¼ ìì²´ì˜ ì •ë³´ë¥¼ ì €ì¥í•  ë³€ìˆ˜ ì„ ì–¸
+	if (!ReadFile(hfile, &bmpfilehead, sizeof(bmpfilehead), &actualRead, NULL)) //ë¹„íŠ¸ë§µíŒŒì¼ ìì²´ì˜ ì •ë³´ë¥¼ ì½ì„ìˆ˜ ì—†ë‹¤ë©´
 	{
-		CloseHandle(hfile);		//ÇÚµéÀ» ¹İ³³ÇØÁÖ°í
-		return false;			//false¸¦ ¹İÈ¯ÇØÁØ´Ù
+		CloseHandle(hfile); //í•¸ë“¤ì„ ë°˜ë‚©í•´ì£¼ê³ 
+		return false; //falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
 	}
-	if (bmpfilehead.bfType != 0x4D42)		//ºñÆ®¸ÊÆÄÀÏÀÌ ¾Æ´Ò°æ¿ì
+	if (bmpfilehead.bfType != 0x4D42) //ë¹„íŠ¸ë§µíŒŒì¼ì´ ì•„ë‹ê²½ìš°
 	{
-		CloseHandle(hfile);		//ÇÚµéÀ» ¹İ³³ÇØÁÖ°í
-		return false;			//false¸¦ ¹İÈ¯ÇØÁØ´Ù
-	}
-
-	BITMAPINFOHEADER bmpinfohead;		//ºñÆ®¸Ê¿µ»ó ÀÚÃ¼ÀÇ Á¤º¸¸¦ ÀúÀåÇÒ º¯¼ö ¼±¾ğ
-	if (!ReadFile(hfile, &bmpinfohead, sizeof(bmpinfohead), &actualRead, NULL))		//ºñÆ®¸Ê¿µ»ó ÀÚÃ¼ÀÇ Á¤º¸¸¦ ÀĞÀ»¼ö ¾ø´Ù¸é
-	{
-		CloseHandle(hfile);		//ÇÚµéÀ» ¹İ³³ÇØÁÖ°í
-		return false;			//false¸¦ ¹İÈ¯ÇØÁØ´Ù
+		CloseHandle(hfile); //í•¸ë“¤ì„ ë°˜ë‚©í•´ì£¼ê³ 
+		return false; //falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
 	}
 
-	if (bmpinfohead.biBitCount != 24)		//ÇÈ¼¿´ç ºñÆ®¼ö°¡ 24°³°¡ ¾Æ´Ï¸é 
+	BITMAPINFOHEADER bmpinfohead; //ë¹„íŠ¸ë§µì˜ìƒ ìì²´ì˜ ì •ë³´ë¥¼ ì €ì¥í•  ë³€ìˆ˜ ì„ ì–¸
+	if (!ReadFile(hfile, &bmpinfohead, sizeof(bmpinfohead), &actualRead, NULL)) //ë¹„íŠ¸ë§µì˜ìƒ ìì²´ì˜ ì •ë³´ë¥¼ ì½ì„ìˆ˜ ì—†ë‹¤ë©´
 	{
-		CloseHandle(hfile);		//ÇÚµéÀ» ¹İ³³ÇØÁÖ°í
-		return false;			//false¸¦ ¹İÈ¯ÇØÁØ´Ù
+		CloseHandle(hfile); //í•¸ë“¤ì„ ë°˜ë‚©í•´ì£¼ê³ 
+		return false; //falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
 	}
 
-	int nHeight = bmpinfohead.biHeight;		//ºñÆ®¸ÊÀÇ ³ôÀÌ¸¦ ºÒ·¯¿Í nHeight¿¡ ÃÊ±âÈ­
+	if (bmpinfohead.biBitCount != 24) //í”½ì…€ë‹¹ ë¹„íŠ¸ìˆ˜ê°€ 24ê°œê°€ ì•„ë‹ˆë©´ 
+	{
+		CloseHandle(hfile); //í•¸ë“¤ì„ ë°˜ë‚©í•´ì£¼ê³ 
+		return false; //falseë¥¼ ë°˜í™˜í•´ì¤€ë‹¤
+	}
+
+	int nHeight = bmpinfohead.biHeight; //ë¹„íŠ¸ë§µì˜ ë†’ì´ë¥¼ ë¶ˆëŸ¬ì™€ nHeightì— ì´ˆê¸°í™”
 	int nWidth = bmpinfohead.biWidth;
 
-	int nDestY, nDeltaY, nDestY2, nDeltaY2;		//ÇöÀç ³ôÀÌ,ÀÌ¹ÌÁö°¡ µÚÁıÈû »óÅÂ¿¡µû¶ó ´ÙÀ½¶óÀÎÀ¸·Î ¹Ù²Ü¶§ ³ôÀÌ¿¡ ´õÇØÁÖ´Â°ª
+	int nDestY, nDeltaY, nDestY2, nDeltaY2; //í˜„ì¬ ë†’ì´,ì´ë¯¸ì§€ê°€ ë’¤ì§‘í˜ ìƒíƒœì—ë”°ë¼ ë‹¤ìŒë¼ì¸ìœ¼ë¡œ ë°”ê¿€ë•Œ ë†’ì´ì— ë”í•´ì£¼ëŠ”ê°’
 
 	nDestY = nHeight - 1;
 	nDeltaY = -1;
@@ -262,11 +263,12 @@ bool CBMP::SaveWorldBMP(int _x, int _y, unsigned char *buffer, unsigned char *bu
 	{
 		for (int x = 0; x < m_nWidth; x++)
 		{
-			if (*(m_pBuffer + (x << 2) + nDestY2*(m_nWidth << 2)) == 0)
-			if (*(m_pBuffer + (x << 2) + nDestY2*(m_nWidth << 2) + 1) == 0)
-			if (*(m_pBuffer + (x << 2) + nDestY2*(m_nWidth << 2) + 2) == 0)
-				continue;
-			CopyMemory(buffer2 + ((x + _x) << 2) + ((nDestY - _y)*(nWidth << 2)) - (x + _x + (nDestY - _y)*nWidth), m_pBuffer + (x << 2) + nDestY2*(m_nWidth << 2), 3);
+			if (*(m_pBuffer + (x << 2) + nDestY2 * (m_nWidth << 2)) == 0)
+				if (*(m_pBuffer + (x << 2) + nDestY2 * (m_nWidth << 2) + 1) == 0)
+					if (*(m_pBuffer + (x << 2) + nDestY2 * (m_nWidth << 2) + 2) == 0)
+						continue;
+			CopyMemory(buffer2 + ((x + _x) << 2) + ((nDestY - _y)*(nWidth << 2)) - (x + _x + (nDestY - _y)*nWidth),
+			           m_pBuffer + (x << 2) + nDestY2*(m_nWidth << 2), 3);
 		}
 
 		nDestY += nDeltaY;

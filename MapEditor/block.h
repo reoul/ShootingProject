@@ -1,19 +1,16 @@
-#ifndef __block_h__
-#define __block_h__
+﻿#pragma once
+#include "GameObject.h"
 
-#include "gobject.h"
-
-class CBLOCK : public CGObject
+class Block : public GameObject
 {
-private:
-	int number;
 public:
-	CBLOCK();
-	~CBLOCK();
-	void Initialize(CSprite* pSprite, int x, int y, CTimer* timer, int CurrentFrame, int FrameInterval);
-	void Draw(int x,int y,LPDIRECTDRAWSURFACE7 lpSurface);
-	void SetSprite(CSprite* sprite);
+	Block();
+	~Block();
+	void Initialize(Sprite* pSprite, int x, int y, Timer* timer, int CurrentFrame, int FrameInterval);
+	void Draw(int x, int y, LPDIRECTDRAWSURFACE7 lpSurface);
+	void SetSprite(Sprite* sprite);
 	void SetBlockNumber(int _number);
 	int GetBlockNumber();
+private:
+	int number;
 };
-#endif

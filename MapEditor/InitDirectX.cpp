@@ -1,4 +1,4 @@
-#include <Windows.h>
+﻿#include <Windows.h>
 #include <windowsx.h>
 
 #include <dsound.h>
@@ -7,7 +7,7 @@
 #include <ddraw.h>
 #include <dinput.h>
 
-#include "define.h"
+#include "SettingData.h"
 
 bool InitDirectDraw(void);
 bool InitDirectInput(void);
@@ -83,7 +83,9 @@ bool InitDirectDraw(void)
 
 bool InitDirectInput(void)
 {
-	if (FAILED(DirectInput8Create(g_hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (LPVOID *)&g_lpDirectInputObject, NULL)))
+	if (FAILED(
+		DirectInput8Create(g_hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (LPVOID *)&g_lpDirectInputObject, NULL
+		)))
 		return false;
 
 	if (FAILED(g_lpDirectInputObject->CreateDevice(GUID_SysKeyboard, &g_lpDirectInputKeyboard, NULL)))

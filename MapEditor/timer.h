@@ -1,19 +1,15 @@
-#ifndef __timer_h__
-#define __timer_h__
+﻿#pragma once
 
-class CTimer
+class Timer
 {
-private:
-	int m_nStartTime;
-	int GetTime();
-
 public:
 	float deltaTime;
-	CTimer();
-	~CTimer();
+	Timer();
+	~Timer();
 	void start();
 	int time();
-	bool elapsed(int &time, int interval);
+	bool elapsed(int& time, int interval);
+private:
+	int GetTime();
+	int m_nStartTime;
 };
-
-#endif

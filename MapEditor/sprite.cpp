@@ -1,18 +1,20 @@
+#include "Sprite.h"
 #include <Windows.h>
-#include "sprite.h"
 #include <string>
-#include "camera.h"
-#include "define.h"
-#include "boss.h"
+
+#include "Bmp.h"
+#include "Camera.h"
+#include "SettingData.h"
+#include "Boss.h"
 
 #define pi 3.141592
 
 static RECT destRect;
 static RECT destRect2;
-extern CCamera camera;
-extern CBoss boss;
+extern Camera camera;
+extern Boss boss;
 
-CSprite::CSprite()
+Sprite::Sprite()
 {
 	destRect.left = 0;
 	destRect.top = 0;
@@ -24,13 +26,13 @@ CSprite::CSprite()
 	destRect2.right = 800;
 	destRect2.bottom = 0;
 
-	m_ppSurface = NULL;	
+	m_ppSurface = NULL;
 	m_ppDrawSurface = NULL;
 	m_nFrame = 0;
 	m_pBMPArray = NULL;
 }
 
-CSprite::~CSprite()
+Sprite::~Sprite()
 {
 	if (m_ppSurface)
 		delete[] m_ppSurface;
@@ -42,12 +44,12 @@ CSprite::~CSprite()
 		delete[] m_pBMPArray;
 }
 
-CBMP *CSprite::GetBMP()
+Bmp* Sprite::GetBMP()
 {
 	return m_pBMPArray;
 }
 
-bool CSprite::InitSprite(int nFrame, int nWidth, int nHeight, int nColorKey, LPDIRECTDRAW7 pDirectDraw)
+bool Sprite::InitSprite(int nFrame, int nWidth, int nHeight, int nColorKey, LPDIRECTDRAW7 pDirectDraw)
 {
 	if (m_ppSurface)
 		delete[] m_ppSurface;
@@ -68,7 +70,7 @@ bool CSprite::InitSprite(int nFrame, int nWidth, int nHeight, int nColorKey, LPD
 	if (!m_ppDrawSurface)
 		return false;
 
-	m_pBMPArray = new CBMP[nFrame];
+	m_pBMPArray = new Bmp[nFrame];
 
 	if (!m_pBMPArray)
 		return false;
@@ -117,23 +119,13 @@ bool CSprite::InitSprite(int nFrame, int nWidth, int nHeight, int nColorKey, LPD
 	m_nSize = 1;
 	number = 0;
 
-	draw_Height = m_nHeight*m_nSize;
-	draw_Width = m_nWidth*m_nSize;
-
-	/*if ((draw_Height % 2) == 0)
-		IsDrawHeightEven = true;
-	else
-		IsDrawHeightEven = false;
-
-	if ((draw_Width % 2) == 0)
-		IsDrawWidthEven = true;
-	else
-		IsDrawWidthEven = false;*/
+	draw_Height = m_nHeight * m_nSize;
+	draw_Width = m_nWidth * m_nSize;
 
 	return true;
 }
 
-bool CSprite::LoadFrame(int nFrame, char* filename)
+bool Sprite::LoadFrame(int nFrame, char* filename)
 {
 	if (!m_pBMPArray[nFrame].LoadBMPFile(filename))
 		return false;
@@ -144,32 +136,13 @@ bool CSprite::LoadFrame(int nFrame, char* filename)
 	return true;
 }
 
-bool CSprite::Drawing(int nFrame, int x, int y, LPDIRECTDRAWSURFACE7 pSurface, bool bUsingColorKey)
+bool Sprite::Drawing(int nFrame, int x, int y, LPDIRECTDRAWSURFACE7 pSurface, bool bUsingColorKey)
 {
-	RECT destRect;					//출력 영역 설정 변수
-	RECT destRect2;					//원본 이미지 영역 설정 변수
-
-	//destRect.left = x - (m_nWidth >> 1) - (m_nWidth * (camera.GetExpansion() - 1));			//확대버전
-	//destRect.top = y - (m_nHeight >> 1) - (m_nHeight * (camera.GetExpansion() - 1));
-	//destRect.right = destRect.left + m_nWidth + 2*(m_nWidth * (camera.GetExpansion() - 1));
-	//destRect.bottom = destRect.top + m_nHeight + 2*(m_nHeight * (camera.GetExpansion() - 1));
-
-	/*draw_Height = m_nHeight*m_nSize;
-	draw_Width = m_nWidth*m_nSize;*/
-
-	/*if ((draw_Height % 2) == 0)
-		IsDrawHeightEven = true;
-	else
-		IsDrawHeightEven = false;
-	if ((draw_Width % 2) == 0)
-		IsDrawWidthEven = true;
-	else
-		IsDrawWidthEven = false;*/
+	RECT destRect; //출력 영역 설정 변수
+	RECT destRect2; //원본 이미지 영역 설정 변수
 
 	destRect.left = x - (draw_Width >> 1);
 	destRect.top = y - (draw_Height >> 1);
-	//destRect.left = x - (draw_Width >> 1);
-	//destRect.top = y - (draw_Height >> 1);
 	destRect.right = destRect.left + draw_Width;
 	destRect.bottom = destRect.top + draw_Height;
 
@@ -180,7 +153,7 @@ bool CSprite::Drawing(int nFrame, int x, int y, LPDIRECTDRAWSURFACE7 pSurface, b
 
 	if (destRect.top < 0)
 	{
-		destRect2.top = -destRect.top/m_nSize;
+		destRect2.top = -destRect.top / m_nSize;
 		destRect.top = 0;
 		if (destRect2.top > m_nHeight)
 			return true;
@@ -207,11 +180,11 @@ bool CSprite::Drawing(int nFrame, int x, int y, LPDIRECTDRAWSURFACE7 pSurface, b
 			return true;
 	}
 
-	HRESULT	hResult;
+	HRESULT hResult;
 	if (bUsingColorKey)
 	{
-
-		if (FAILED(hResult = pSurface->Blt(&destRect, m_ppDrawSurface[nFrame], &destRect2, DDBLT_WAIT | DDBLT_KEYSRC, NULL)))
+		if (FAILED(
+			hResult = pSurface->Blt(&destRect, m_ppDrawSurface[nFrame], &destRect2, DDBLT_WAIT | DDBLT_KEYSRC, NULL)))
 			if (hResult == DDERR_SURFACELOST)
 				return (Restore());
 			else
@@ -227,10 +200,9 @@ bool CSprite::Drawing(int nFrame, int x, int y, LPDIRECTDRAWSURFACE7 pSurface, b
 	}
 
 	return true;
-
 }
 
-bool CSprite::Drawing(RECT rect, LPDIRECTDRAWSURFACE7 pSurface, bool bUsingColorKey)
+bool Sprite::Drawing(RECT rect, LPDIRECTDRAWSURFACE7 pSurface, bool bUsingColorKey)
 {
 	RECT destRect2;
 
@@ -270,10 +242,9 @@ bool CSprite::Drawing(RECT rect, LPDIRECTDRAWSURFACE7 pSurface, bool bUsingColor
 			return true;
 	}
 
-	HRESULT	hResult;
+	HRESULT hResult;
 	if (bUsingColorKey)
 	{
-
 		if (FAILED(hResult = pSurface->Blt(&rect, m_ppDrawSurface[0], &destRect2, DDBLT_WAIT | DDBLT_KEYSRC, NULL)))
 			if (hResult == DDERR_SURFACELOST)
 				return (Restore());
@@ -290,16 +261,15 @@ bool CSprite::Drawing(RECT rect, LPDIRECTDRAWSURFACE7 pSurface, bool bUsingColor
 	}
 
 	return true;
-
 }
 
-bool CSprite::DrawingBossHp(int nFrame, int x, int y, LPDIRECTDRAWSURFACE7 pSurface, bool bUsingColorKey)
+bool Sprite::DrawingBossHp(int nFrame, int x, int y, LPDIRECTDRAWSURFACE7 pSurface, bool bUsingColorKey)
 {
-	RECT destRect;					//출력 영역 설정 변수
-	RECT destRect2;					//원본 이미지 영역 설정 변수
+	RECT destRect; //출력 영역 설정 변수
+	RECT destRect2; //원본 이미지 영역 설정 변수
 
 	destRect.left = x - (draw_Width >> 1);
-	destRect.top = y - (draw_Height >> 1) + (draw_Height * ((1000 - boss.m_nHp) * 0.001f));		// 보스 체력 깍인 만큼 체력 부분 줄여줌
+	destRect.top = y - (draw_Height >> 1) + (draw_Height * ((1000 - boss.m_nHp) * 0.001f)); // 보스 체력 깍인 만큼 체력 부분 줄여줌
 	destRect.right = destRect.left + draw_Width;
 	destRect.bottom = y - (draw_Height >> 1) + draw_Height;
 
@@ -308,11 +278,11 @@ bool CSprite::DrawingBossHp(int nFrame, int x, int y, LPDIRECTDRAWSURFACE7 pSurf
 	destRect2.right = m_nWidth;
 	destRect2.bottom = m_nHeight;
 
-	HRESULT	hResult;
+	HRESULT hResult;
 	if (bUsingColorKey)
 	{
-
-		if (FAILED(hResult = pSurface->Blt(&destRect, m_ppDrawSurface[nFrame], &destRect2, DDBLT_WAIT | DDBLT_KEYSRC, NULL)))
+		if (FAILED(
+			hResult = pSurface->Blt(&destRect, m_ppDrawSurface[nFrame], &destRect2, DDBLT_WAIT | DDBLT_KEYSRC, NULL)))
 			if (hResult == DDERR_SURFACELOST)
 				return (Restore());
 			else
@@ -328,10 +298,9 @@ bool CSprite::DrawingBossHp(int nFrame, int x, int y, LPDIRECTDRAWSURFACE7 pSurf
 	}
 
 	return true;
-
 }
 
-bool CSprite::Restore()
+bool Sprite::Restore()
 {
 	if (!m_ppSurface)
 		return false;
@@ -359,57 +328,47 @@ bool CSprite::Restore()
 			return false;
 	}
 	return true;
-
 }
 
-int CSprite::GetNumberOfFrame()
+int Sprite::GetNumberOfFrame()
 {
 	return m_nFrame;
 }
 
-void CSprite::SetSize(float _size)
+void Sprite::SetSize(float _size)
 {
 	m_nSize = _size;
 
-	draw_Height = m_nHeight*m_nSize;
-	draw_Width = m_nWidth*m_nSize;
-
-	/*if ((draw_Height % 2) == 0)
-		IsDrawHeightEven = true;
-	else
-		IsDrawHeightEven = false;
-	if ((draw_Width % 2) == 0)
-		IsDrawWidthEven = true;
-	else
-		IsDrawWidthEven = false;*/
+	draw_Height = m_nHeight * m_nSize;
+	draw_Width = m_nWidth * m_nSize;
 }
 
-void CSprite::SetNumber(int _number)
+void Sprite::SetNumber(int _number)
 {
 	number = _number;
 }
 
-float CSprite::GetSize()
+float Sprite::GetSize()
 {
 	return m_nSize;
 }
 
-int CSprite::GetNumber()
+int Sprite::GetNumber()
 {
 	return number;
 }
 
-int CSprite::GetWidth()
+int Sprite::GetWidth()
 {
 	return m_nWidth;
 }
 
-int CSprite::GetHeight()
+int Sprite::GetHeight()
 {
 	return m_nHeight;
 }
 
-bool CSprite::ReleaseAll()
+bool Sprite::ReleaseAll()
 {
 	if (!m_ppSurface)
 		return false;
@@ -427,10 +386,9 @@ bool CSprite::ReleaseAll()
 	}
 
 	return true;
-
 }
 
-bool CSprite::Drawing2(int nFrame, int x, int y, LPDIRECTDRAWSURFACE7 pSurface, bool bUsingColorKey)
+bool Sprite::Drawing2(int nFrame, int x, int y, LPDIRECTDRAWSURFACE7 pSurface, bool bUsingColorKey)
 {
 	if (destRect.top == 1200)
 	{
@@ -473,10 +431,48 @@ bool CSprite::Drawing2(int nFrame, int x, int y, LPDIRECTDRAWSURFACE7 pSurface, 
 	return true;
 }
 
-bool CSprite::BlockDrawing(int x, int y, LPDIRECTDRAWSURFACE7 pSurface, bool bUsingColorKey)
+bool Sprite::DrawingSkillCoolTime(float coolTimePercent, int x, int y, LPDIRECTDRAWSURFACE7 pSurface,
+                                  bool bUsingColorKey)
 {
-	RECT destRect;					//출력 영역 설정 변수
-	RECT destRect2;					//원본 이미지 영역 설정 변수
+	RECT destRect; //출력 영역 설정 변수
+	RECT destRect2; //원본 이미지 영역 설정 변수
+
+	destRect.left = x - (draw_Width >> 1);
+	destRect.top = y - (draw_Height >> 1);
+	destRect.right = destRect.left + draw_Width;
+	destRect.bottom = destRect.top + draw_Height;
+	destRect.top = y - (draw_Height >> 1) + m_nHeight - (int)(m_nHeight * coolTimePercent);
+
+	destRect2.left = 0;
+	destRect2.top = m_nHeight - (int)(m_nHeight * coolTimePercent);
+	destRect2.right = m_nWidth;
+	destRect2.bottom = m_nHeight;
+
+	HRESULT hResult;
+	if (bUsingColorKey)
+	{
+		if (FAILED(hResult = pSurface->Blt(&destRect, m_ppDrawSurface[0], &destRect2, DDBLT_WAIT | DDBLT_KEYSRC, NULL)))
+			if (hResult == DDERR_SURFACELOST)
+				return (Restore());
+			else
+				return false;
+	}
+	else
+	{
+		if (FAILED(hResult = pSurface->Blt(&destRect, m_ppDrawSurface[0], &destRect2, DDBLT_WAIT, NULL)))
+			if (hResult == DDERR_SURFACELOST)
+				return (Restore());
+			else
+				return false;
+	}
+
+	return true;
+}
+
+bool Sprite::BlockDrawing(int x, int y, LPDIRECTDRAWSURFACE7 pSurface, bool bUsingColorKey)
+{
+	RECT destRect; //출력 영역 설정 변수
+	RECT destRect2; //원본 이미지 영역 설정 변수
 
 	destRect.left = x;
 	destRect.top = y;
@@ -517,10 +513,9 @@ bool CSprite::BlockDrawing(int x, int y, LPDIRECTDRAWSURFACE7 pSurface, bool bUs
 			return true;
 	}
 
-	HRESULT	hResult;
+	HRESULT hResult;
 	if (bUsingColorKey)
 	{
-
 		if (FAILED(hResult = pSurface->Blt(&destRect, m_ppDrawSurface[0], &destRect2, DDBLT_WAIT | DDBLT_KEYSRC, NULL)))
 			if (hResult == DDERR_SURFACELOST)
 				return (Restore());
@@ -539,9 +534,8 @@ bool CSprite::BlockDrawing(int x, int y, LPDIRECTDRAWSURFACE7 pSurface, bool bUs
 	return true;
 }
 
-void CSprite::Rotate(double Degree, int _curFrame)
+void Sprite::Rotate(double Degree, int _curFrame)
 {
-
 	int x, y;
 
 	int orig_x, orig_y;
@@ -562,35 +556,19 @@ void CSprite::Rotate(double Degree, int _curFrame)
 	{
 		for (x = 0; x < m_nWidth; x++)
 		{
-			for (int i = 0; i < 3; i++)
-			{
-				//if (*(m_pBuffer + (x << 2) + nDestY2 * (m_nWidth << 2)) == 0)
-				//	if (*(m_pBuffer + (x << 2) + nDestY2 * (m_nWidth << 2) + 1) == 0)
-				//		if (*(m_pBuffer + (x << 2) + nDestY2 * (m_nWidth << 2) + 2) == 0)
-				//			continue;
-				//CopyMemory(buffer2 + ((x + _x) << 2) + ((nDestY - _y) * (nWidth << 2)) - (x + _x + (nDestY - _y) * nWidth), m_pBuffer + (x << 2) + nDestY2 * (m_nWidth << 2), 3);
-			}
 			orig_x = (int)(xcenter + ((double)y - ycenter) * ss + ((double)x - xcenter) * cc);
 			orig_y = (int)(ycenter + ((double)y - ycenter) * cc - ((double)x - xcenter) * ss);
 			ZeroMemory(pixel, 3);
 			if ((orig_y >= 0 && orig_y < m_nHeight) && (orig_x >= 0 && orig_x < m_nWidth))
-				CopyMemory(pixel, m_pBMPArray->GetBMPBuffer() + (orig_x << 2) + orig_y * (m_nWidth << 2), 3);		//원본 픽셀 값 추출
-			//char b = *(m_pBMPArray->GetBMPBuffer() + (orig_x << 2) + orig_y * (m_nWidth << 2));
-			//char g = *(m_pBMPArray->GetBMPBuffer() + (orig_x << 2) + orig_y * (m_nWidth << 2)+1);
-			//char r = *(m_pBMPArray->GetBMPBuffer() + (orig_x << 2) + orig_y * (m_nWidth << 2)+2);
+				CopyMemory(pixel, m_pBMPArray->GetBMPBuffer() + (orig_x << 2) + orig_y * (m_nWidth << 2), 3); //원본 픽셀 값 추출
 
-			if((orig_y >= 0 && orig_y < m_nHeight) && (orig_x >= 0 && orig_x < m_nWidth)) // (4)
+			if ((orig_y >= 0 && orig_y < m_nHeight) && (orig_x >= 0 && orig_x < m_nWidth)) // (4)
 				CopyMemory(buffer + (x << 2) + y * (m_nWidth << 2), pixel, 3);
-				//CopyMemory(buffer + (m_pBMPArray->GetBMPBuffer() + (orig_x << 2) + orig_y * (m_nWidth << 2)), *pixel, 3);
-				//pixel = InputImage[orig_y][orig_x]; // (5)
-		} // x-loop
-		
-	} // y-loop
+		}
+	}
 
 	m_pBMPArray->CopyBufferToSurface(m_ppDrawSurface[_curFrame], buffer);
 
 	delete[] pixel;
 	delete[] buffer;
-
-
 }

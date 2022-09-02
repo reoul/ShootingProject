@@ -1,8 +1,8 @@
-#include "sprite8.h"
+﻿#include "Sprite8.h"
+#include "Sprite.h"
 
 CSprite8::CSprite8()
 {
-
 }
 
 CSprite8::~CSprite8()
@@ -19,17 +19,17 @@ CSprite8::~CSprite8()
 
 void CSprite8::Init()
 {
-	left = new CSprite();
-	leftup = new CSprite();
-	leftdown = new CSprite();
-	right = new CSprite();
-	rightup	= new CSprite();
-	rightdown = new CSprite();
-	up	= new CSprite();
-	down = new CSprite();
+	left = new Sprite();
+	leftup = new Sprite();
+	leftdown = new Sprite();
+	right = new Sprite();
+	rightup = new Sprite();
+	rightdown = new Sprite();
+	up = new Sprite();
+	down = new Sprite();
 }
 
-CSprite* CSprite8::GetSprite(DIRECTION type)
+Sprite* CSprite8::GetSprite(DIRECTION type)
 {
 	switch (type)
 	{

@@ -1,4 +1,5 @@
 #include "Vector2.h"
+#include <corecrt_math.h>
 
 #define PI 3.141592
 
@@ -7,15 +8,17 @@ Vector2::Vector2()
 	x = 0;
 	y = 0;
 }
+
 Vector2::Vector2(float _x, float _y)
 {
 	x = _x;
 	y = _y;
 }
+
 Vector2::~Vector2()
 {
-
 }
+
 void Vector2::SetRect(float _x, float _y)
 {
 	x = _x;
@@ -39,7 +42,7 @@ float Vector2::Distance(Vector2 v1, Vector2 v2)
 
 double Vector2::norm()
 {
-	return hypot(x,y);
+	return hypot(x, y);
 }
 
 Vector2 Vector2::normalize()
@@ -82,16 +85,16 @@ int Vector2::VectorToAngle()
 
 	float angle = acos(a.x) * 180 / PI;
 
-	Vector2 toDir = Vector2(1,0) - Vector2(x,y);
+	Vector2 toDir = Vector2(1, 0) - Vector2(x, y);
 	toDir = toDir.normalize();
-	float cross = (toDir.x * 0) - (toDir.y * 1);		//어느방향으로 돌지 계산
+	float cross = (toDir.x * 0) - (toDir.y * 1); //어느방향으로 돌지 계산
 
 	//float angle = acosf((toDir.x * m_direction.x) + (toDir.y * m_direction.y));		//두 벡터의 내각(0~180 양수)
 	//if (isnan(angle))
 	//	angle = 0;
-	if (cross > 0)		//외적 값이 음수면 시계방향으로 회전
+	if (cross > 0) //외적 값이 음수면 시계방향으로 회전
 	{
-		angle = 360-angle;
+		angle = 360 - angle;
 	}
 
 	//float fAng = acos((a.x * 0 + a.y * 0) / (sqrt(a.x * a.x + a.y * a.y) * sqrt(0))) * 360 / PI;
@@ -104,8 +107,7 @@ int Vector2::VectorToAngle()
 	//	return (int)fAng;
 
 
-
-//출처: https://3dmpengines.tistory.com/174 [3DMP]
+	//출처: https://3dmpengines.tistory.com/174 [3DMP]
 
 	return (int)angle;
 }

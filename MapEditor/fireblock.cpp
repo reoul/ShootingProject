@@ -1,7 +1,8 @@
-#include "fireblock.h"
-#include "camera.h"
+﻿#include "Fireblock.h"
+#include "Camera.h"
+#include "SettingData.h"
 
-extern CCamera camera;
+extern Camera camera;
 
 FireBlock::FireBlock()
 {
@@ -13,16 +14,16 @@ FireBlock::~FireBlock()
 {
 }
 
-void FireBlock::Initialize(int x, int y, CTimer* timer, int frameInterval, CSprite* sprite)
+void FireBlock::Initialize(int x, int y, Timer* timer, int frameInterval, Sprite* sprite)
 {
 	draw_x = 0;
 	draw_y = 0;
-	CGObject::Initialize(sprite, x, y, timer, 0, frameInterval, 0);
+	GameObject::Initialize(sprite, x, y, timer, 0, frameInterval, 0);
 }
 
 void FireBlock::Draw(LPDIRECTDRAWSURFACE7 surface)
 {
 	draw_x = (int)(-(camera.GetX() - GetPos().x) + (SCREEN_WIDTH * 0.5f));
 	draw_y = (int)(-(camera.GetY() - GetPos().y) + (SCREEN_HEIGHT * 0.5f));
-	CGObject::Draw(false, draw_x, draw_y, surface);
+	GameObject::Draw(false, draw_x, draw_y, surface);
 }

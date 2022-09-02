@@ -1,16 +1,13 @@
-#ifndef __game_enum_h__
-#define __game_enum_h__
+#pragma once
 
-enum MOD { MOD_INTRO = 0, MOD_GAME, MOD_EDITOR, MOD_QUIT };		//지금 인트로 화면인지,게임화면인지, 맵에디터인지 구별
+enum MOD { MOD_INTRO = 0, MOD_GAME, MOD_EDITOR, MOD_QUIT }; //지금 인트로 화면인지,게임화면인지, 맵에디터인지 구별
 
-enum DIRECTION { LEFT = 1, RIGHT, UP, DOWN, LEFTUP, RIGHTUP, LEFTDOWN, RIGHTDOWN };	//방향을 설명
+enum DIRECTION { LEFT = 1, RIGHT, UP, DOWN, LEFTUP, RIGHTUP, LEFTDOWN, RIGHTDOWN }; //방향을 설명
 
-enum ACTION { IDLE = 0, MOVE, RUN, ROLL, ATTACK, SLEEP, DEAD, SKILL, FAINT};	//무슨 행동을 취하는지
+enum ACTION { IDLE = 0, MOVE, RUN, ROLL, ATTACK, SLEEP, DEAD, SKILL, FAINT }; //무슨 행동을 취하는지
 
 enum OBJECT_TYPE { PLYAER = 0, ARROW, BOSS, SNOWBALL, BLOCK, EDITOR_BLOCK, ENEMY, ICE };
 
 enum EDIT_STATE { EDIT_BOSS = 0, EDIT_FOREST, EDIT_BOSS_EDIT, EDIT_FOREST_EDIT };
 
-enum EDIT_WINDOW { EDIT_BLOCK_WINDOW1,EDIT_BLOCK_WINDOW2};
-
-#endif
+enum EDIT_WINDOW { EDIT_BLOCK_WINDOW1, EDIT_BLOCK_WINDOW2 };

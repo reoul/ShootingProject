@@ -1,29 +1,30 @@
-#include "arrow.h"
+#include "Arrow.h"
 
-#include "camera.h"
-#include "myplayer.h"
-#include "block.h"
-#include "boss.h"
 #include <Windows.h>
-#include "gameEnum.h"
-#include "map.h"
-#include "Vector2.h"
 #include <vector>
+
+#include "Camera.h"
+#include "Player.h"
+#include "Block.h"
+#include "Boss.h"
+#include "GameEnum.h"
+#include "Map.h"
+#include "Vector2.h"
 
 using namespace std;
 
 extern DIRECTION curPlayerDirection;
 
-extern CArrow arrow[TOTAL_ARROW];
-extern CCamera camera;
-extern CPlayer player;
-extern CBLOCK wall[139];
-extern CBoss boss;
-extern CTimer g_Timer;
+extern Arrow arrow[TOTAL_ARROW];
+extern Camera camera;
+extern Player player;
+extern Block wall[139];
+extern Boss boss;
+extern Timer g_Timer;
 extern Map map;
 extern vector<Vector2> wallBlock;
 
-CArrow::CArrow()
+Arrow::Arrow()
 {
 	m_nSpeedX = 0;
 	m_nSpeedY = 0;
@@ -43,12 +44,11 @@ CArrow::CArrow()
 	moveSpeed = 50;
 }
 
-CArrow::~CArrow()
+Arrow::~Arrow()
 {
-
 }
 
-void CArrow::Initialize(int x, int y, CTimer* timer, int moveFrame, CSprite8* arrowSprite)
+void Arrow::Initialize(int x, int y, Timer* timer, int moveFrame, CSprite8* arrowSprite)
 {
 	m_nSpeedX = 0;
 	m_nSpeedY = 0;
@@ -56,6 +56,7 @@ void CArrow::Initialize(int x, int y, CTimer* timer, int moveFrame, CSprite8* ar
 	m_nCount = 0;
 	draw_x = 0;
 	draw_y = 0;
+	m_nShootTime = 10000000;
 	m_pArrowSprite = arrowSprite;
 	m_nLastMoveTime = 0;
 	m_nMoveInterval = moveFrame;
@@ -71,10 +72,10 @@ void CArrow::Initialize(int x, int y, CTimer* timer, int moveFrame, CSprite8* ar
 	SetRect(&arrowHitRect[cnt++], 0, 8, 8, 0);
 	SetRect(&arrowHitRect[cnt++], 8, 0, 0, 8);
 	SetRect(&arrowHitRect[cnt], 0, 0, 8, 8);
-	CGObject::Initialize(arrowSprite->GetSprite(DIRECTION::UP), x, y, timer, 0, 0, 0);
+	GameObject::Initialize(arrowSprite->GetSprite(DIRECTION::UP), x, y, timer, 0, 0, 0);
 }
 
-void CArrow::SetSpeedXY(float power, Vector2 direction)
+void Arrow::SetSpeedXY(float power, Vector2 direction)
 {
 	m_nCount = 0;
 	m_nPower = power;
@@ -83,67 +84,25 @@ void CArrow::SetSpeedXY(float power, Vector2 direction)
 	m_direction = direction;
 	m_nTurnRadian = 1;
 	m_bIsLive = true;
-	//switch ((int)curPlayerDistanceState)
-	//{
-	//case 1:
-	//	m_nSpeedX = -1 * power;
-	//	m_nSpeedY = 0 * power;
-	//	//SetSprite(m_pArrowSprite->GetLeft());
-	//	break;
-	//case 2:
-	//	m_nSpeedX = 1 * power;
-	//	m_nSpeedY = 0 * power;
-	//	//SetSprite(m_pArrowSprite->GetRight());
-	//	break;
-	//case 3:
-	//	m_nSpeedX = 0 * power;
-	//	m_nSpeedY = -1 * power;
-	//	//SetSprite(m_pArrowSprite->GetUp());
-	//	break;
-	//case 4:
-	//	m_nSpeedX = 0 * power;
-	//	m_nSpeedY = 1 * power;
-	//	//SetSprite(m_pArrowSprite->GetDown());
-	//	break;
-	//case 5:
-	//	m_nSpeedX = -0.7 * power;
-	//	m_nSpeedY = -0.7 * power;
-	//	//SetSprite(m_pArrowSprite->GetLeftUp());
-	//	break;
-	//case 6:
-	//	m_nSpeedX = 0.7 * power;
-	//	m_nSpeedY = -0.7 * power;
-	//	//SetSprite(m_pArrowSprite->GetRightUp());
-	//	break;
-	//case 7:
-	//	m_nSpeedX = -0.7 * power;
-	//	m_nSpeedY = 0.7 * power;
-	//	//SetSprite(m_pArrowSprite->GetLeftDown());
-	//	break;
-	//case 8:
-	//	m_nSpeedX = 0.7 * power;
-	//	m_nSpeedY = 0.7 * power;
-	//	//SetSprite(m_pArrowSprite->GetRightDown());
-	//	break;
-	//}
+	m_nShootTime = g_Timer.time();
 }
 
-void CArrow::CheckSprite()
+void Arrow::CheckSprite()
 {
 	SetSprite(m_pArrowSprite->GetSprite(DIRECTION::RIGHT));
 	SetHitRect(arrowHitRect[(int)curPlayerDirection - 1]);
 }
 
-void CArrow::Draw(LPDIRECTDRAWSURFACE7 surface)
+void Arrow::Draw(LPDIRECTDRAWSURFACE7 surface)
 {
 	if (!m_bIsLive)
 		return;
-	draw_x = (int)(-(camera.GetX() - GetPos().x) + (SCREEN_WIDTH*0.5f));
-	draw_y = (int)(-(camera.GetY() - GetPos().y) + (SCREEN_HEIGHT*0.5f));
-	CGObject::Draw(false, draw_x, draw_y, surface);
+	draw_x = (int)(-(camera.GetX() - GetPos().x) + (SCREEN_WIDTH * 0.5f));
+	draw_y = (int)(-(camera.GetY() - GetPos().y) + (SCREEN_HEIGHT * 0.5f));
+	GameObject::Draw(false, draw_x, draw_y, surface);
 }
 
-void CArrow::CheckMove()
+void Arrow::CheckMove()
 {
 	if (!m_bIsLive)
 		return;
@@ -160,17 +119,16 @@ void CArrow::CheckMove()
 			{
 				if (map.GetStageNum() == 0)
 				{
-					SetRect(&rect, wallBlock[i].x * 32, wallBlock[i].y * 32, wallBlock[i].x * 32 + 32, wallBlock[i].y * 32 + 32);
+					SetRect(&rect, wallBlock[i].x * 32, wallBlock[i].y * 32, wallBlock[i].x * 32 + 32,
+					        wallBlock[i].y * 32 + 32);
 				}
 				else
 				{
-					SetRect(&rect, wall[i].GetPos().x * 32, wall[i].GetPos().y * 32, wall[i].GetPos().x * 32 + 32, wall[i].GetPos().y * 32 + 32);
+					SetRect(&rect, wall[i].GetPos().x * 32, wall[i].GetPos().y * 32, wall[i].GetPos().x * 32 + 32,
+					        wall[i].GetPos().y * 32 + 32);
 				}
 				if (CheckHit(rect))
 				{
-					//SetX(GetPos().x - m_nSpeedX);
-					//SetY(GetPos().y - m_nSpeedY);
-					//IsHit();
 					m_bIsUse = false;
 					m_bIsLive = false;
 					m_bIsHoming = false;
@@ -178,31 +136,12 @@ void CArrow::CheckMove()
 			}
 		}
 
-		/*if (GetX() < 1110)
-		{
-			SetX(1111);
-			m_nSpeedX = 0;
-		}
-		if (GetX() > 2090)
-		{
-			SetX(2089);
-			m_nSpeedX = 0;
-		}
-		if (GetY() < 1116)
-		{
-			SetY(1117);
-			m_nSpeedY = 0;
-		}
-		if (GetY() > 2084)
-		{
-			SetY(2083);
-			m_nSpeedY = 0;
-		}*/
 		if (!m_bIsHoming)
 		{
 			m_nSpeedX -= m_nSpeedX * 0.02f * m_nCount * moveSpeed * g_Timer.deltaTime;
 			m_nSpeedY -= m_nSpeedY * 0.02f * m_nCount * moveSpeed * g_Timer.deltaTime;
 		}
+
 		if ((abs(m_nSpeedX) < 0.1f) && (abs(m_nSpeedY) < 0.1f))
 		{
 			m_bIsUse = false;
@@ -211,17 +150,26 @@ void CArrow::CheckMove()
 			m_nSpeedX = 0;
 			m_nSpeedY = 0;
 		}
-		m_nCount++;
 
+		if (g_Timer.elapsed(m_nShootTime, 2000))
+		{
+			m_bIsUse = false;
+			m_bIsLive = false;
+			m_bIsHoming = false;
+			m_nSpeedX = 0;
+			m_nSpeedY = 0;
+		}
+
+		m_nCount++;
 	}
 }
 
-void CArrow::IsCharging()
+void Arrow::IsCharging()
 {
 	m_bIsCharging = true;
 }
 
-CArrow* CArrow::FindNotUseArrow()
+Arrow* Arrow::FindNotUseArrow()
 {
 	for (int i = 0; i < TOTAL_ARROW; i++)
 	{
@@ -231,27 +179,27 @@ CArrow* CArrow::FindNotUseArrow()
 	return NULL;
 }
 
-void CArrow::SetIsUse(bool use)
+void Arrow::SetIsUse(bool use)
 {
 	m_bIsUse = use;
 }
 
-void CArrow::SetCharging(bool _charging)
+void Arrow::SetCharging(bool _charging)
 {
 	m_bIsCharging = _charging;
 }
 
-bool CArrow::GetIsUse()
+bool Arrow::GetIsUse()
 {
 	return m_bIsUse;
 }
 
-bool CArrow::GetIsCharging()
+bool Arrow::GetIsCharging()
 {
 	return m_bIsCharging;
 }
 
-bool CArrow::GetChargingBow()
+bool Arrow::GetChargingBow()
 {
 	for (int i = 0; i < TOTAL_ARROW; i++)
 	{
@@ -261,7 +209,7 @@ bool CArrow::GetChargingBow()
 	return false;
 }
 
-bool CArrow::IsZeroArrow()
+bool Arrow::IsZeroArrow()
 {
 	for (int i = 0; i < TOTAL_ARROW; i++)
 	{
@@ -271,14 +219,14 @@ bool CArrow::IsZeroArrow()
 	return true;
 }
 
-bool CArrow::IsSpeedZero()
+bool Arrow::IsSpeedZero()
 {
 	if ((abs(m_nSpeedX) == 0) && (abs(m_nSpeedY) == 0))
 		return true;
 	return false;
 }
 
-void CArrow::IsHit()
+void Arrow::IsHit()
 {
 	m_bIsHit = true;
 	m_bIsUse = false;
@@ -286,31 +234,29 @@ void CArrow::IsHit()
 	m_bIsHoming = false;
 	m_nSpeedX = 0;
 	m_nSpeedY = 0;
-	//m_nSpeedX = -m_nSpeedX*0.2f;
-	//m_nSpeedY = -m_nSpeedY*0.2f;
 }
 
-int CArrow::GetPower()
+int Arrow::GetPower()
 {
 	return (int)m_nPower;
 }
 
-bool CArrow::GetIsHit()
+bool Arrow::GetIsHit()
 {
 	return m_bIsHit;
 }
 
-void CArrow::SetIsHit(bool isHit)
+void Arrow::SetIsHit(bool isHit)
 {
 	m_bIsHit = isHit;
 }
 
-void CArrow::SetHoming(bool _homing)
+void Arrow::SetHoming(bool _homing)
 {
 	m_bIsHoming = _homing;
 }
 
-void CArrow::HomingArrow()
+void Arrow::HomingArrow()
 {
 	if (!m_bIsLive && !m_bIsHoming)
 		return;
@@ -318,40 +264,31 @@ void CArrow::HomingArrow()
 	curPos.SetRect(GetPos().x, GetPos().y);
 	Vector2 toDir = m_pTarget->GetPos() - curPos;
 	toDir = toDir.normalize();
-	float cross = (toDir.x * m_direction.y) - (toDir.y * m_direction.x);		//어느방향으로 돌지 계산
+	float cross = (toDir.x * m_direction.y) - (toDir.y * m_direction.x); //어느방향으로 돌지 계산
 
 	float tmp = (toDir.x * m_direction.x) + (toDir.y * m_direction.y);
 	if (tmp < -1)
 		tmp = -1;
 	if (tmp > 1)
 		tmp = 1;
-	float angle = acosf(tmp);		//두 벡터의 내각(0~180 양수)
-	//if (isnan(angle))
-	//	angle = 0;
-	if (cross > 0)		//외적 값이 음수면 시계방향으로 회전
+	float angle = acosf(tmp); //두 벡터의 내각(0~180 양수)
+	if (cross > 0) //외적 값이 음수면 시계방향으로 회전
 		angle *= -1;
 
-	m_direction.Rotate(angle * m_nTurnRadian);   // 회전
+	m_direction.Rotate(angle * m_nTurnRadian); // 회전
 
 	m_nTurnRadian += 1;
 
 	m_nSpeedX = m_direction.x * 5 * moveSpeed * g_Timer.deltaTime;
 	m_nSpeedY = m_direction.y * 5 * moveSpeed * g_Timer.deltaTime;
-
-    //turnRadian += 5.0f * dt;    // 회전 속도 증가
-
-//	   if(turnRadian >= maxRadian)
-//        direction = toDir;
-//출처: https://eastroot1590.tistory.com/entry/유도탄-만들기Guided-Missile [글그리 블로그]
-
 }
 
-Vector2 CArrow::GetSpeedXY()
+Vector2 Arrow::GetSpeedXY()
 {
-	return Vector2(m_nSpeedX,m_nSpeedY);
+	return Vector2(m_nSpeedX, m_nSpeedY);
 }
 
-bool CArrow::IsHoming()
+bool Arrow::IsHoming()
 {
 	return m_bIsHoming;
 }

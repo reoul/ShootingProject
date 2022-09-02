@@ -1,10 +1,9 @@
-#ifndef __fireblock_h__
-#define __fireblock_h__
+﻿#pragma once
 
-#include "gobject.h"
-#include "sprite.h"
+#include "GameObject.h"
+#include "Sprite.h"
 
-class FireBlock : public CGObject
+class FireBlock : public GameObject
 {
 private:
 	int draw_x;
@@ -13,8 +12,6 @@ private:
 public:
 	FireBlock();
 	~FireBlock();
-	void Initialize(int x, int y, CTimer* timer, int frameInterval, CSprite* sprite);
+	void Initialize(int x, int y, Timer* timer, int frameInterval, Sprite* sprite);
 	void Draw(LPDIRECTDRAWSURFACE7 surface);
 };
-
-#endif

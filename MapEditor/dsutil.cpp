@@ -1,4 +1,4 @@
-#define WIN32_LEAN_AND_MEAN
+﻿#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <windowsx.h>
 #include <mmsystem.h>
@@ -7,16 +7,14 @@
 #include "Dsutil.h"
 
 
-
-
 //DSLoadSoundBuffer - Loads a.WAV into a sound buffer and returs the sound buffer
 
-IDirectSoundBuffer * DSLoadSoundBuffer(IDirectSound *pDS, LPCTSTR lpName)
+IDirectSoundBuffer* DSLoadSoundBuffer(IDirectSound* pDS, LPCTSTR lpName)
 {
-	IDirectSoundBuffer *pDSB = NULL;
-	DSBUFFERDESC dsBD = { 0 };
-	BYTE *pbWaveData;
-	void *pvBase;
+	IDirectSoundBuffer* pDSB = NULL;
+	DSBUFFERDESC dsBD = {0};
+	BYTE* pbWaveData;
+	void* pvBase;
 
 	dsBD.dwSize = sizeof(dsBD);
 	dsBD.dwFlags = DSBCAPS_STATIC | DSBCAPS_CTRLVOLUME |
@@ -58,19 +56,18 @@ IDirectSoundBuffer * DSLoadSoundBuffer(IDirectSound *pDS, LPCTSTR lpName)
 }
 
 
-
-
 //DSLoad3DSoundBuffer - Loads a.Wave into a #D sound buffer and returns the sound buffer
 
-IDirectSoundBuffer *DSLoad3DSoundBuffer(IDirectSound *pDS, LPCTSTR lpName)
+IDirectSoundBuffer* DSLoad3DSoundBuffer(IDirectSound* pDS, LPCTSTR lpName)
 {
-	IDirectSoundBuffer *pDSB = NULL;
-	DSBUFFERDESC dsBD = { 0 };
-	BYTE *pbWaveData;
-	void *pvBase;
+	IDirectSoundBuffer* pDSB = NULL;
+	DSBUFFERDESC dsBD = {0};
+	BYTE* pbWaveData;
+	void* pvBase;
 
 	dsBD.dwSize = sizeof(dsBD);
-	dsBD.dwFlags = DSBCAPS_STATIC | DSBCAPS_CTRL3D | DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLFREQUENCY | DSBCAPS_LOCSOFTWARE | DSBCAPS_STICKYFOCUS;
+	dsBD.dwFlags = DSBCAPS_STATIC | DSBCAPS_CTRL3D | DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLFREQUENCY | DSBCAPS_LOCSOFTWARE |
+		DSBCAPS_STICKYFOCUS;
 
 	if (DSGetWaveResource(NULL, lpName, &dsBD.lpwfxFormat, &pbWaveData, &dsBD.dwBufferBytes))
 	{
@@ -109,12 +106,12 @@ IDirectSoundBuffer *DSLoad3DSoundBuffer(IDirectSound *pDS, LPCTSTR lpName)
 
 //	DSReloadSoundBuffer
 
-BOOL DSReloadSoundBuffer(IDirectSoundBuffer *pDSB, LPCTSTR lpName)
+BOOL DSReloadSoundBuffer(IDirectSoundBuffer* pDSB, LPCTSTR lpName)
 {
 	BOOL result = FALSE;
-	BYTE *pbWaveData;
+	BYTE* pbWaveData;
 	DWORD cbWaveSize;
-	void *pvBase;
+	void* pvBase;
 
 	if (DSGetWaveResource(NULL, lpName, NULL, &pbWaveData, &cbWaveSize))
 	{
@@ -141,11 +138,11 @@ BOOL DSReloadSoundBuffer(IDirectSoundBuffer *pDSB, LPCTSTR lpName)
 //DSGetWaveResource
 
 BOOL DSGetWaveResource(HMODULE hModule, LPCTSTR lpName,
-	WAVEFORMATEX **ppWaveHeader, BYTE **ppbWaveData, DWORD *pcbWaveSize)
+                       WAVEFORMATEX** ppWaveHeader, BYTE** ppbWaveData, DWORD* pcbWaveSize)
 {
 	HRSRC hResInfo;
 	HGLOBAL hResData;
-	void *pvRes;
+	void* pvRes;
 
 	if (((hResInfo = FindResource(hModule, lpName, c_szWAV)) != NULL) &&
 		((hResData = LoadResource(hModule, hResInfo)) != NULL) &&
@@ -159,11 +156,10 @@ BOOL DSGetWaveResource(HMODULE hModule, LPCTSTR lpName,
 }
 
 
-BOOL DSGetWaveFile(HMODULE hModule, LPCTSTR lpName, WAVEFORMATEX **ppWaveHeader,
-	BYTE **ppbWaveData, DWORD *pcbWaveSize, void **ppvBase)
+BOOL DSGetWaveFile(HMODULE hModule, LPCTSTR lpName, WAVEFORMATEX** ppWaveHeader,
+                   BYTE** ppbWaveData, DWORD* pcbWaveSize, void** ppvBase)
 {
-
-	void *pvRes;
+	void* pvRes;
 	HANDLE hFile, hMapping;
 
 	*ppvBase = NULL;
@@ -201,14 +197,14 @@ BOOL DSGetWaveFile(HMODULE hModule, LPCTSTR lpName, WAVEFORMATEX **ppWaveHeader,
 
 // SndObj fns
 
-SNDOBJ *SndObjCreate(IDirectSound *pDS, LPCTSTR lpName, int iConcurrent)
+SNDOBJ* SndObjCreate(IDirectSound* pDS, LPCTSTR lpName, int iConcurrent)
 {
-	SNDOBJ *pSO = NULL;
+	SNDOBJ* pSO = NULL;
 	LPWAVEFORMATEX pWaveHeader;
 	BOOL fFound = FALSE;
-	BYTE *pbData;
+	BYTE* pbData;
 	DWORD cbData;
-	void *pvBase;
+	void* pvBase;
 
 
 	if (DSGetWaveResource(NULL, lpName, &pWaveHeader, &pbData, &cbData))
@@ -221,11 +217,11 @@ SNDOBJ *SndObjCreate(IDirectSound *pDS, LPCTSTR lpName, int iConcurrent)
 
 	if (fFound)
 	{
-		if (iConcurrent<1)
+		if (iConcurrent < 1)
 			iConcurrent = 1;
 
-		if ((pSO = (SNDOBJ*)LocalAlloc(LPTR, sizeof(SNDOBJ) + (iConcurrent - 1)*
-			sizeof(IDirectSoundBuffer*))) != NULL)
+		if ((pSO = (SNDOBJ*)LocalAlloc(LPTR, sizeof(SNDOBJ) + (iConcurrent - 1) *
+		                               sizeof(IDirectSoundBuffer*))) != NULL)
 		{
 			int i;
 
@@ -234,14 +230,13 @@ SNDOBJ *SndObjCreate(IDirectSound *pDS, LPCTSTR lpName, int iConcurrent)
 			pSO->cbWaveSize = cbData;
 			pSO->Buffers[0] = DSLoadSoundBuffer(pDS, lpName);
 
-			for (i = 1; i<pSO->iAlloc; i++)
+			for (i = 1; i < pSO->iAlloc; i++)
 			{
 				if (FAILED(IDirectSound_DuplicateSoundBuffer(pDS, pSO->Buffers[0], &pSO->Buffers[i])))
 				{
 					pSO->Buffers[i] = DSLoadSoundBuffer(pDS, lpName);
 					if (!pSO->Buffers[i])
 					{
-
 						SndObjDestroy(pSO);
 						pSO = NULL;
 						break;
@@ -254,13 +249,13 @@ SNDOBJ *SndObjCreate(IDirectSound *pDS, LPCTSTR lpName, int iConcurrent)
 }
 
 //
-void SndObjDestroy(SNDOBJ *pSO)
+void SndObjDestroy(SNDOBJ* pSO)
 {
 	if (pSO)
 	{
 		int i;
 
-		for (i = 0; i<pSO->iAlloc; i++)
+		for (i = 0; i < pSO->iAlloc; i++)
 		{
 			if (pSO->Buffers[i])
 			{
@@ -273,9 +268,9 @@ void SndObjDestroy(SNDOBJ *pSO)
 }
 
 //
-IDirectSoundBuffer *SndObjGetFreeBuffer(SNDOBJ *pSO)
+IDirectSoundBuffer* SndObjGetFreeBuffer(SNDOBJ* pSO)
 {
-	IDirectSoundBuffer *pDSB;
+	IDirectSoundBuffer* pDSB;
 
 	if (pSO == NULL)
 		return NULL;
@@ -289,9 +284,9 @@ IDirectSoundBuffer *SndObjGetFreeBuffer(SNDOBJ *pSO)
 
 		if (FAILED(hres)) dwStatus = 0;
 
-		if ((dwStatus &DSBSTATUS_PLAYING) == DSBSTATUS_PLAYING)
+		if ((dwStatus & DSBSTATUS_PLAYING) == DSBSTATUS_PLAYING)
 		{
-			if (pSO->iAlloc>1)
+			if (pSO->iAlloc > 1)
 			{
 				if (++pSO->iCurrent >= pSO->iAlloc) pSO->iCurrent = 0;
 
@@ -308,7 +303,6 @@ IDirectSoundBuffer *SndObjGetFreeBuffer(SNDOBJ *pSO)
 			{
 				pDSB = NULL;
 			}
-
 		}
 
 		if (pDSB && (dwStatus & DSBSTATUS_BUFFERLOST))
@@ -324,7 +318,7 @@ IDirectSoundBuffer *SndObjGetFreeBuffer(SNDOBJ *pSO)
 }
 
 //
-BOOL SndObjPlay(SNDOBJ *pSO, DWORD dwPlayFlags)
+BOOL SndObjPlay(SNDOBJ* pSO, DWORD dwPlayFlags)
 {
 	BOOL result = FALSE;
 
@@ -332,7 +326,7 @@ BOOL SndObjPlay(SNDOBJ *pSO, DWORD dwPlayFlags)
 
 	if (!(dwPlayFlags & DSBPLAY_LOOPING) || (pSO->iAlloc == 1))
 	{
-		IDirectSoundBuffer *pDSB = SndObjGetFreeBuffer(pSO);
+		IDirectSoundBuffer* pDSB = SndObjGetFreeBuffer(pSO);
 
 		if (pDSB != NULL)
 		{
@@ -342,20 +336,20 @@ BOOL SndObjPlay(SNDOBJ *pSO, DWORD dwPlayFlags)
 	return result;
 }
 
-void SetVolume(IDirectSoundBuffer *pDSB, float _volume)
+void SetVolume(IDirectSoundBuffer* pDSB, float _volume)
 {
 	IDirectSoundBuffer_SetVolume(pDSB, _volume);
 }
 
 //
-BOOL SndObjStop(SNDOBJ *pSO)
+BOOL SndObjStop(SNDOBJ* pSO)
 {
 	int i;
 
 	if (pSO == NULL)
 		return FALSE;
 
-	for (i = 0; i<pSO->iAlloc; i++)
+	for (i = 0; i < pSO->iAlloc; i++)
 	{
 		IDirectSoundBuffer_Stop(pSO->Buffers[i]);
 		IDirectSoundBuffer_SetCurrentPosition(pSO->Buffers[i], 0);
@@ -365,7 +359,7 @@ BOOL SndObjStop(SNDOBJ *pSO)
 }
 
 //
-BOOL DSFillSoundBuffer(IDirectSoundBuffer *pDSB, BYTE * pbWaveData, DWORD cbWaveSize)
+BOOL DSFillSoundBuffer(IDirectSoundBuffer* pDSB, BYTE* pbWaveData, DWORD cbWaveSize)
 {
 	if (pDSB && pbWaveData && cbWaveSize)
 	{
@@ -389,12 +383,11 @@ BOOL DSFillSoundBuffer(IDirectSoundBuffer *pDSB, BYTE * pbWaveData, DWORD cbWave
 }
 
 //
-BOOL DSParseWaveResource(void *pvRes, WAVEFORMATEX **ppWaveHeader, BYTE **ppbWaveData, DWORD *pcbWaveSize)
+BOOL DSParseWaveResource(void* pvRes, WAVEFORMATEX** ppWaveHeader, BYTE** ppbWaveData, DWORD* pcbWaveSize)
 
 {
-
-	DWORD *pdw;
-	DWORD *pdwEnd;
+	DWORD* pdw;
+	DWORD* pdwEnd;
 	DWORD dwRiff;
 	DWORD dwType;
 	DWORD dwLength;
@@ -408,20 +401,20 @@ BOOL DSParseWaveResource(void *pvRes, WAVEFORMATEX **ppWaveHeader, BYTE **ppbWav
 	if (pcbWaveSize)
 		*pcbWaveSize = 0;
 
-	pdw = (DWORD *)pvRes;
+	pdw = (DWORD*)pvRes;
 	dwRiff = *pdw++;
 	dwLength = *pdw++;
 	dwType = *pdw++;
 
 	if (dwRiff != mmioFOURCC('R', 'I', 'F', 'F'))
-		goto exit;	//not even RIFF
+		goto exit; //not even RIFF
 
 	if (dwType != mmioFOURCC('W', 'A', 'V', 'E'))
-		goto exit;	//not a wav
+		goto exit; //not a wav
 
-	pdwEnd = (DWORD *)((BYTE *)pdw + dwLength - 4);
+	pdwEnd = (DWORD*)((BYTE*)pdw + dwLength - 4);
 
-	while (pdw<pdwEnd)
+	while (pdw < pdwEnd)
 	{
 		dwType = *pdw++;
 		dwLength = *pdw++;
@@ -432,10 +425,10 @@ BOOL DSParseWaveResource(void *pvRes, WAVEFORMATEX **ppWaveHeader, BYTE **ppbWav
 
 			if (ppWaveHeader && !*ppWaveHeader)
 			{
-				if (dwLength<sizeof(WAVEFORMAT))
-					goto exit;	//	not a wav
+				if (dwLength < sizeof(WAVEFORMAT))
+					goto exit; //	not a wav
 
-				*ppWaveHeader = (WAVEFORMATEX *)pdw;
+				*ppWaveHeader = (WAVEFORMATEX*)pdw;
 
 				if ((!ppbWaveData || *ppbWaveData) && (!pcbWaveSize || *pcbWaveSize))
 				{
@@ -459,10 +452,9 @@ BOOL DSParseWaveResource(void *pvRes, WAVEFORMATEX **ppWaveHeader, BYTE **ppbWav
 			break;
 		}
 
-		pdw = (DWORD *)((BYTE *)pdw + ((dwLength + 1)&~1));
+		pdw = (DWORD*)((BYTE*)pdw + ((dwLength + 1) & ~1));
 	}
 
 exit:
 	return FALSE;
 }
-

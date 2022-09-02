@@ -1,43 +1,43 @@
-#include "snowball.h"
-#include "camera.h"
-#include "block.h"
+﻿#include "SnowBall.h"
+#include "Camera.h"
+#include "Block.h"
+#include "SettingData.h"
 
-extern CCamera camera;
-extern CBLOCK wall[139];
+extern Camera camera;
+extern Block wall[139];
 
-CSnowBall::CSnowBall()
+SnowBall::SnowBall()
 {
-
-}
-CSnowBall::~CSnowBall()
-{
-
 }
 
-void CSnowBall::Initialize(int x, int y, CTimer* timer, int moveFrame, CSprite* sprite)
+SnowBall::~SnowBall()
+{
+}
+
+void SnowBall::Initialize(int x, int y, Timer* timer, int moveFrame, Sprite* sprite)
 {
 	draw_x = 0;
 	draw_y = 0;
 	m_nLastMoveTime = 0;
 	m_nMoveInterval = moveFrame;
 	SetRect(&snowHitRect, 24, 24, 24, 24);
-	CGObject::Initialize(sprite, x, y, timer, 0, 0, 0);
+	GameObject::Initialize(sprite, x, y, timer, 0, 0, 0);
 }
 
-void CSnowBall::SetDirection(Vector2 _direction)
+void SnowBall::SetDirection(Vector2 _direction)
 {
-	CGObject::SetDirection(_direction);
+	GameObject::SetDirection(_direction);
 	m_bIsUse = true;
 }
 
-void CSnowBall::Draw(LPDIRECTDRAWSURFACE7 surface)
+void SnowBall::Draw(LPDIRECTDRAWSURFACE7 surface)
 {
-	draw_x = (int)(-(camera.GetX() - GetPos().x) + (SCREEN_WIDTH*0.5f));
-	draw_y = (int)(-(camera.GetY() - GetPos().y) + (SCREEN_HEIGHT*0.5f));
-	CGObject::Draw(false, draw_x, draw_y, surface);
+	draw_x = (int)(-(camera.GetX() - GetPos().x) + (SCREEN_WIDTH * 0.5f));
+	draw_y = (int)(-(camera.GetY() - GetPos().y) + (SCREEN_HEIGHT * 0.5f));
+	GameObject::Draw(false, draw_x, draw_y, surface);
 }
 
-void CSnowBall::CheckMove()
+void SnowBall::CheckMove()
 {
 	if (!m_bIsLive)
 		return;
@@ -53,7 +53,8 @@ void CSnowBall::CheckMove()
 	{
 		for (int i = 0; i < 139; i++)
 		{
-			SetRect(&rect, wall[i].GetPos().x * 32, wall[i].GetPos().y * 32, wall[i].GetPos().x * 32 + 32, wall[i].GetPos().y * 32 + 32);
+			SetRect(&rect, wall[i].GetPos().x * 32, wall[i].GetPos().y * 32, wall[i].GetPos().x * 32 + 32,
+			        wall[i].GetPos().y * 32 + 32);
 			if (CheckHit(rect))
 			{
 				/*SetX(GetX() - direction.x * 20);
@@ -62,7 +63,7 @@ void CSnowBall::CheckMove()
 			}
 		}
 	}
-	
+
 	SetHitRect(snowHitRect);
 
 	/*if (GetX() < 1100 || GetX() > 2100 || GetY() < 1100 || GetY() > 2100)
@@ -71,16 +72,16 @@ void CSnowBall::CheckMove()
 	}*/
 }
 
-void CSnowBall::IsHit()
+void SnowBall::IsHit()
 {
-
 }
 
-void CSnowBall::SetUse(bool use)
+void SnowBall::SetUse(bool use)
 {
 	m_bIsUse = use;
 }
-bool CSnowBall::IsUse()
+
+bool SnowBall::IsUse()
 {
 	return m_bIsUse;
 }

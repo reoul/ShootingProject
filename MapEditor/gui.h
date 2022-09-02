@@ -1,28 +1,25 @@
-#ifndef __gui_h__
-#define __gui_h__
-
-#include "sprite.h"
-#include "timer.h"
+﻿#pragma once
+#include "Sprite.h"
+#include "Timer.h"
 
 class Gui
 {
-private:
-	float m_x;
-	float m_y;
-	int m_nCurrentFrame;
-	int m_nLastFrameTime;
-	int m_nFrameInterval;
-	CSprite* m_pSprite;
-	CTimer* m_pTimer;
 public:
 	Gui();
 	~Gui();
-	void Initialize(int x, int y, CSprite* sprite,CTimer* timer, int frameInterval);
-	void Drawing(LPDIRECTDRAWSURFACE7 lpsurface);
+	void Initialize(int x, int y, Sprite* sprite, Timer* timer, int frameInterval);
+	virtual void Drawing(LPDIRECTDRAWSURFACE7 lpsurface);
 	void DrawingBossHp(LPDIRECTDRAWSURFACE7 lpsurface);
 	void DrawingPlayerHp(LPDIRECTDRAWSURFACE7 lpsurface);
 	void SetFrame(int frame);
 	int GetFrame();
+protected:
+	float m_x;
+	float m_y;
+	Sprite* m_pSprite;
+private:
+	int m_nCurrentFrame;
+	int m_nLastFrameTime;
+	int m_nFrameInterval;
+	Timer* m_pTimer;
 };
-
-#endif

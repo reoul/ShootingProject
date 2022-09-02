@@ -1,7 +1,7 @@
-#include "gui.h"
-#include "myplayer.h"
+﻿#include "Gui.h"
+#include "Player.h"
 
-extern CPlayer player;
+extern Player player;
 
 Gui::Gui()
 {
@@ -16,7 +16,7 @@ Gui::~Gui()
 {
 }
 
-void Gui::Initialize(int x, int y, CSprite* sprite, CTimer* timer, int frameInterval)
+void Gui::Initialize(int x, int y, Sprite* sprite, Timer* timer, int frameInterval)
 {
 	m_x = x;
 	m_y = y;
@@ -28,7 +28,7 @@ void Gui::Initialize(int x, int y, CSprite* sprite, CTimer* timer, int frameInte
 
 void Gui::Drawing(LPDIRECTDRAWSURFACE7 lpsurface)
 {
-	if (m_pTimer->elapsed(m_nLastFrameTime, m_nFrameInterval))
+	if (m_pSprite->GetNumberOfFrame() > 1 && m_pTimer->elapsed(m_nLastFrameTime, m_nFrameInterval))
 		m_nCurrentFrame = ++m_nCurrentFrame % m_pSprite->GetNumberOfFrame();
 	m_pSprite->Drawing(m_nCurrentFrame, m_x, m_y, lpsurface, true);
 }

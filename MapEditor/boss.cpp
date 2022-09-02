@@ -1,39 +1,42 @@
-#include "boss.h"
-#include <math.h>
-#include "timer.h"
-#include "snowball.h"
-#include "block.h"
+#include "Boss.h"
 #include <dsound.h>
-#include "DSUTIL.h"
-#include "gameEnum.h"
+#include <math.h>
 
-extern CTimer g_Timer;
-extern CSnowBall snowball[TOTAL_SNOWBALL];
-extern CBLOCK wall[139];
+#include "Arrow.h"
+#include "Timer.h"
+#include "SnowBall.h"
+#include "Block.h"
+#include "DSUTIL.h"
+#include "GameEnum.h"
+#include "SettingData.h"
+
+extern Timer g_Timer;
+extern SnowBall snowball[TOTAL_SNOWBALL];
+extern Block wall[139];
 extern int cntVibes;
 extern bool boss_HitWall;
 
 extern HSNDOBJ Sound[10];
 
-CBoss::CBoss()
+Boss::Boss()
 {
-
 }
-CBoss::~CBoss()
+
+Boss::~Boss()
 {
-
 }
-extern CCamera camera;
-extern CPlayer player;
+
+extern Camera camera;
+extern Player player;
 
 extern DIRECTION curPlayerDirection;
 extern DIRECTION curBossDirection;
 extern ACTION curPlayerAction;
 extern ACTION curBossAction;
 
-extern CArrow arrow[TOTAL_ARROW];
+extern Arrow arrow[TOTAL_ARROW];
 
-void CBoss::Initialize(int x, int y, CTimer* timer, int currentFrame, int frameInterval, int moveInterval)
+void Boss::Initialize(int x, int y, Timer* timer, int currentFrame, int frameInterval, int moveInterval)
 {
 	draw_x = x;
 	draw_y = y;
@@ -85,12 +88,12 @@ void CBoss::Initialize(int x, int y, CTimer* timer, int currentFrame, int frameI
 	SetRect(&attackHitRect[cnt++], 48, 55, 34, 45);
 	SetRect(&attackHitRect[cnt], 41, 50, 46, 46);
 
-	CGObject::Initialize(m_pCurSprite, x, y, timer, currentFrame, frameInterval, 0);
+	GameObject::Initialize(m_pCurSprite, x, y, timer, currentFrame, frameInterval, 0);
 
 	m_nMoveInterval = moveInterval;
 }
 
-void CBoss::SetSprite(CSprite* _sleep, CSprite8* _idle, CSprite8* _roll, CSprite8* _attack, CSprite8* _dead)
+void Boss::SetSprite(Sprite* _sleep, CSprite8* _idle, CSprite8* _roll, CSprite8* _attack, CSprite8* _dead)
 {
 	m_pBoss_SleepSprite = _sleep;
 	m_pBoss_IdleSprite = _idle;
@@ -101,16 +104,17 @@ void CBoss::SetSprite(CSprite* _sleep, CSprite8* _idle, CSprite8* _roll, CSprite
 	m_pOldSprite = _idle->GetSprite(DIRECTION::LEFT);
 }
 
-void CBoss::Draw(LPDIRECTDRAWSURFACE7 surface)
+void Boss::Draw(LPDIRECTDRAWSURFACE7 surface)
 {
-	CGObject::Draw(true, draw_x, draw_y, surface);
+	GameObject::Draw(true, draw_x, draw_y, surface);
 }
-bool CBoss::GetIsRoll()
+
+bool Boss::GetIsRoll()
 {
 	return m_bIsRoll;
 }
 
-bool CBoss::CanMove()
+bool Boss::CanMove()
 {
 	if (!m_bIsLive)
 		return false;
@@ -119,16 +123,17 @@ bool CBoss::CanMove()
 	return false;
 }
 
-float CBoss::GetSpeedX()
+float Boss::GetSpeedX()
 {
 	return m_nSpeedX;
 }
-float CBoss::GetSpeedY()
+
+float Boss::GetSpeedY()
 {
 	return m_nSpeedY;
 }
 
-void CBoss::Attack()
+void Boss::Attack()
 {
 	SndObjPlay(Sound[5], NULL);
 	CheckPlayerDirection();
@@ -143,7 +148,7 @@ void CBoss::Attack()
 	cntAttack++;
 }
 
-void CBoss::Hit(int damege)
+void Boss::Hit(int damege)
 {
 	m_nHp -= damege;
 	if ((m_nHp < 300) && !m_bIsRoar)
@@ -153,22 +158,26 @@ void CBoss::Hit(int damege)
 	}
 	if (m_nHp < 0)
 	{
+		for (int i = 0; i < TOTAL_ARROW; i++)
+		{
+			arrow[i].IsHit();
+		}
 		SndObjPlay(Sound[7], NULL);
 		curBossAction = ACTION::DEAD;
 	}
 }
 
-int CBoss::GetCntAttack()
+int Boss::GetCntAttack()
 {
 	return cntAttack;
 }
 
-int CBoss::GetHp()
+int Boss::GetHp()
 {
 	return m_nHp;
 }
 
-void CBoss::CheckPlayerDirection()
+void Boss::CheckPlayerDirection()
 {
 	float x = player.GetPos().x - GetPos().x;
 	float y = player.GetPos().y - GetPos().y;
@@ -177,7 +186,7 @@ void CBoss::CheckPlayerDirection()
 	playerDirection.SetRect(x / direction, y / direction);
 }
 
-void CBoss::CheckDirectionState()
+void Boss::CheckDirectionState()
 {
 	CheckPlayerDirection();
 	if (playerDirection.y < 0)
@@ -210,15 +219,16 @@ void CBoss::CheckDirectionState()
 	}
 }
 
-void CBoss::CheckSpeedXY()
+void Boss::CheckSpeedXY()
 {
 	m_nSpeedX = playerDirection.x * moveSpeed * g_Timer.deltaTime;
 	m_nSpeedY = playerDirection.y * moveSpeed * g_Timer.deltaTime;
 }
 
-void CBoss::CheckSprite()
+void Boss::CheckSprite()
 {
-	if (g_Timer.elapsed(m_nLastIdleTime, m_nIdleFrameInterval) && ((int)curBossAction == 0) && !((int)curBossAction == 6))
+	if (g_Timer.elapsed(m_nLastIdleTime, m_nIdleFrameInterval) && ((int)curBossAction == 0) && !((int)curBossAction ==
+		6))
 		NextPattern();
 	if ((int)curBossAction == 6)
 	{
@@ -230,7 +240,9 @@ void CBoss::CheckSprite()
 			m_pCurSprite = m_pBoss_SleepSprite;
 		else
 		{
-			m_pCurSprite = !(curBossAction == ACTION::ROLL) ? m_pBoss_IdleSprite->GetSprite(curBossDirection) : m_pBoss_RollSprite->GetSprite(curBossDirection);
+			m_pCurSprite = !(curBossAction == ACTION::ROLL)
+				               ? m_pBoss_IdleSprite->GetSprite(curBossDirection)
+				               : m_pBoss_RollSprite->GetSprite(curBossDirection);
 			if ((int)curBossAction == 4)
 				m_pCurSprite = m_pBoss_AttackSprite->GetSprite(curBossDirection);
 		}
@@ -238,7 +250,7 @@ void CBoss::CheckSprite()
 	if (m_pOldSprite != m_pCurSprite && (!m_bIsRoll || (curBossAction == ACTION::DEAD)))
 	{
 		m_pOldSprite = m_pCurSprite;
-		CGObject::SetSprite(m_pCurSprite);
+		GameObject::SetSprite(m_pCurSprite);
 		switch (curBossAction)
 		{
 		case ACTION::IDLE:
@@ -275,12 +287,12 @@ void CBoss::CheckSprite()
 	}
 }
 
-Vector2 CBoss::GetPlayerDirection()
+Vector2 Boss::GetPlayerDirection()
 {
 	return playerDirection;
 }
 
-void CBoss::MoveANDCheckState()
+void Boss::MoveANDCheckState()
 {
 	//if (!((int)curBossActionState == 3) && !((int)curBossActionState ==5))
 	//{
@@ -313,7 +325,7 @@ void CBoss::MoveANDCheckState()
 		cntHitWall++;
 	}
 
-	if (curBossAction == ACTION::ROLL)		//공격중이거나 기본상태가 아닐경우 캐릭터를 움직여준다
+	if (curBossAction == ACTION::ROLL) //공격중이거나 기본상태가 아닐경우 캐릭터를 움직여준다
 	{
 		SetX(GetPos().x + m_nSpeedX);
 		SetY(GetPos().y + m_nSpeedY);
@@ -324,7 +336,8 @@ void CBoss::MoveANDCheckState()
 	{
 		for (int i = 0; i < 139; i++)
 		{
-			SetRect(&rect, wall[i].GetPos().x * 32, wall[i].GetPos().y * 32, wall[i].GetPos().x * 32 + 32, wall[i].GetPos().y * 32 + 32);
+			SetRect(&rect, wall[i].GetPos().x * 32, wall[i].GetPos().y * 32, wall[i].GetPos().x * 32 + 32,
+			        wall[i].GetPos().y * 32 + 32);
 			if (CheckHit(rect))
 			{
 				SetX(GetPos().x - m_nSpeedX);
@@ -405,13 +418,13 @@ void CBoss::MoveANDCheckState()
 	//}
 }
 
-void CBoss::MoveInit()
+void Boss::MoveInit()
 {
 	m_nSpeedX = 0;
 	m_nSpeedY = 0;
 }
 
-void CBoss::NextPattern()
+void Boss::NextPattern()
 {
 	if ((ACTION)pattern[curPattern] == ACTION::ROLL)
 		m_nIdleFrameInterval = 1500;

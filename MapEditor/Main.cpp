@@ -14,28 +14,29 @@
 #include <math.h>
 #include <vector>
 
-#include "bmp.h"
-#include "timer.h"
-#include "sprite.h"
-#include "define.h"
-#include "block.h"
-#include "mapeditor.h"
-#include "myplayer.h"
-#include "camera.h"
-#include "worldmapBmp.h"
-#include "introsprite.h"
-#include "sprite8.h"
-#include "arrow.h"
-#include "boss.h"
+#include "Bmp.h"
+#include "Timer.h"
+#include "Sprite.h"
+#include "SettingData.h"
+#include "Block.h"
+#include "MapEditor.h"
+#include "Player.h"
+#include "Camera.h"
+#include "WorldMapBmp.h"
+#include "IntroSprite.h"
+#include "Sprite8.h"
+#include "Arrow.h"
+#include "Boss.h"
 #include "Vector2.h"
-#include "snowball.h"
-#include "choicewindow.h"
-#include "gui.h"
-#include "gameEnum.h"
-#include "map.h"
+#include "SnowBall.h"
+#include "ChoiceWindow.h"
+#include "Gui.h"
+#include "GameEnum.h"
+#include "Map.h"
 #include <string>
-#include "fireblock.h"
-#include "enemy.h"
+#include "Fireblock.h"
+#include "Enemy.h"
+#include "SkillUI.h"
 
 using namespace std;
 
@@ -62,29 +63,29 @@ LPDIRECTDRAWSURFACE7 g_lpSecondarySurface = NULL;
 LPDIRECTINPUT8 g_lpDirectInputObject = NULL;
 LPDIRECTINPUTDEVICE8 g_lpDirectInputKeyboard = NULL;
 
-CBLOCK Block[BLOCK_Y][BLOCK_X];
-CSprite blockSprite[4][TOTAL_BLOCK_SPRITE];
-CSprite blockSprite2[TOTAL_BLOCK_SPRITE_Y][TOTAL_BLOCK_SPRITE_X];
-CSprite fireSprite;
-CPlayer player;
-CBoss boss;
+Block g_blocks[BLOCK_Y][BLOCK_X];
+Sprite blockSprite[4][TOTAL_BLOCK_SPRITE];
+Sprite blockSprite2[TOTAL_BLOCK_SPRITE_Y][TOTAL_BLOCK_SPRITE_X];
+Sprite fireSprite;
+Player player;
+Boss boss;
 FireBlock fireBlock;
 
-CCamera camera;
+Camera camera;
 
-CBLOCK curBlock;
-CSprite grassSprite;
+Block curBlock;
+Sprite grassSprite;
 
-CSprite player_skill;
+Sprite player_skill;
 
-CSprite enemy_idle_left;
-CSprite enemy_idle_right;
-CSprite enemy_up_left;
-CSprite enemy_up_right;
-CSprite enemy_hide_left;
-CSprite enemy_hide_right;
-CSprite enemy_attack_left;
-CSprite enemy_attack_right;
+Sprite enemy_idle_left;
+Sprite enemy_idle_right;
+Sprite enemy_up_left;
+Sprite enemy_up_right;
+Sprite enemy_hide_left;
+Sprite enemy_hide_right;
+Sprite enemy_attack_left;
+Sprite enemy_attack_right;
 
 CSprite8 player_walk;
 CSprite8 player_roll;
@@ -98,25 +99,31 @@ CSprite8 boss_roll;
 CSprite8 boss_attack;
 CSprite8 boss_dead;
 
-CSprite boss_sleep;
-CSprite boss_snowball;
+Sprite boss_sleep;
+Sprite boss_snowball;
 
-CSprite boss_hp_window;
-CSprite boss_hp;
+Sprite boss_hp_window;
+Sprite boss_hp;
 
-CSprite player_hp;
+Sprite player_hp;
 
-CArrow arrow[TOTAL_ARROW];
-CSnowBall snowball[TOTAL_SNOWBALL];
+Sprite skill_background;
+Sprite skill_roll;
+Sprite skill_cyclone;
+
+Sprite tutorialSprite;
+
+Arrow arrow[TOTAL_ARROW];
+SnowBall snowball[TOTAL_SNOWBALL];
 Enemy enemy[TOTAL_ENEMY];
 
-CIntroSprite introSprite;
-CIntroSprite introButton;
-CWorldMap bossMap;
-CWorldMap bossMapRoof;
-CWorldMap baseMap;
-CWorldMap* curEditMap;
-Map	map;
+IntroSprite introSprite;
+IntroSprite introButton;
+WorldMap bossMap;
+WorldMap bossMapRoof;
+WorldMap baseMap;
+WorldMap* curEditMap;
+Map map;
 
 Vector2 attackDirection;
 Vector2 firstPosition;
@@ -128,8 +135,11 @@ Gui playerHp1;
 Gui playerHp2;
 Gui playerHp3;
 Gui playerHp4;
+Gui tutorial;
+SkillUI skillRoll;
+SkillUI skillCyclone;
 
-MOD curMod;			//현재 모드
+MOD curMod; //현재 모드
 
 DIRECTION curPlayerDirection;
 DIRECTION curBossDirection;
@@ -139,15 +149,16 @@ ACTION curBossAction;
 
 EDIT_STATE curEditState;
 
-EDIT_WINDOW curEditWindow;		//현재 에디터 창
+EDIT_WINDOW curEditWindow; //현재 에디터 창
 
-MAPEDITOR g_editor;		//맵에디터 변수
+MAPEDITOR g_editor; //맵에디터 변수
 
-CTimer g_Timer;
+Timer g_Timer;
 bool g_bActiveApp = false;
 bool g_bIsFirst;
 bool g_bIsGame = true;
 bool g_bIsQuit = false;
+bool IsSkipTutorial = false;
 
 int mouseX = 0, mouseY = 0;
 int cameraPositionX;
@@ -156,7 +167,6 @@ int cameraPositionY;
 int arrowDirection;
 float x, y;
 int StartTime = 0;
-CBLOCK* wallBlock;
 
 extern BOOL _InitDirectSound(void);
 BOOL m_bEditorFirst = TRUE;
@@ -183,8 +193,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	if (RegisterClassEx(&wndclass) == 0)
 		return 0;
 	g_hwnd = CreateWindowEx(WS_EX_TOPMOST, CLASS_NAME, CLASS_NAME, WS_POPUP | WS_VISIBLE,
-		GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN),
-		SCREEN_WIDTH, SCREEN_HEIGHT, NULL, NULL, hInstance, NULL);
+	                        GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN),
+	                        SCREEN_WIDTH, SCREEN_HEIGHT, NULL, NULL, hInstance, NULL);
 
 	if (g_hwnd == NULL) return 0;
 	g_hInstance = hInstance;
@@ -241,7 +251,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 }
 
-LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
 	if (curMod == MOD_QUIT && !g_bIsQuit)
 	{
 		g_bIsQuit = true;
@@ -284,9 +295,8 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 			g_bActiveApp = false;
 		break;
 	case WM_KEYDOWN:
-		//if (wParam == 'G') curMod = MOD_GAME;
 		if (wParam == 'Y') curMod = MOD_INTRO;
-		//if (wParam == 'M') curMod = MOD_EDITOR;
+		if (wParam == VK_RETURN) IsSkipTutorial = true;
 		if (wParam == VK_ESCAPE) DestroyWindow(hwnd);
 		break;
 	case WM_LBUTTONDOWN:
@@ -298,8 +308,10 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 			if (!(curPlayerAction == ACTION::ROLL))
 				if (!player.IsArrowNull() && !(curPlayerAction == ACTION::DEAD) && !camera.GetIsFirstAlpha())
 				{
-					firstPosition.SetRect(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1), HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
-					curMousePosition.SetRect(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1), HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
+					firstPosition.SetRect(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1),
+					                      HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
+					curMousePosition.SetRect(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1),
+					                         HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
 					camera.SetIsExpansion(true);
 					player.GetCurArrow()->SetCharging(true);
 					x = curMousePosition.x - player.GetPos().x;
@@ -311,7 +323,8 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		case MOD_EDITOR:
 			g_editor.CheckChoiceWindow(LOWORD(lParam), HIWORD(lParam));
 			if (!g_editor.IsChoiceWindow())
-				g_editor.SetStartXY(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1), HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
+				g_editor.SetStartXY(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1),
+				                    HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
 			else
 				g_editor.GetChoiceWindow()->CheckBlockClick(LOWORD(lParam), HIWORD(lParam));
 			break;
@@ -328,7 +341,8 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 			if (!camera.GetIsFirstAlpha())
 			{
 				isSound = false;
-				curMousePosition.SetRect(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1), HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
+				curMousePosition.SetRect(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1),
+				                         HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
 				camera.SetIsExpansion(false);
 				x = curMousePosition.x - player.GetPos().x;
 				y = curMousePosition.y - player.GetPos().y;
@@ -339,9 +353,9 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		case MOD_EDITOR:
 			if (!g_editor.IsChoiceWindow())
 			{
-				g_editor.SetEndXY(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1), HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
-				g_editor.SetBlock(Block, curBlock.GetSprite(), &g_Timer);
-				//curEditMap->CopyBufferToSurface4(g_lpDirectDrawObject);
+				g_editor.SetEndXY(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1),
+				                  HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
+				g_editor.SetBlock(g_blocks, curBlock.GetSprite(), &g_Timer);
 				g_editor.SaveWallData();
 			}
 			else
@@ -361,7 +375,8 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		case MOD_GAME:
 			if (camera.GetIsExpansion() && !camera.GetIsFirstAlpha())
 			{
-				curMousePosition.SetRect(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1), HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
+				curMousePosition.SetRect(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1),
+				                         HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
 				x = curMousePosition.x - player.GetPos().x;
 				y = curMousePosition.y - player.GetPos().y;
 				arrowDirection = (int)sqrtf(pow(x, 2) + pow(y, 2));
@@ -417,11 +432,6 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 
 			player_hp.ReleaseAll();
 
-			/*for (int i = 0; i < TOTAL_BLOCK_SPRITE; i++)
-			{
-
-			}*/
-
 			g_lpDirectDrawObject->Release();
 		}
 		if (g_lpDirectInputObject)
@@ -439,7 +449,6 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		return DefWindowProc(hwnd, message, wParam, lParam);
 	}
 	return 0;
-
 }
 
 BOOL DirectInputKeyboardDown(LPDIRECTINPUTDEVICE8 lpKeyboard, int dikcode)
@@ -462,8 +471,9 @@ bool LoadWorldMapBlock()
 	HANDLE hfile;
 	DWORD actualRead;
 
-	hfile = CreateFile(TEXT("data\\blockData.txt"), GENERIC_READ, FILE_SHARE_READ, (LPSECURITY_ATTRIBUTES)NULL, OPEN_EXISTING,
-		FILE_ATTRIBUTE_NORMAL, (HANDLE)NULL);
+	hfile = CreateFile(TEXT("data\\blockData.txt"), GENERIC_READ, FILE_SHARE_READ, (LPSECURITY_ATTRIBUTES)NULL,
+	                   OPEN_EXISTING,
+	                   FILE_ATTRIBUTE_NORMAL, (HANDLE)NULL);
 
 	if (hfile == INVALID_HANDLE_VALUE)
 	{
@@ -475,10 +485,10 @@ bool LoadWorldMapBlock()
 
 	MapData = new unsigned char[BLOCK_X * BLOCK_Y * 2];
 
-	if (!ReadFile(hfile, MapData, BLOCK_X * BLOCK_Y * 2, &actualRead, NULL))		//비트맵파일 자체의 정보를 읽을수 없다면
+	if (!ReadFile(hfile, MapData, BLOCK_X * BLOCK_Y * 2, &actualRead, NULL)) //비트맵파일 자체의 정보를 읽을수 없다면
 	{
-		CloseHandle(hfile);		//핸들을 반납해주고
-		return false;			//false를 반환해준다
+		CloseHandle(hfile); //핸들을 반납해주고
+		return false; //false를 반환해준다
 	}
 
 	char tmp[2];
@@ -489,7 +499,7 @@ bool LoadWorldMapBlock()
 		{
 			memcpy(tmp, MapData + (i * BLOCK_X * 2) + j * 2, 2);
 			tmp2 = atoi(tmp);
-			Block[i][j].SetBlockNumber(tmp2);
+			g_blocks[i][j].SetBlockNumber(tmp2);
 		}
 	}
 	memcpy(g_editor.GetBlockData(), MapData, BLOCK_X * BLOCK_Y * 2);
@@ -498,8 +508,9 @@ bool LoadWorldMapBlock()
 
 	CloseHandle(hfile);
 
-	hfile = CreateFile(TEXT("data\\blockData2.txt"), GENERIC_READ, FILE_SHARE_READ, (LPSECURITY_ATTRIBUTES)NULL, OPEN_EXISTING,
-		FILE_ATTRIBUTE_NORMAL, (HANDLE)NULL);
+	hfile = CreateFile(TEXT("data\\blockData2.txt"), GENERIC_READ, FILE_SHARE_READ, (LPSECURITY_ATTRIBUTES)NULL,
+	                   OPEN_EXISTING,
+	                   FILE_ATTRIBUTE_NORMAL, (HANDLE)NULL);
 
 	if (hfile == INVALID_HANDLE_VALUE)
 	{
@@ -509,10 +520,10 @@ bool LoadWorldMapBlock()
 
 	MapData = new unsigned char[BLOCK_X * BLOCK_Y * 2];
 
-	if (!ReadFile(hfile, MapData, BLOCK_X * BLOCK_Y * 2, &actualRead, NULL))		//비트맵파일 자체의 정보를 읽을수 없다면
+	if (!ReadFile(hfile, MapData, BLOCK_X * BLOCK_Y * 2, &actualRead, NULL)) //비트맵파일 자체의 정보를 읽을수 없다면
 	{
-		CloseHandle(hfile);		//핸들을 반납해주고
-		return false;			//false를 반환해준다
+		CloseHandle(hfile); //핸들을 반납해주고
+		return false; //false를 반환해준다
 	}
 	for (int i = 0; i < BLOCK_Y; i++)
 	{
@@ -520,7 +531,7 @@ bool LoadWorldMapBlock()
 		{
 			memcpy(tmp, MapData + (i * BLOCK_X * 2) + j * 2, 2);
 			tmp2 = atoi(tmp);
-			Block[i][j].SetBlockNumber(tmp2);
+			g_blocks[i][j].SetBlockNumber(tmp2);
 		}
 	}
 	memcpy(g_editor.GetBlockData2(), MapData, BLOCK_X * BLOCK_Y * 2);
@@ -542,7 +553,7 @@ bool LoadBMPandInitSurface()
 
 	g_bIsFirst = true;
 #pragma region intro
-	if (!introSprite.LoadBMPFile("image\\intro\\background5.bmp"))
+	if (!introSprite.LoadBMPFile("image\\intro\\background.bmp"))
 		return false;
 	if (!introSprite.CopyBufferToSurface(g_lpDirectDrawObject))
 		return false;
@@ -1050,7 +1061,7 @@ bool LoadBMPandInitSurface()
 			path = "image\\mapblock\\mapblock2\\";
 			path.append(_index);
 			path.append(_bmp);
-			char* c = new char[path.size() + 1];		//string을 char로 바꿔주는 과정
+			char* c = new char[path.size() + 1]; //string을 char로 바꿔주는 과정
 		std:copy(path.begin(), path.end(), c);
 			c[path.size()] = '\0';
 			if (!blockSprite2[y][x].LoadFrame(0, c))
@@ -1088,6 +1099,8 @@ bool LoadBMPandInitSurface()
 	boss_roll.Init();
 	boss_attack.Init();
 	boss_dead.Init();
+
+#pragma region player_sprite
 
 #pragma region player_walk
 	if (!player_walk.GetSprite(DIRECTION::LEFT)->InitSprite(6, 20, 32, COLOR_KEY, g_lpDirectDrawObject))
@@ -1212,8 +1225,6 @@ bool LoadBMPandInitSurface()
 #pragma endregion
 
 #pragma region player_roll
-
-	//todo 스프라이트 스프라이트8로 바꾸고 함수 없애기
 	if (!player_roll.GetSprite(DIRECTION::LEFT)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
 	if (!player_roll.GetSprite(DIRECTION::LEFT)->LoadFrame(0, "image\\me\\roll\\left\\left_00.bmp"))
@@ -1335,8 +1346,6 @@ bool LoadBMPandInitSurface()
 		return false;
 #pragma endregion
 
-
-
 #pragma region player_dead
 	if (!player_dead.GetSprite(DIRECTION::LEFT)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
@@ -1398,6 +1407,10 @@ bool LoadBMPandInitSurface()
 	if (!player_skill.LoadFrame(10, "image\\skill\\skill_11.bmp"))
 		return false;
 #pragma endregion
+
+#pragma endregion
+
+#pragma region bow_arrow_sprite
 
 #pragma region bow_walk
 	if (!bow_walk.GetSprite(DIRECTION::LEFT)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
@@ -1477,17 +1490,23 @@ bool LoadBMPandInitSurface()
 
 	if (!bow_walk.GetSprite(DIRECTION::RIGHTDOWN)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(0, "image\\bow\\walk\\rightdown\\bow_walk_rightdown_00.bmp"))
+	if (!bow_walk.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(
+		0, "image\\bow\\walk\\rightdown\\bow_walk_rightdown_00.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(1, "image\\bow\\walk\\rightdown\\bow_walk_rightdown_01.bmp"))
+	if (!bow_walk.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(
+		1, "image\\bow\\walk\\rightdown\\bow_walk_rightdown_01.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(2, "image\\bow\\walk\\rightdown\\bow_walk_rightdown_02.bmp"))
+	if (!bow_walk.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(
+		2, "image\\bow\\walk\\rightdown\\bow_walk_rightdown_02.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(3, "image\\bow\\walk\\rightdown\\bow_walk_rightdown_03.bmp"))
+	if (!bow_walk.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(
+		3, "image\\bow\\walk\\rightdown\\bow_walk_rightdown_03.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(4, "image\\bow\\walk\\rightdown\\bow_walk_rightdown_04.bmp"))
+	if (!bow_walk.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(
+		4, "image\\bow\\walk\\rightdown\\bow_walk_rightdown_04.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(5, "image\\bow\\walk\\rightdown\\bow_walk_rightdown_05.bmp"))
+	if (!bow_walk.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(
+		5, "image\\bow\\walk\\rightdown\\bow_walk_rightdown_05.bmp"))
 		return false;
 
 	if (!bow_walk.GetSprite(DIRECTION::UP)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
@@ -1599,17 +1618,23 @@ bool LoadBMPandInitSurface()
 
 	if (!bow_roll.GetSprite(DIRECTION::RIGHTDOWN)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(0, "image\\bow\\roll\\rightdown\\bow_roll_rightdown_00.bmp"))
+	if (!bow_roll.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(
+		0, "image\\bow\\roll\\rightdown\\bow_roll_rightdown_00.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(1, "image\\bow\\roll\\rightdown\\bow_roll_rightdown_01.bmp"))
+	if (!bow_roll.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(
+		1, "image\\bow\\roll\\rightdown\\bow_roll_rightdown_01.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(2, "image\\bow\\roll\\rightdown\\bow_roll_rightdown_02.bmp"))
+	if (!bow_roll.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(
+		2, "image\\bow\\roll\\rightdown\\bow_roll_rightdown_02.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(3, "image\\bow\\roll\\rightdown\\bow_roll_rightdown_03.bmp"))
+	if (!bow_roll.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(
+		3, "image\\bow\\roll\\rightdown\\bow_roll_rightdown_03.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(4, "image\\bow\\roll\\rightdown\\bow_roll_rightdown_04.bmp"))
+	if (!bow_roll.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(
+		4, "image\\bow\\roll\\rightdown\\bow_roll_rightdown_04.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(5, "image\\bow\\roll\\rightdown\\bow_roll_rightdown_05.bmp"))
+	if (!bow_roll.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(
+		5, "image\\bow\\roll\\rightdown\\bow_roll_rightdown_05.bmp"))
 		return false;
 
 	if (!bow_roll.GetSprite(DIRECTION::UP)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
@@ -1726,6 +1751,10 @@ bool LoadBMPandInitSurface()
 	if (!arrowSprite.GetSprite(DIRECTION::DOWN)->LoadFrame(0, "image\\arrow\\arrow_down.bmp"))
 		return false;
 #pragma endregion
+
+#pragma endregion
+
+#pragma region boss_sprite
 
 #pragma region boss_idle
 	if (!boss_sleep.InitSprite(1, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
@@ -2033,6 +2062,8 @@ bool LoadBMPandInitSurface()
 		return false;
 #pragma endregion
 
+#pragma endregion
+
 #pragma region boss_hp_bar
 	if (!boss_hp_window.InitSprite(1, 36, 552, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
@@ -2061,6 +2092,33 @@ bool LoadBMPandInitSurface()
 	if (!player_hp.LoadFrame(2, "image\\gui\\player_hp\\hp_2.bmp"))
 		return false;
 #pragma endregion
+
+#pragma region skill_backgroud
+	if (!skill_background.InitSprite(1, 65, 65, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!skill_background.LoadFrame(0, "image\\gui\\skill\\background.bmp"))
+		return false;
+#pragma endregion
+
+#pragma region skill_roll
+	if (!skill_roll.InitSprite(1, 45, 45, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!skill_roll.LoadFrame(0, "image\\gui\\skill\\roll.bmp"))
+		return false;
+#pragma endregion
+
+#pragma region skill_cyclone
+	if (!skill_cyclone.InitSprite(1, 45, 45, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!skill_cyclone.LoadFrame(0, "image\\gui\\skill\\cyclone.bmp"))
+		return false;
+#pragma endregion
+
+	if (!tutorialSprite.InitSprite(1, 1024, 596, 10, g_lpDirectDrawObject))
+		return false;
+	if (!tutorialSprite.LoadFrame(0, "image\\gui\\tutorial.bmp"))
+		return false;
+
 
 #pragma region enemy_idle
 	if (!enemy_idle_left.InitSprite(6, 24 * 2, 21 * 2, COLOR_KEY, g_lpDirectDrawObject))

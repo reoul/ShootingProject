@@ -1,27 +1,25 @@
-#ifndef __sprite8_h_
-#define __sprite8_h_
+﻿#pragma once
+#include "GameEnum.h"
 
-#include "sprite.h"
-#include "gameEnum.h"
+class Sprite;
 
 class CSprite8
 {
-private:
-	CSprite *left;
-	CSprite *leftup;
-	CSprite *leftdown;
-	CSprite *right;
-	CSprite *rightup;
-	CSprite *rightdown;
-	CSprite *up;
-	CSprite *down;
 public:
 	CSprite8();
 	~CSprite8();
 	void Init();
-	CSprite* GetSprite(DIRECTION type);
+	Sprite* GetSprite(DIRECTION type);
 	void SetSizeAll(float size);
 	bool ReleaseAll();
 	void ReStoreAll();
+private:
+	Sprite* left;
+	Sprite* leftup;
+	Sprite* leftdown;
+	Sprite* right;
+	Sprite* rightup;
+	Sprite* rightdown;
+	Sprite* up;
+	Sprite* down;
 };
-#endif

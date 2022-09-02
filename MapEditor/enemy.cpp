@@ -1,7 +1,8 @@
-#include "enemy.h"
-#include "camera.h"
+﻿#include "Enemy.h"
+#include "Camera.h"
+#include "SettingData.h"
 
-extern CCamera camera;
+extern Camera camera;
 
 Enemy::Enemy()
 {
@@ -11,14 +12,14 @@ Enemy::~Enemy()
 {
 }
 
-void Enemy::Initialize(int x, int y, CTimer* timer, int currentFrame, int frameInterval, int moveInterval)
+void Enemy::Initialize(int x, int y, Timer* timer, int currentFrame, int frameInterval, int moveInterval)
 {
 	m_nMoveInterval = moveInterval;
-	CGObject::Initialize(m_pLeftIdleSprite, x, y, timer, currentFrame, frameInterval, 0);
+	GameObject::Initialize(m_pLeftIdleSprite, x, y, timer, currentFrame, frameInterval, 0);
 }
 
-void Enemy::SetSprite(CSprite* _leftidle, CSprite* _rightidle, CSprite* _leftup, CSprite* _rightup, 
-		CSprite* _lefthide, CSprite* _righthide, CSprite* _leftattack, CSprite* _rightattack)
+void Enemy::SetSprite(Sprite* _leftidle, Sprite* _rightidle, Sprite* _leftup, Sprite* _rightup,
+                      Sprite* _lefthide, Sprite* _righthide, Sprite* _leftattack, Sprite* _rightattack)
 {
 	m_pLeftIdleSprite = _leftidle;
 	m_pRightIdleSprite = _rightidle;
@@ -28,12 +29,12 @@ void Enemy::SetSprite(CSprite* _leftidle, CSprite* _rightidle, CSprite* _leftup,
 	m_pRightHideSprite = _righthide;
 	m_pLeftAttackSprite = _leftattack;
 	m_pRightAttackSprite = _rightattack;
-	CGObject::SetSprite(m_pLeftIdleSprite);
+	GameObject::SetSprite(m_pLeftIdleSprite);
 }
 
 void Enemy::Draw(LPDIRECTDRAWSURFACE7 surface)
 {
 	draw_x = (int)(-(camera.GetX() - GetPos().x) + (SCREEN_WIDTH * 0.5f));
 	draw_y = (int)(-(camera.GetY() - GetPos().y) + (SCREEN_HEIGHT * 0.5f));
-	CGObject::Draw(true, draw_x, draw_y, surface);
+	GameObject::Draw(true, draw_x, draw_y, surface);
 }

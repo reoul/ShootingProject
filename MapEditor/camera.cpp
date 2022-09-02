@@ -1,9 +1,10 @@
+#include "Camera.h"
 #include <vector>
 #include <thread>
-#include <stdio.h>
-#include "camera.h"
+
 #include "Vector2.h"
-#include "gameEnum.h"
+#include "GameEnum.h"
+#include "SettingData.h"
 
 using namespace std;
 
@@ -13,103 +14,104 @@ extern DIRECTION curPlayerDirection;
 
 extern ACTION curPlayerAction;
 
-extern CPlayer player;
+extern Player player;
 
 extern Vector2 attackDirection;
 
 extern HDC hdc;
 extern TCHAR buffer2[40];
 
-CCamera::CCamera()
+Camera::Camera()
 {
 	_rgb = new unsigned char[SCREEN_HEIGHT * SCREEN_WIDTH * 4];
 }
-CCamera::~CCamera()
+
+Camera::~Camera()
 {
 }
 
-int CCamera::GetX()
+int Camera::GetX()
 {
 	return m_x;
 }
 
-int CCamera::GetY()
+int Camera::GetY()
 {
 	return m_y;
 }
 
-//int CCamera::GetDrawFinishX()
+//int Camera::GetDrawFinishX()
 //{
 //	return m_nFinishX;
 //}
 //
-//int CCamera::GetDrawFinishY()
+//int Camera::GetDrawFinishY()
 //{
 //	return m_nFinishY;
 //}
 
-int CCamera::GetZoomInRange()
+int Camera::GetZoomInRange()
 {
 	return m_nZoomInRange;
 }
 
-void CCamera::SetXY(int x, int y)
+void Camera::SetXY(int x, int y)
 {
 	m_x = x;
 	m_y = y;
 }
 
-float CCamera::GetExpansion()
+float Camera::GetExpansion()
 {
 	return m_expansion;
 }
 
-bool CCamera::GetIsExpansion()
+bool Camera::GetIsExpansion()
 {
 	return m_bIsExpansion;
 }
 
-bool CCamera::GetIsFirstAlpha()
+bool Camera::GetIsFirstAlpha()
 {
 	return IsFirstAlpha;
 }
 
-void CCamera::SetIsFirstAlpha(bool alpha)
+void Camera::SetIsFirstAlpha(bool alpha)
 {
 	IsFirstAlpha = alpha;
 }
 
-void CCamera::SetAlpha(int alpha)
+void Camera::SetAlpha(int alpha)
 {
 	Alpha = alpha;
 }
 
-int CCamera::GetAlpha()
+int Camera::GetAlpha()
 {
 	return Alpha;
 }
 
-void CCamera::SetExpansion(float _expansion)
+void Camera::SetExpansion(float _expansion)
 {
 	m_expansion = _expansion;
 }
 
-void CCamera::SetIsExpansion(bool expantion)
+void Camera::SetIsExpansion(bool expantion)
 {
 	m_bIsExpansion = expantion;
 }
 
-void CCamera::Expansion()
+void Camera::Expansion()
 {
 	m_bIsExpansion = true;
 }
 
-bool CCamera::IsExpansion()
+bool Camera::IsExpansion()
 {
 	return m_bIsExpansion;
 }
 
-void CCamera::CheckExpansion()
+void Camera::CheckExpansion()
 {
 	if (m_pTimer->elapsed(m_nLastFrameTime, m_nExpantionInterval))
 	{
@@ -128,7 +130,7 @@ void CCamera::CheckExpansion()
 	}
 }
 
-void CCamera::Initialize(CTimer* timer)
+void Camera::Initialize(Timer* timer)
 {
 	m_nExpantionInterval = 4;
 	m_nMoveInterval = 4;
@@ -150,7 +152,7 @@ void CCamera::Initialize(CTimer* timer)
 	m_nLastFrameTime = m_pTimer->time();
 }
 
-void CCamera::InitExpantion()
+void Camera::InitExpantion()
 {
 	m_nSpeedX = 0;
 	m_nSpeedY = 0;
@@ -161,60 +163,60 @@ void CCamera::InitExpantion()
 	//m_bIsExpansion = false;
 }
 
-void CCamera::SetIsSkill(bool skill)
+void Camera::SetIsSkill(bool skill)
 {
 	m_bIsSkill = skill;
 }
 
-void CCamera::Left()
+void Camera::Left()
 {
 	m_x -= 5;
 	if (m_x < SCREEN_WIDTH >> 1)
 		m_x = SCREEN_WIDTH >> 1;
 }
 
-void CCamera::Right()
+void Camera::Right()
 {
 	m_x += 5;
 	if (m_x > WORLDMAP_WIDTH - (SCREEN_WIDTH >> 1))
 		m_x = WORLDMAP_WIDTH - (SCREEN_WIDTH >> 1);
 }
 
-void CCamera::Up()
+void Camera::Up()
 {
 	m_y -= 5;
 	if (m_y < SCREEN_HEIGHT >> 1)
 		m_y = SCREEN_HEIGHT >> 1;
 }
 
-void CCamera::Down()
+void Camera::Down()
 {
 	m_y += 5;
 	if (m_y > WORLDMAP_HEIGHT - (SCREEN_HEIGHT >> 1))
 		m_y = WORLDMAP_HEIGHT - (SCREEN_HEIGHT >> 1);
 }
 
-void CCamera::Left2()
+void Camera::Left2()
 {
 	m_nSpeedX -= 1;
 }
 
-void CCamera::Right2()
+void Camera::Right2()
 {
 	m_nSpeedX += 1;
 }
 
-void CCamera::Up2()
+void Camera::Up2()
 {
 	m_nSpeedY -= 1;
 }
 
-void CCamera::Down2()
+void Camera::Down2()
 {
 	m_nSpeedY += 1;
 }
 
-void CCamera::Move()
+void Camera::Move()
 {
 	//m_x += (m_nFinishX - m_x)* !((int)curPlayerActionState == 4) ? 0.5f : 0.1f;
 	//m_y += (m_nFinishY - m_y)* !((int)curPlayerActionState == 4) ? 0.5f : 0.1f;
@@ -236,24 +238,24 @@ void CCamera::Move()
 		m_y = WORLDMAP_HEIGHT - (SCREEN_HEIGHT >> 1);
 }
 
-void CCamera::CheckFinishXY()
+void Camera::CheckFinishXY()
 {
 	m_nFinishX = GetFinishX2();
 	m_nFinishY = GetFinishY2();
 }
 
-void CCamera::SetFinishXY(int x, int y)
+void Camera::SetFinishXY(int x, int y)
 {
 	m_nFinishX = x;
 	m_nFinishY = y;
 }
 
-float CCamera::GetExpansionSpeed()
+float Camera::GetExpansionSpeed()
 {
 	return m_expansionSpeed;
 }
 
-int CCamera::GetFinishX()
+int Camera::GetFinishX()
 {
 	int _x;
 
@@ -279,7 +281,7 @@ int CCamera::GetFinishX()
 	return _x;
 }
 
-int CCamera::GetFinishY()
+int Camera::GetFinishY()
 {
 	int _y;
 	int a = rand() % 4;
@@ -302,10 +304,10 @@ int CCamera::GetFinishY()
 	return _y;
 }
 
-int CCamera::GetFinishX2()
+int Camera::GetFinishX2()
 {
 	int _x = 0;
-	if ((curPlayerAction != ACTION::ATTACK) && (curPlayerAction != ACTION::ROLL))		//공격중이 아닐때
+	if ((curPlayerAction != ACTION::ATTACK) && (curPlayerAction != ACTION::ROLL)) //공격중이 아닐때
 	{
 		_x = (int)player.GetPos().x;
 	}
@@ -317,10 +319,10 @@ int CCamera::GetFinishX2()
 }
 
 
-int CCamera::GetFinishY2()
+int Camera::GetFinishY2()
 {
 	int _y;
-	if ((curPlayerAction != ACTION::ATTACK) && (curPlayerAction != ACTION::ROLL))		//공격중이 아닐때
+	if ((curPlayerAction != ACTION::ATTACK) && (curPlayerAction != ACTION::ROLL)) //공격중이 아닐때
 	{
 		_y = (int)player.GetPos().y;
 	}
@@ -331,14 +333,14 @@ int CCamera::GetFinishY2()
 	return _y;
 }
 
-void CCamera::AlphaBlending(LPDIRECTDRAWSURFACE7 lpSurface)		//버퍼에서 표면으로 복사하는 함수
+void Camera::AlphaBlending(LPDIRECTDRAWSURFACE7 lpSurface) //버퍼에서 표면으로 복사하는 함수
 {
 	unsigned char* rgb = new unsigned char[SCREEN_HEIGHT * SCREEN_WIDTH * 4];
-	DDSURFACEDESC2 ddsd;					//표면의 정보를 확인할수 있는 변수를 선언
-	ZeroMemory(&ddsd, sizeof(ddsd));		//ddsd주소에서 ddsd크기만큼 메모리영역을 0으로 채워줌
-	ddsd.dwSize = sizeof(ddsd);				//dwSize를 ddsd크기만큼 초기화 해준다
+	DDSURFACEDESC2 ddsd; //표면의 정보를 확인할수 있는 변수를 선언
+	ZeroMemory(&ddsd, sizeof(ddsd)); //ddsd주소에서 ddsd크기만큼 메모리영역을 0으로 채워줌
+	ddsd.dwSize = sizeof(ddsd); //dwSize를 ddsd크기만큼 초기화 해준다
 
-	FAILED(lpSurface->Lock(NULL, &ddsd, DDLOCK_WAIT, NULL));				//만약 표면을 잠금하는데 실패할경우 false를 반환해준다
+	FAILED(lpSurface->Lock(NULL, &ddsd, DDLOCK_WAIT, NULL)); //만약 표면을 잠금하는데 실패할경우 false를 반환해준다
 
 	//unsigned char *pDest, *pSrc;			//표면의주소를 담을수 있는 변수, 버퍼의 주소를 담을수 있는 변수
 	//unsigned char *aaa = new unsigned char[SCREEN_HEIGHT*SCREEN_WIDTH * 4];
@@ -370,7 +372,7 @@ void CCamera::AlphaBlending(LPDIRECTDRAWSURFACE7 lpSurface)		//버퍼에서 표�
 	//ZeroMemory(surface, sizeof(surface));
 
 	/*pDest = (unsigned char*)ddsd.lpSurface;
-	pSrc = aaa;*/						//버퍼의 주소를 불러옴
+	pSrc = aaa;*/ //버퍼의 주소를 불러옴
 
 	//CopyMemory(aaaa, surface, sizeof(surface));
 
@@ -428,13 +430,13 @@ void worker(thread_data* data)
 	}
 }
 
-void CCamera::AlphaBlending2(LPDIRECTDRAWSURFACE7 lpSurface)
+void Camera::AlphaBlending2(LPDIRECTDRAWSURFACE7 lpSurface)
 {
-	DDSURFACEDESC2 ddsd;					//표면의 정보를 확인할수 있는 변수를 선언
-	ZeroMemory(&ddsd, sizeof(ddsd));		//ddsd주소에서 ddsd크기만큼 메모리영역을 0으로 채워줌
-	ddsd.dwSize = sizeof(ddsd);				//dwSize를 ddsd크기만큼 초기화 해준다
+	DDSURFACEDESC2 ddsd; //표면의 정보를 확인할수 있는 변수를 선언
+	ZeroMemory(&ddsd, sizeof(ddsd)); //ddsd주소에서 ddsd크기만큼 메모리영역을 0으로 채워줌
+	ddsd.dwSize = sizeof(ddsd); //dwSize를 ddsd크기만큼 초기화 해준다
 
-	lpSurface->Lock(NULL, &ddsd, DDLOCK_WAIT, NULL);				//만약 표면을 잠금하는데 실패할경우 false를 반환해준다
+	lpSurface->Lock(NULL, &ddsd, DDLOCK_WAIT, NULL); //만약 표면을 잠금하는데 실패할경우 false를 반환해준다
 
 	//unsigned char *pDest, *pSrc;			//표면의주소를 담을수 있는 변수, 버퍼의 주소를 담을수 있는 변수
 	//unsigned char *aaa = new unsigned char[SCREEN_HEIGHT*SCREEN_WIDTH * 4];

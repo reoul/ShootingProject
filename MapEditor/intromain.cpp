@@ -4,42 +4,43 @@
 #include <dinput.h>
 #include <dsound.h>
 
-#include "bmp.h"
-#include "timer.h"
-#include "sprite.h"
-#include "define.h"
-#include "block.h"
-#include "myplayer.h"
-#include "camera.h"
-#include "worldmapBmp.h"
-#include "introsprite.h"
+#include "Bmp.h"
+#include "Timer.h"
+#include "Sprite.h"
+#include "SettingData.h"
+#include "Block.h"
+#include "Player.h"
+#include "Camera.h"
+#include "WorldMapBmp.h"
+#include "IntroSprite.h"
 #include "DSUTIL.h"
-#include "gameEnum.h"
+#include "GameEnum.h"
 
 
 extern BOOL DirectInputKeyboardDown(LPDIRECTINPUTDEVICE8 lpKeyboard, int dikcode);
-extern LPDIRECTDRAWSURFACE7		g_lpPrimarySurface;
-extern LPDIRECTDRAWSURFACE7		g_lpSecondarySurface;
-extern LPDIRECTDRAW7			g_lpDirectDrawObject;
-extern LPDIRECTINPUT			g_lpDirectInputObject;
-extern LPDIRECTINPUTDEVICE8		g_lpDirectInputKeyboard;
-extern CTimer					g_Timer;
+extern LPDIRECTDRAWSURFACE7 g_lpPrimarySurface;
+extern LPDIRECTDRAWSURFACE7 g_lpSecondarySurface;
+extern LPDIRECTDRAW7 g_lpDirectDrawObject;
+extern LPDIRECTINPUT8 g_lpDirectInputObject;
+extern LPDIRECTINPUTDEVICE8 g_lpDirectInputKeyboard;
+extern Timer g_Timer;
 
 
-extern CCamera					camera;
+extern Camera camera;
 extern HDC hdc;
 extern TCHAR buffer3[40];
 
-extern CWorldMap				bossMap;
-extern CIntroSprite				introSprite;
-extern CIntroSprite				introButton;
-extern HSNDOBJ					Sound[10];
+extern WorldMap bossMap;
+extern IntroSprite introSprite;
+extern IntroSprite introButton;
+extern HSNDOBJ Sound[10];
 
 void InitIntro();
 
 extern MOD curMod;
 
-enum SELECT {START = 0, OPTION, QUIT};
+enum SELECT { START = 0, OPTION, QUIT };
+
 SELECT curSelect;
 int countSelect;
 int SelectMod;
@@ -64,7 +65,7 @@ void IntroMain(void)
 			introButton.KeyDown();
 			if (introButton.KeyCheckClick())
 			{
-				countSelect -= 1;
+				countSelect -= 2;
 				if (countSelect < 0)
 					countSelect = 0;
 				switch (countSelect)
@@ -86,7 +87,7 @@ void IntroMain(void)
 			introButton.KeyDown();
 			if (introButton.KeyCheckClick())
 			{
-				countSelect += 1;
+				countSelect += 2;
 				if (countSelect > 2)
 					countSelect = 2;
 				switch (countSelect)
@@ -126,20 +127,20 @@ void IntroMain(void)
 	switch (curSelect)
 	{
 	case START:
-		introButton.Drawing2(0, 605, 392, g_lpSecondarySurface, true);		//1280 = (567,368)     1152 = (512,440)
+		introButton.Drawing2(0, 605, 392, g_lpSecondarySurface, true);
 		break;
 	case OPTION:
-		introButton.Drawing2(1, 605, 417, g_lpSecondarySurface, true);		//1280 = (567,390)     1152 = (512,467)
+		introButton.Drawing2(1, 605, 417, g_lpSecondarySurface, true);
 		break;
 	case QUIT:
-		introButton.Drawing2(2, 605, 439, g_lpSecondarySurface, true);		//1280 = (567,411)     1152 = (512,492)
+		introButton.Drawing2(2, 605, 439, g_lpSecondarySurface, true);
 		break;
 	}
 
 	if (isStart)
 	{
 		camera.AlphaBlending2(g_lpSecondarySurface);
-		SetVolume(Sound[1]->Buffers[0], (255 - camera.GetAlpha())*-20);
+		SetVolume(Sound[1]->Buffers[0], (255 - camera.GetAlpha()) * -20);
 		if (camera.GetAlpha() <= 10)
 		{
 			SndObjStop(Sound[1]);
@@ -147,14 +148,11 @@ void IntroMain(void)
 	}
 
 	HRESULT hResult;
-	if (FAILED(hResult = g_lpPrimarySurface->Flip(NULL, DDFLIP_WAIT)))	//더블버퍼링 화면전환
+	if (FAILED(hResult = g_lpPrimarySurface->Flip(NULL, DDFLIP_WAIT))) //더블버퍼링 화면전환
 	{
 		if (hResult == DDERR_SURFACELOST)
 			g_lpPrimarySurface->Restore();
 	}
-
-	//sprintf_s(buffer3, TEXT("%d"), camera.GetAlpha());
-	//TextOut(hdc, 0, 0, buffer3, 40);
 }
 
 void InitIntro()
@@ -163,7 +161,6 @@ void InitIntro()
 	SndObjStop(Sound[1]);
 	SndObjStop(Sound[4]);
 	SndObjPlay(Sound[1], DSBPLAY_LOOPING);
-	//SetVolume(Sound[1]->Buffers[0], SoundSize);
 	camera.Initialize(&g_Timer);
 	camera.SetIsFirstAlpha(false);
 	camera.SetAlpha(255);

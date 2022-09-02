@@ -1,13 +1,21 @@
-#ifndef __snowball_h__
-#define __snowball_h__
-
-#include "gobject.h"
-#include "sprite.h"
-#include "define.h"
+﻿#pragma once
+#include "GameObject.h"
 #include "Vector2.h"
 
-class CSnowBall : public CGObject
+class Sprite;
+
+class SnowBall : public GameObject
 {
+public:
+	SnowBall();
+	~SnowBall();
+	void Initialize(int x, int y, Timer* timer, int moveFrame, Sprite* sprite);
+	void SetDirection(Vector2 _direction);
+	void CheckMove();
+	void Draw(LPDIRECTDRAWSURFACE7 surface);
+	void IsHit();
+	void SetUse(bool use);
+	bool IsUse();
 private:
 	int draw_x;
 	int draw_y;
@@ -15,16 +23,4 @@ private:
 	int m_nMoveInterval;
 	bool m_bIsUse;
 	RECT snowHitRect;
-public:
-	CSnowBall();
-	~CSnowBall();
-	void Initialize(int x, int y, CTimer* timer, int moveFrame, CSprite* sprite);
-	void SetDirection(Vector2 _direction);
-	void CheckMove();
-	void Draw(LPDIRECTDRAWSURFACE7 surface);
-	void IsHit();
-	void SetUse(bool use);
-	bool IsUse();
 };
-
-#endif

@@ -1,17 +1,15 @@
-#ifndef __buttondown_h_
-#define __buttondown_h_
+﻿#pragma once
 
-class CButtonDown
+class ButtonDown
 {
-private:
-	int count;
-	bool m_bIsDown;
 public:
-	CButtonDown();
-	~CButtonDown();
+	ButtonDown();
+	~ButtonDown();
 	void KeyDown();
 	void KeyCheckUp();
 	void KeyInitDown();
 	bool KeyCheckClick();
+private:
+	int count;
+	bool m_bIsDown;
 };
-#endif

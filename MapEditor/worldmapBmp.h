@@ -1,31 +1,16 @@
-#ifndef __worldmapBmp_h__
-#define __worldmapBmp_h__
-
+﻿#pragma once
 #include <ddraw.h>
-#include "define.h"
-#include "bmp.h"
-#include "sprite.h"
+#include "Sprite.h"
 
-class CWorldMap
+class WorldMap
 {
-private:
-	int m_nWidth;
-	int m_nHeight;
-	unsigned char *m_pBuffer;
-	unsigned char *m_pBuffer2;
-	CSprite *m_pSprite;
-	LPDIRECTDRAWSURFACE7 *m_pSurface;
-	bool isStart;
-
 public:
-	CWorldMap();
-	~CWorldMap();
-	int GetWidth();
-	int GetHeight();
+	WorldMap();
+	~WorldMap();
 	unsigned char* GetBMPBuffer();
 	unsigned char* GetBMPBuffer2();
 	LPDIRECTDRAWSURFACE7* GetSurface();
-	bool LoadBMPFile(char *filename);
+	bool LoadBMPFile(char* filename);
 	bool CopyBufferToSurface(LPDIRECTDRAW7 pDirectDraw);
 	bool CopyBufferToSurface2(LPDIRECTDRAW7 pDirectDraw);
 	bool CopyBufferToSurface3(LPDIRECTDRAW7 pDirectDraw);
@@ -36,6 +21,12 @@ public:
 	bool Drawing2(int x, int y, LPDIRECTDRAWSURFACE7 pSurface, bool bUsingColorKey, LPDIRECTDRAW7 pDirectDraw);
 	bool ReleaseAll();
 	void Restore();
+private:
+	int m_nWidth;
+	int m_nHeight;
+	unsigned char* m_pBuffer;
+	unsigned char* m_pBuffer2;
+	Sprite* m_pSprite;
+	LPDIRECTDRAWSURFACE7* m_pSurface;
+	bool isStart;
 };
-
-#endif

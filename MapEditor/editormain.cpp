@@ -3,35 +3,35 @@
 #include <ddraw.h>
 #include <dinput.h>
 
-#include "bmp.h"
-#include "timer.h"
-#include "sprite.h"
-#include "define.h"
-#include "block.h"
-#include "myplayer.h"
-#include "camera.h"
-#include "worldmapBmp.h"
-#include "mapeditor.h"
-#include "gameEnum.h"
+#include "Bmp.h"
+#include "Timer.h"
+#include "Sprite.h"
+#include "SettingData.h"
+#include "Block.h"
+#include "Player.h"
+#include "Camera.h"
+#include "WorldMapBmp.h"
+#include "MapEditor.h"
+#include "GameEnum.h"
 
 
 extern BOOL DirectInputKeyboardDown(LPDIRECTINPUTDEVICE8 lpKeyboard, int dikcode);
-extern LPDIRECTDRAWSURFACE7		g_lpPrimarySurface;
-extern LPDIRECTDRAWSURFACE7		g_lpSecondarySurface;
-extern LPDIRECTDRAW7			g_lpDirectDrawObject;
-extern LPDIRECTINPUT			g_lpDirectInputObject;
-extern LPDIRECTINPUTDEVICE8		g_lpDirectInputKeyboard;
-extern CTimer					g_Timer;
+extern LPDIRECTDRAWSURFACE7 g_lpPrimarySurface;
+extern LPDIRECTDRAWSURFACE7 g_lpSecondarySurface;
+extern LPDIRECTDRAW7 g_lpDirectDrawObject;
+extern LPDIRECTINPUT g_lpDirectInputObject;
+extern LPDIRECTINPUTDEVICE8 g_lpDirectInputKeyboard;
+extern Timer g_Timer;
 
-extern CSprite					grassSprite;
-extern CBLOCK					Block[BLOCK_Y][BLOCK_X];
-extern CPlayer					player;
-extern CCamera					camera;
-extern CWorldMap				bossMap;
-extern CWorldMap				bossMapRoof;
-extern CWorldMap				baseMap;
-extern CWorldMap*				curEditMap;
-extern MAPEDITOR				g_editor;
+extern Sprite grassSprite;
+extern Block g_blocks[BLOCK_Y][BLOCK_X];
+extern Player player;
+extern Camera camera;
+extern WorldMap bossMap;
+extern WorldMap bossMapRoof;
+extern WorldMap baseMap;
+extern WorldMap* curEditMap;
+extern MAPEDITOR g_editor;
 
 extern EDIT_STATE curEditState;
 
@@ -78,13 +78,13 @@ void EditorMain(void)
 	{
 		for (int x = 0; x < BLOCK_X; x++)
 		{
-			Block[y][x].Draw(camera.GetX(), camera.GetY(), g_lpSecondarySurface);
+			g_blocks[y][x].Draw(camera.GetX(), camera.GetY(), g_lpSecondarySurface);
 		}
 	}
 	g_editor.GetChoiceWindow()->Drawing(g_lpSecondarySurface);
 
 	HRESULT hResult;
-	if (FAILED(hResult = g_lpPrimarySurface->Flip(NULL, DDFLIP_WAIT)))	//더블버퍼링 화면전환
+	if (FAILED(hResult = g_lpPrimarySurface->Flip(NULL, DDFLIP_WAIT))) //더블버퍼링 화면전환
 	{
 		if (hResult == DDERR_SURFACELOST)
 			g_lpPrimarySurface->Restore();

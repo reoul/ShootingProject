@@ -18,58 +18,58 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="bmp.cpp">
+    <ClCompile Include="Bmp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="InitDirectX.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sprite.cpp">
+    <ClCompile Include="Sprite.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="gobject.cpp">
+    <ClCompile Include="GameObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="timer.cpp">
+    <ClCompile Include="Timer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="gamemain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="block.cpp">
+    <ClCompile Include="Block.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="mapeditor.cpp">
+    <ClCompile Include="MapEditor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="myplayer.cpp">
+    <ClCompile Include="Player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="camera.cpp">
+    <ClCompile Include="Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="worldmapBmp.cpp">
+    <ClCompile Include="WorldMapBmp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="editormain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="intromain.cpp">
+    <ClCompile Include="IntroMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="introsprite.cpp">
+    <ClCompile Include="IntroSprite.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="buttondown.cpp">
+    <ClCompile Include="ButtonDown.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sprite8.cpp">
+    <ClCompile Include="Sprite8.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="arrow.cpp">
+    <ClCompile Include="Arrow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="boss.cpp">
+    <ClCompile Include="Boss.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="dsutil.cpp">
@@ -78,69 +78,72 @@
     <ClCompile Include="Vector2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="snowball.cpp">
+    <ClCompile Include="SnowBall.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="choicewindow.cpp">
+    <ClCompile Include="ChoiceWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="gui.cpp">
+    <ClCompile Include="Gui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="map.cpp">
+    <ClCompile Include="Map.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="fireblock.cpp">
+    <ClCompile Include="Fireblock.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="enemy.cpp">
+    <ClCompile Include="Enemy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SkillUI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="bmp.h">
+    <ClInclude Include="Bmp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="sprite.h">
+    <ClInclude Include="Sprite.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="gobject.h">
+    <ClInclude Include="GameObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="define.h">
+    <ClInclude Include="SettingData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="timer.h">
+    <ClInclude Include="Timer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="block.h">
+    <ClInclude Include="Block.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="mapeditor.h">
+    <ClInclude Include="MapEditor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="myplayer.h">
+    <ClInclude Include="Player.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="camera.h">
+    <ClInclude Include="Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="worldmapBmp.h">
+    <ClInclude Include="WorldMapBmp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="introsprite.h">
+    <ClInclude Include="IntroSprite.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="buttondown.h">
+    <ClInclude Include="ButtonDown.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="sprite8.h">
+    <ClInclude Include="Sprite8.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="arrow.h">
+    <ClInclude Include="Arrow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="boss.h">
+    <ClInclude Include="Boss.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DSUTIL.h">
@@ -149,28 +152,28 @@
     <ClInclude Include="Vector2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="snowball.h">
+    <ClInclude Include="SnowBall.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="choicewindow.h">
+    <ClInclude Include="ChoiceWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="gui.h">
+    <ClInclude Include="Gui.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="map.h">
+    <ClInclude Include="Map.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="gameEnum.h">
+    <ClInclude Include="GameEnum.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="fireblock.h">
+    <ClInclude Include="Fireblock.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="enemy.h">
+    <ClInclude Include="Enemy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ice.h">
+    <ClInclude Include="SkillUI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

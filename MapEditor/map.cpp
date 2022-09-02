@@ -1,4 +1,5 @@
-#include "map.h"
+﻿#include "Map.h"
+#include "WorldMapBmp.h"
 
 Map::Map()
 {
@@ -11,10 +12,8 @@ Map::~Map()
 {
 }
 
-void Map::SetWorldMap(CWorldMap* baseMap, CWorldMap* bossWorldMap, CWorldMap* bossWorldMapRoof)
+void Map::SetWorldMap(WorldMap* baseMap, WorldMap* bossWorldMap, WorldMap* bossWorldMapRoof)
 {
-	m_x = 0;
-	m_y = 0;
 	m_pbassWorldMap = baseMap;
 	m_pBossWorldMap = bossWorldMap;
 	m_pBossWorldMapRoof = bossWorldMapRoof;
@@ -29,6 +28,13 @@ void Map::SetPos(int x, int y)
 void Map::SetStage(int _stage)
 {
 	stage = _stage;
+}
+
+void Map::Init()
+{
+	m_x = 0;
+	m_y = 0;
+	stage = 0;
 }
 
 int Map::GetStageNum()

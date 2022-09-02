@@ -1,24 +1,25 @@
-#include "buttondown.h"
+﻿#include "ButtonDown.h"
 
-CButtonDown::CButtonDown()
+ButtonDown::ButtonDown()
 {
 	count = 0;
 }
 
-CButtonDown::~CButtonDown()
+ButtonDown::~ButtonDown()
 {
 }
 
-void CButtonDown::KeyDown()
+void ButtonDown::KeyDown()
 {
 	count++;
 }
 
-void CButtonDown::KeyInitDown()
+void ButtonDown::KeyInitDown()
 {
 	count = 0;
 }
-void CButtonDown::KeyCheckUp()
+
+void ButtonDown::KeyCheckUp()
 {
 	if (count > 0)
 		m_bIsDown = true;
@@ -26,7 +27,7 @@ void CButtonDown::KeyCheckUp()
 		m_bIsDown = false;
 }
 
-bool CButtonDown::KeyCheckClick()
+bool ButtonDown::KeyCheckClick()
 {
 	return m_bIsDown == true ? false : true;
 }

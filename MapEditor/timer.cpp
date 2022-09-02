@@ -1,34 +1,33 @@
+﻿#include "Timer.h"
 #pragma comment(lib,"winmm.lib")
 #include <Windows.h>
 
-#include "timer.h"
-
-CTimer::CTimer()
+Timer::Timer()
 {
 	m_nStartTime = 0;
 	deltaTime = 0;
 }
 
-CTimer::~CTimer()
+Timer::~Timer()
 {
 }
 
-void CTimer::start()
+void Timer::start()
 {
 	m_nStartTime = timeGetTime();
 }
 
-int CTimer::time()
+int Timer::time()
 {
 	return (timeGetTime() - m_nStartTime);
 }
 
-int CTimer::GetTime()
+int Timer::GetTime()
 {
 	return timeGetTime();
 }
 
-bool CTimer::elapsed(int &stime, int interval)
+bool Timer::elapsed(int& stime, int interval)
 {
 	int current_time = time();
 	if (current_time >= stime + interval)
