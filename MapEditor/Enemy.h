@@ -11,7 +11,7 @@ public:
 public:
 	Enemy();
 	~Enemy();
-	void Initialize(int x, int y, Timer* timer, int currentFrame, int frameInterval, int moveInterval);
+	void Initialize(int x, int y, int currentFrame, int frameInterval, int moveInterval);
 	void SetSprite(Sprite* _leftidle, Sprite* _rightidle, Sprite* _leftup, Sprite* _rightup, Sprite* _lefthide,
 	               Sprite* _righthide, Sprite* _leftattack, Sprite* _rightattack);
 	void Draw(LPDIRECTDRAWSURFACE7 surface);

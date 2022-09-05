@@ -9,9 +9,9 @@ Block::~Block()
 {
 }
 
-void Block::Initialize(Sprite* pSprite, int x, int y, Timer* timer, int CurrentFrame, int FrameInterval)
+void Block::Initialize(Sprite* pSprite, int x, int y, int CurrentFrame, int FrameInterval)
 {
-	GameObject::Initialize(pSprite, x, y, timer, CurrentFrame, FrameInterval, 0);
+	GameObject::Initialize(pSprite, x, y, CurrentFrame, FrameInterval, 0);
 }
 
 void Block::Draw(int x, int y, LPDIRECTDRAWSURFACE7 lpSurface)

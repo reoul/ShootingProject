@@ -7,7 +7,7 @@ class Gui
 public:
 	Gui();
 	~Gui();
-	void Initialize(int x, int y, Sprite* sprite, Timer* timer, int frameInterval);
+	void Initialize(int x, int y, Sprite* sprite, int frameInterval);
 	virtual void Drawing(LPDIRECTDRAWSURFACE7 lpsurface);
 	void DrawingBossHp(LPDIRECTDRAWSURFACE7 lpsurface);
 	void DrawingPlayerHp(LPDIRECTDRAWSURFACE7 lpsurface);
@@ -19,7 +19,6 @@ protected:
 	Sprite* m_pSprite;
 private:
 	int m_nCurrentFrame;
-	int m_nLastFrameTime;
+	system_clock::time_point m_nLastFrameTime;
 	int m_nFrameInterval;
-	Timer* m_pTimer;
 };

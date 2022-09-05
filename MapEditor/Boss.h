@@ -14,7 +14,7 @@ public:
 	Boss();
 	~Boss();
 	bool GetIsRoll();
-	void Initialize(int x, int y, Timer* timer, int currentFrame, int frameInterval, int moveInterval);
+	void Initialize(int x, int y, int currentFrame, int frameInterval, int moveInterval);
 	void SetSprite(Sprite* _sleep, CSprite8* _idle, CSprite8* _roll, CSprite8* _attack, CSprite8* _dead);
 	void Draw(LPDIRECTDRAWSURFACE7 surface);
 	bool CanMove();
@@ -36,7 +36,7 @@ private:
 	bool m_bIsRoll;
 	bool m_bIsHitWall;
 	bool m_bIsRoar;
-	int m_nLastMoveTime;
+	system_clock::time_point m_nLastMoveTime;
 	int m_nMoveInterval;
 	int m_nMoveSpeed;
 	float m_nSpeedX;
@@ -48,7 +48,7 @@ private:
 	int curPattern;
 	int cntAttack;
 	int cntHitWall;
-	int m_nLastIdleTime;
+	system_clock::time_point m_nLastIdleTime;
 	int m_nIdleFrameInterval;
 	Vector2 playerDirection;
 

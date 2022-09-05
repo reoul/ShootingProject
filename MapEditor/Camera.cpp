@@ -113,7 +113,7 @@ bool Camera::IsExpansion()
 
 void Camera::CheckExpansion()
 {
-	if (m_pTimer->elapsed(m_nLastFrameTime, m_nExpantionInterval))
+	if (Timer::Elapsed(m_nLastFrameTime, m_nExpantionInterval))
 	{
 		if (m_bIsExpansion)
 		{
@@ -130,7 +130,7 @@ void Camera::CheckExpansion()
 	}
 }
 
-void Camera::Initialize(Timer* timer)
+void Camera::Initialize()
 {
 	m_nExpantionInterval = 4;
 	m_nMoveInterval = 4;
@@ -146,10 +146,9 @@ void Camera::Initialize(Timer* timer)
 	m_expansionSpeed = 0.006f;
 	m_bIsExpansion = false;
 	m_bIsSkill = false;
-	m_pTimer = timer;
 	Alpha = 0;
 	IsFirstAlpha = true;
-	m_nLastFrameTime = m_pTimer->time();
+	m_nLastFrameTime = Timer::Now();
 }
 
 void Camera::InitExpantion()
@@ -218,8 +217,8 @@ void Camera::Down2()
 
 void Camera::Move()
 {
-	//m_x += (m_nFinishX - m_x)* !((int)curPlayerActionState == 4) ? 0.5f : 0.1f;
-	//m_y += (m_nFinishY - m_y)* !((int)curPlayerActionState == 4) ? 0.5f : 0.1f;
+	//mX += (m_nFinishX - mX)* !((int)curPlayerActionState == 4) ? 0.5f : 0.1f;
+	//mY += (m_nFinishY - mY)* !((int)curPlayerActionState == 4) ? 0.5f : 0.1f;
 	if ((int)curPlayerAction == ACTION::ATTACK)
 		m_nMoveSpeed = 0.1f;
 	else

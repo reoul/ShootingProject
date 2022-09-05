@@ -1,18 +1,18 @@
 #pragma once
 
-// todo : 제너릭으로 만들기
 class Vector2
 {
 public:
 	Vector2();
-	Vector2(float _x, float _y);
-	~Vector2();
-	void SetRect(float _x, float _y);
+	Vector2(float x_, float y_);
+	Vector2(const Vector2&) = default;
+	~Vector2() = default;
+	void SetXY(float x_, float y_);
 	Vector2 operator-(Vector2 vec);
-	float Length();
+	float Length() const;
 	static float Distance(Vector2 v1, Vector2 v2);
-	double norm(); //벡터의 길이 반환
-	Vector2 normalize();
+	float norm() const; //벡터의 길이 반환
+	Vector2 normalize() const;
 	void Rotate(float degrees);
 	int VectorToAngle();
 public:

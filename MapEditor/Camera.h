@@ -22,7 +22,7 @@ public:
 	void SetIsExpansion(bool expantion);
 	bool IsExpansion();
 	void InitExpantion();
-	void Initialize(Timer* timer);
+	void Initialize();
 	void CheckExpansion();
 	void Left();
 	void Right();
@@ -44,7 +44,7 @@ public:
 	void AlphaBlending(LPDIRECTDRAWSURFACE7 lpSurface);
 	void AlphaBlending2(LPDIRECTDRAWSURFACE7 lpSurface);
 private:
-	int m_nLastFrameTime;
+	system_clock::time_point m_nLastFrameTime;
 	int m_nExpantionInterval;
 	int m_nMoveInterval;
 	float m_x;
@@ -61,6 +61,5 @@ private:
 	float m_expansionSpeed;
 	bool m_bIsExpansion;
 	bool m_bIsSkill;
-	Timer* m_pTimer;
 	unsigned char* _rgb;
 };

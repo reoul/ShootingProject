@@ -14,14 +14,14 @@ SnowBall::~SnowBall()
 {
 }
 
-void SnowBall::Initialize(int x, int y, Timer* timer, int moveFrame, Sprite* sprite)
+void SnowBall::Initialize(int x, int y, int moveFrame, Sprite* sprite)
 {
 	draw_x = 0;
 	draw_y = 0;
 	m_nLastMoveTime = 0;
 	m_nMoveInterval = moveFrame;
 	SetRect(&snowHitRect, 24, 24, 24, 24);
-	GameObject::Initialize(sprite, x, y, timer, 0, 0, 0);
+	GameObject::Initialize(sprite, x, y, 0, 0, 0);
 }
 
 void SnowBall::SetDirection(Vector2 _direction)
@@ -39,13 +39,13 @@ void SnowBall::Draw(LPDIRECTDRAWSURFACE7 surface)
 
 void SnowBall::CheckMove()
 {
-	if (!m_bIsLive)
+	if (!mIsLive)
 		return;
 
-	if (m_pTimer->elapsed(m_nLastFrameTime, m_nMoveInterval))
+	if (Timer::Elapsed(mLastFrameTime, m_nMoveInterval))
 	{
-		SetX(GetPos().x + m_direction.x * 20);
-		SetY(GetPos().y + m_direction.y * 20);
+		SetX(GetPos().x + mDirection.x * 20);
+		SetY(GetPos().y + mDirection.y * 20);
 	}
 
 	RECT rect;

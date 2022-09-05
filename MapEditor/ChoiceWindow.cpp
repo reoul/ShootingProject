@@ -86,7 +86,7 @@ void ChoiceWindow::CheckBlockClick(int x, int y)
 	if (rect.left < x && rect.top < y && rect.right > x && rect.bottom > y) //블럭창을 클릭했을때
 	{
 		canMove = true;
-		moveXY.SetRect(rect.left - x, rect.top - y);
+		moveXY.SetXY(rect.left - x, rect.top - y);
 	}
 	else
 	{

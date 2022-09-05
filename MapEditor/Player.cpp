@@ -10,6 +10,7 @@
 #include "Vector2.h"
 #include "Gui.h"
 #include "SettingData.h"
+#include "Sprite8.h"
 
 using namespace std;
 
@@ -23,7 +24,6 @@ extern ACTION curPlayerAction;
 extern ACTION curBossAction;
 
 extern Arrow arrow[TOTAL_ARROW];
-extern Timer g_Timer;
 extern Vector2 attackDirection;
 extern Block wall[139];
 extern Map map;
@@ -42,7 +42,7 @@ Player::~Player()
 {
 }
 
-void Player::Initialize(int x, int y, Timer* timer, int currentFrame, int frameInterval, int moveInterval,
+void Player::Initialize(int x, int y, int currentFrame, int frameInterval, int moveInterval,
                         int skillFrameInterval)
 {
 	m_nHp = 8;
@@ -52,17 +52,14 @@ void Player::Initialize(int x, int y, Timer* timer, int currentFrame, int frameI
 	m_nOldY = y;
 	curPlayerDirection = DIRECTION::DOWN;
 	curPlayerAction = ACTION::FAINT;
-	curState = OBJECT_TYPE::PLYAER;
-	moveSpeed = 60;
+	mCurState = OBJECT_TYPE::PLYAER;
+	mMoveSpeed = 60;
 	m_nMoveSpeedFold = 2;
 	m_bIsSkill = false;
 	m_bIsRoll = false;
 	m_nSpeedX = 0;
 	m_nSpeedY = 0;
 	m_bIsUseBow = false;
-	m_nLastSkillTime = 0;
-	m_nSkillCoolTime = g_Timer.time() - 20000;
-	m_nLastRollTime = 0;
 	int a = 0, b = 0;
 	SetRect(&walkHitRect[a++], 4, 12, 6, 10);
 	SetRect(&walkHitRect[a++], 6, 12, 4, 12);
@@ -138,7 +135,7 @@ void Player::Initialize(int x, int y, Timer* timer, int currentFrame, int frameI
 	a++;
 	b = 0;
 
-	GameObject::Initialize(m_pCurSprite, x, y, timer, currentFrame, frameInterval, skillFrameInterval);
+	GameObject::Initialize(m_pCurSprite, x, y, currentFrame, frameInterval, skillFrameInterval);
 
 	m_nMoveInterval = moveInterval;
 }
@@ -519,9 +516,9 @@ void Player::CheckKeyBoard()
 			if (DirectInputKeyboardDown(g_lpDirectInputKeyboard, DIK_SPACE))
 			{
 				if (!IsUsingSkill())
-					if (g_Timer.elapsed(m_nLastRollTime, 1000))
+					if (Timer::Elapsed(m_nLastRollTime, 1000))
 					{
-						m_nLastRollTime = g_Timer.time();
+						m_nLastRollTime = Timer::Now();
 						Roll();
 					}
 			}
@@ -562,12 +559,12 @@ void Player::Skill()
 {
 	if (curPlayerAction != ACTION::DEAD)
 	{
-		if (g_Timer.elapsed(m_nSkillCoolTime, 10000))
+		if (Timer::Elapsed(m_nLastSkillTime, SkillCoolTime))
 		{
 			if (m_bIsSkill == false)
 			{
 				m_bIsSkill = true;
-				m_nLastSkillTime = g_Timer.time();
+				m_nLastSkillTime = Timer::Now();
 				camera.SetIsSkill(true);
 			}
 		}
@@ -578,11 +575,11 @@ void Player::CheckUseSkill()
 {
 	if (m_bIsSkill)
 	{
-		if (g_Timer.elapsed(m_nLastSkillTime, 5000))
+		if (Timer::Elapsed(m_nLastSkillTime, 5000))
 		{
 			m_bIsSkill = false;
 			camera.SetIsSkill(false);
-			//m_nSkillCoolTime = g_Timer.time();
+			//m_nSkillCoolTime = Timer::Now();
 		}
 	}
 }
@@ -595,27 +592,27 @@ bool Player::GetIsRoll()
 void Player::Roll()
 {
 	curPlayerAction = ACTION::ROLL;
-	m_nFrameInterval = 70;
+	mFrameInterval = 70;
 }
 
 void Player::Left()
 {
-	m_nSpeedX -= moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime;
+	m_nSpeedX -= mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime;
 }
 
 void Player::Right()
 {
-	m_nSpeedX += moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime;
+	m_nSpeedX += mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime;
 }
 
 void Player::Up()
 {
-	m_nSpeedY -= moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime;
+	m_nSpeedY -= mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime;
 }
 
 void Player::Down()
 {
-	m_nSpeedY += moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime;
+	m_nSpeedY += mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime;
 }
 
 void Player::Hit()
@@ -645,10 +642,10 @@ void Player::Hit()
 
 bool Player::CanMove()
 {
-	if (!m_bIsLive)
+	if (!mIsLive)
 		return false;
 
-	if (m_pTimer->elapsed(m_nLastMoveTime, m_nMoveInterval))
+	if (Timer::Elapsed(m_nLastMoveTime, m_nMoveInterval))
 		return true;
 	return false;
 }
@@ -665,14 +662,14 @@ float Player::GetSpeedY()
 
 float Player::GetSkillCoolTimePercent()
 {
-	float percent = (float)(g_Timer.time() - m_nSkillCoolTime) / 10000;
+	float percent = (Timer::Now() - m_nLastSkillTime).count() / SkillCoolTime;
 	percent = percent - ((percent > 1) ? percent - 1 : 0);
 	return percent;
 }
 
 float Player::GetRollCoolTimePercent()
 {
-	float percent = (float)(g_Timer.time() - m_nLastRollTime) / 1000;
+	float percent = (Timer::Now() - m_nLastRollTime).count() / RollCoolTime;
 	percent = percent - ((percent > 1) ? percent - 1 : 0);
 	return percent;
 }
@@ -704,36 +701,36 @@ void Player::MoveANDCheckState()
 		switch (curPlayerDirection)
 		{
 		case DIRECTION::LEFT:
-			m_nSpeedX = -(moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime);
+			m_nSpeedX = -(mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime);
 			m_nSpeedY = 0;
 			break;
 		case DIRECTION::RIGHT:
-			m_nSpeedX = moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime;
+			m_nSpeedX = mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime;
 			m_nSpeedY = 0;
 			break;
 		case DIRECTION::UP:
 			m_nSpeedX = 0;
-			m_nSpeedY = -(moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime);
+			m_nSpeedY = -(mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime);
 			break;
 		case DIRECTION::DOWN:
 			m_nSpeedX = 0;
-			m_nSpeedY = moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime;
+			m_nSpeedY = mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime;
 			break;
 		case DIRECTION::LEFTUP:
-			m_nSpeedX = -(moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime);
-			m_nSpeedY = -(moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime);
+			m_nSpeedX = -(mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime);
+			m_nSpeedY = -(mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime);
 			break;
 		case DIRECTION::RIGHTUP:
-			m_nSpeedX = moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime;
-			m_nSpeedY = -(moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime);
+			m_nSpeedX = mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime;
+			m_nSpeedY = -(mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime);
 			break;
 		case DIRECTION::LEFTDOWN:
-			m_nSpeedX = -(moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime);
-			m_nSpeedY = moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime;
+			m_nSpeedX = -(mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime);
+			m_nSpeedY = mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime;
 			break;
 		case DIRECTION::RIGHTDOWN:
-			m_nSpeedX = moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime;
-			m_nSpeedY = moveSpeed * m_nMoveSpeedFold * g_Timer.deltaTime;
+			m_nSpeedX = mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime;
+			m_nSpeedY = mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime;
 			break;
 		}
 	}
@@ -825,7 +822,7 @@ void Player::MoveANDCheckState()
 
 	SetHitRect((curPlayerAction != ACTION::ROLL)
 		           ? walkHitRect[(int)curPlayerDirection - 1]
-		           : rollHitRect[(int)curPlayerDirection - 1][m_nCurrentFrame]);
+		           : rollHitRect[(int)curPlayerDirection - 1][mCurrentFrame]);
 
 	if (curPlayerAction == ACTION::FAINT)
 	{
@@ -859,7 +856,7 @@ void Player::MoveInit()
 	if (curPlayerAction != ACTION::ROLL)
 	{
 		m_nMoveSpeedFold = 2;
-		m_nFrameInterval = 140;
+		mFrameInterval = 140;
 	}
 	m_bIsUseBow = false;
 }

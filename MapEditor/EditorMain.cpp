@@ -10,6 +10,7 @@
 #include "Block.h"
 #include "Player.h"
 #include "Camera.h"
+#include "ChoiceWindow.h"
 #include "WorldMapBmp.h"
 #include "MapEditor.h"
 #include "GameEnum.h"
@@ -21,7 +22,6 @@ extern LPDIRECTDRAWSURFACE7 g_lpSecondarySurface;
 extern LPDIRECTDRAW7 g_lpDirectDrawObject;
 extern LPDIRECTINPUT g_lpDirectInputObject;
 extern LPDIRECTINPUTDEVICE8 g_lpDirectInputKeyboard;
-extern Timer g_Timer;
 
 extern Sprite grassSprite;
 extern Block g_blocks[BLOCK_Y][BLOCK_X];
@@ -93,7 +93,7 @@ void EditorMain(void)
 
 void InitEditor()
 {
-	camera.Initialize(&g_Timer);
+	camera.Initialize();
 	g_editor.Initialize();
 	m_bIntroFirst = TRUE;
 	m_bGameFirst = TRUE;

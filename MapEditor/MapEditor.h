@@ -19,7 +19,7 @@ public:
 	bool IsChoiceWindow();
 	void SetStartXY(int x, int y); //마우스 시작 x,y좌표 설정
 	void SetEndXY(int x, int y); //마우스 종료 x,y좌표 설정
-	void SetBlock(Block block[][BLOCK_X], Sprite* curBlock, Timer* timer);
+	void SetBlock(Block blocks[][BLOCK_Y], Sprite* curBlock);
 	ChoiceWindow* GetChoiceWindow();
 	char* GetBlockData();
 	char* GetBlockData2();

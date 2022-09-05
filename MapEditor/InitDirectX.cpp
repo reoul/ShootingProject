@@ -83,15 +83,13 @@ bool InitDirectDraw(void)
 
 bool InitDirectInput(void)
 {
-	if (FAILED(
-		DirectInput8Create(g_hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (LPVOID *)&g_lpDirectInputObject, NULL
-		)))
+	if (FAILED(DirectInput8Create(g_hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (LPVOID*)&g_lpDirectInputObject, NULL)))
 		return false;
 
 	if (FAILED(g_lpDirectInputObject->CreateDevice(GUID_SysKeyboard, &g_lpDirectInputKeyboard, NULL)))
 		return false;
 
-	if (FAILED(g_lpDirectInputKeyboard->SetCooperativeLevel(g_hwnd,DISCL_FOREGROUND|DISCL_NONEXCLUSIVE)))
+	if (FAILED(g_lpDirectInputKeyboard->SetCooperativeLevel(g_hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE)))
 		return false;
 
 	if (FAILED(g_lpDirectInputKeyboard->SetDataFormat(&c_dfDIKeyboard)))

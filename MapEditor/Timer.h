@@ -1,15 +1,20 @@
 ﻿#pragma once
+#include <chrono>
+
+using namespace std;
+using namespace chrono;
 
 class Timer
 {
 public:
-	float deltaTime;
+	static float deltaTime;
 	Timer();
-	~Timer();
-	void start();
-	int time();
-	bool elapsed(int& time, int interval);
+	~Timer() = default;
+	static void Start();
+	static system_clock::time_point Now();
+	static bool Elapsed(system_clock::time_point& time, int interval);
+	static void UpdateDeltaTime();
 private:
-	int GetTime();
-	int m_nStartTime;
+	system_clock::time_point mStartTime;
+	system_clock::time_point mPrevFrameTime;
 };

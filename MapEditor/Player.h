@@ -14,7 +14,7 @@ public:
 	bool GetIsRoll();
 	void SetArrow(Arrow* arrow);
 	Arrow* GetCurArrow();
-	void Initialize(int x, int y, Timer* timer, int currentFrame, int frameInterval, int moveInterval,
+	void Initialize(int x, int y, int currentFrame, int frameInterval, int moveInterval,
 	                int skillFrameInterval);
 	void SetWalkSprite(CSprite8* sprite);
 	void SetRollSprite(CSprite8* sprite);
@@ -46,15 +46,15 @@ public:
 	void CreateSkillArrow();
 	void CheckKeyBoard();
 private:
+	enum { SkillCoolTime = 10000, RollCoolTime = 1000 };
 	bool m_bIsSkill; //스킬 사용 체크
 	bool m_bIsMove; //이동중 체크
 	bool m_bIsUseBow;
 	bool m_bIsRoll;
-	int m_nLastMoveTime;
+	system_clock::time_point m_nLastMoveTime;
 	int m_nMoveInterval;
-	int m_nLastSkillTime;
-	int m_nSkillCoolTime;
-	int m_nLastRollTime;
+	system_clock::time_point m_nLastSkillTime;
+	system_clock::time_point m_nLastRollTime;
 	float m_nSpeedX;
 	float m_nSpeedY;
 	float m_nOldX;

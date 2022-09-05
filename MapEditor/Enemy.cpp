@@ -12,10 +12,10 @@ Enemy::~Enemy()
 {
 }
 
-void Enemy::Initialize(int x, int y, Timer* timer, int currentFrame, int frameInterval, int moveInterval)
+void Enemy::Initialize(int x, int y, int currentFrame, int frameInterval, int moveInterval)
 {
 	m_nMoveInterval = moveInterval;
-	GameObject::Initialize(m_pLeftIdleSprite, x, y, timer, currentFrame, frameInterval, 0);
+	GameObject::Initialize(m_pLeftIdleSprite, x, y, currentFrame, frameInterval, 0);
 }
 
 void Enemy::SetSprite(Sprite* _leftidle, Sprite* _rightidle, Sprite* _leftup, Sprite* _rightup,

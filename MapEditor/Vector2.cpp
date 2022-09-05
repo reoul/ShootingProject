@@ -1,28 +1,26 @@
 #include "Vector2.h"
 #include <corecrt_math.h>
 
-#define PI 3.141592
+#include <cmath>
+
+#define PI 3.141592f
 
 Vector2::Vector2()
-{
-	x = 0;
-	y = 0;
-}
-
-Vector2::Vector2(float _x, float _y)
-{
-	x = _x;
-	y = _y;
-}
-
-Vector2::~Vector2()
+	: x(0)
+	, y(0)
 {
 }
 
-void Vector2::SetRect(float _x, float _y)
+Vector2::Vector2(float x_, float y_)
+	: x(x_)
+	, y(y_)
 {
-	x = _x;
-	y = _y;
+}
+
+void Vector2::SetXY(float x_, float y_)
+{
+	x = x_;
+	y = y_;
 }
 
 Vector2 Vector2::operator-(Vector2 vec)
@@ -30,7 +28,7 @@ Vector2 Vector2::operator-(Vector2 vec)
 	return Vector2(this->x - vec.x, this->y - vec.y);
 }
 
-float Vector2::Length()
+float Vector2::Length() const
 {
 	return sqrtf(x * x + y * y);
 }
@@ -40,12 +38,12 @@ float Vector2::Distance(Vector2 v1, Vector2 v2)
 	return (v2 - v1).Length();
 }
 
-double Vector2::norm()
+float Vector2::norm() const
 {
-	return hypot(x, y);
+	return std::hypot(x, y);
 }
 
-Vector2 Vector2::normalize()
+Vector2 Vector2::normalize() const
 {
 	Vector2 vec = Vector2(x / norm(), y / norm());
 	if (vec.x > 1)

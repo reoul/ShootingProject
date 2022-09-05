@@ -23,8 +23,6 @@ extern LPDIRECTDRAWSURFACE7 g_lpSecondarySurface;
 extern LPDIRECTDRAW7 g_lpDirectDrawObject;
 extern LPDIRECTINPUT8 g_lpDirectInputObject;
 extern LPDIRECTINPUTDEVICE8 g_lpDirectInputKeyboard;
-extern Timer g_Timer;
-
 
 extern Camera camera;
 extern HDC hdc;
@@ -161,7 +159,7 @@ void InitIntro()
 	SndObjStop(Sound[1]);
 	SndObjStop(Sound[4]);
 	SndObjPlay(Sound[1], DSBPLAY_LOOPING);
-	camera.Initialize(&g_Timer);
+	camera.Initialize();
 	camera.SetIsFirstAlpha(false);
 	camera.SetAlpha(255);
 	curSelect = START;

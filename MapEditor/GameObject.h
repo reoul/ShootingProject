@@ -11,8 +11,7 @@ class GameObject
 public:
 	GameObject();
 	~GameObject();
-	void Initialize(Sprite* pSprite, int x, int y, Timer* timer, int CurrentFrame, int FrameInterval,
-	                int SkillFrameInterval);
+	void Initialize(Sprite* pSprite, int x, int y, int CurrentFrame, int FrameInterval, int SkillFrameInterval);
 	Sprite* GetSprite();
 	void Draw(bool isMove, int x, int y, LPDIRECTDRAWSURFACE7 lpSurface);
 	void SkillDraw(int x, int y, LPDIRECTDRAWSURFACE7 lpSurface);
@@ -39,22 +38,21 @@ public:
 	void SetDirection(Vector2 _direction);
 	Vector2 GetDirection();
 protected:
-	Sprite* m_pSprite;
-	Sprite* m_pBowSprite;
-	int m_nFrameInterval;
-	int m_nCurrentFrame;
-	int m_nLastFrameTime;
-	int m_nSkillFrameInterval;
-	int m_nLastSkillFrameTime;
-	Timer* m_pTimer;
-	bool m_bIsLive;
-	OBJECT_TYPE curState;
-	RECT hitRect; //물체 충돌 영역
-	RECT hitWallRect; //벽 충돌 영역
-	double Degree; //회전 각도
-	Vector2 m_direction; //현재 방향
-	int moveSpeed;
+	Sprite* mSprite;
+	Sprite* mBowSprite;
+	int mFrameInterval;
+	int mCurrentFrame;
+	system_clock::time_point mLastFrameTime;
+	int mSkillFrameInterval;
+	system_clock::time_point mLastSkillFrameTime;
+	int mMoveSpeed;
+	bool mIsLive;
+	OBJECT_TYPE mCurState;
+	RECT mHitRect; //물체 충돌 영역
+	RECT mHitWallRect; //벽 충돌 영역
+	double mDegree; //회전 각도
+	Vector2 mDirection; //현재 방향
 private:
-	float m_x;
-	float m_y;
+	float mX;
+	float mY;
 };

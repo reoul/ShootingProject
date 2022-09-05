@@ -2,39 +2,42 @@
 #pragma comment(lib,"winmm.lib")
 #include <Windows.h>
 
+float Timer::deltaTime = 0.001f;
+static Timer g_timer;
+
 Timer::Timer()
-{
-	m_nStartTime = 0;
-	deltaTime = 0;
-}
-
-Timer::~Timer()
+	: mStartTime(system_clock::now())
+	, mPrevFrameTime(system_clock::now())
 {
 }
 
-void Timer::start()
+void Timer::Start()
 {
-	m_nStartTime = timeGetTime();
+	g_timer.mStartTime = system_clock::now();
 }
 
-int Timer::time()
+system_clock::time_point Timer::Now()
 {
-	return (timeGetTime() - m_nStartTime);
+	return system_clock::time_point(system_clock::now() - g_timer.mStartTime);
 }
 
-int Timer::GetTime()
+bool Timer::Elapsed(system_clock::time_point& time, int interval)
 {
-	return timeGetTime();
-}
-
-bool Timer::elapsed(int& stime, int interval)
-{
-	int current_time = time();
-	if (current_time >= stime + interval)
+	const system_clock::time_point curTime = system_clock::now();
+	const milliseconds intervalTime(interval);
+	if (curTime >= time + intervalTime)
 	{
-		stime = current_time;
+		time = curTime;
 		return true;
 	}
-	else
-		return false;
+
+	return false;
+}
+
+void Timer::UpdateDeltaTime()
+{
+	const system_clock::time_point curTime = system_clock::now();
+	const duration<float> frameTime = curTime - g_timer.mPrevFrameTime;
+	Timer::deltaTime = frameTime.count();
+	g_timer.mPrevFrameTime = curTime;
 }

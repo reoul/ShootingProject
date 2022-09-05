@@ -11,8 +11,8 @@
 #include <windowsx.h>
 #include <ddraw.h>
 #include <dinput.h>
-#include <math.h>
 #include <vector>
+#include <assert.h>
 
 #include "Bmp.h"
 #include "Timer.h"
@@ -153,7 +153,6 @@ EDIT_WINDOW curEditWindow; //현재 에디터 창
 
 MAPEDITOR g_editor; //맵에디터 변수
 
-Timer g_Timer;
 bool g_bActiveApp = false;
 bool g_bIsFirst;
 bool g_bIsGame = true;
@@ -173,7 +172,6 @@ BOOL m_bEditorFirst = TRUE;
 BOOL m_bGameFirst = TRUE;
 BOOL m_bIntroFirst = TRUE;
 extern bool isSound;
-
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -200,7 +198,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	g_hInstance = hInstance;
 	cameraPositionX = 0;
 	cameraPositionY = 0;
-	attackDirection.SetRect(0, 0);
+	attackDirection.SetXY(0, 0);
 
 	SetFocus(g_hwnd);
 
@@ -210,9 +208,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	if (!_InitDirectSound())
 		return 0;
 
-	g_Timer.start();
-
-	srand(g_Timer.time());
+	Timer::Start();
 
 	if (!LoadBMPandInitSurface())
 		return 0;
@@ -234,6 +230,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 		else if (g_bActiveApp)
 		{
+			Timer::UpdateDeltaTime();
 			switch (curMod)
 			{
 			case MOD_INTRO:
@@ -245,6 +242,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			case MOD_EDITOR:
 				EditorMain();
 				break;
+			case MOD_QUIT: 
+				break;
+			default: 
+				assert(false);
 			}
 		}
 		else WaitMessage();
@@ -308,16 +309,16 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			if (!(curPlayerAction == ACTION::ROLL))
 				if (!player.IsArrowNull() && !(curPlayerAction == ACTION::DEAD) && !camera.GetIsFirstAlpha())
 				{
-					firstPosition.SetRect(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1),
+					firstPosition.SetXY(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1),
 					                      HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
-					curMousePosition.SetRect(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1),
+					curMousePosition.SetXY(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1),
 					                         HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
 					camera.SetIsExpansion(true);
 					player.GetCurArrow()->SetCharging(true);
 					x = curMousePosition.x - player.GetPos().x;
 					y = curMousePosition.y - player.GetPos().y;
 					arrowDirection = (int)sqrtf(pow(x, 2) + pow(y, 2));
-					attackDirection.SetRect(x / arrowDirection, y / arrowDirection);
+					attackDirection.SetXY(x / arrowDirection, y / arrowDirection);
 				}
 			break;
 		case MOD_EDITOR:
@@ -341,13 +342,13 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			if (!camera.GetIsFirstAlpha())
 			{
 				isSound = false;
-				curMousePosition.SetRect(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1),
+				curMousePosition.SetXY(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1),
 				                         HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
 				camera.SetIsExpansion(false);
 				x = curMousePosition.x - player.GetPos().x;
 				y = curMousePosition.y - player.GetPos().y;
 				arrowDirection = (int)sqrtf(pow(x, 2) + pow(y, 2));
-				attackDirection.SetRect(x / arrowDirection, y / arrowDirection);
+				attackDirection.SetXY(x / arrowDirection, y / arrowDirection);
 			}
 			break;
 		case MOD_EDITOR:
@@ -355,7 +356,7 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			{
 				g_editor.SetEndXY(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1),
 				                  HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
-				g_editor.SetBlock(g_blocks, curBlock.GetSprite(), &g_Timer);
+				g_editor.SetBlock(g_blocks, curBlock.GetSprite());
 				g_editor.SaveWallData();
 			}
 			else
@@ -375,12 +376,12 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case MOD_GAME:
 			if (camera.GetIsExpansion() && !camera.GetIsFirstAlpha())
 			{
-				curMousePosition.SetRect(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1),
+				curMousePosition.SetXY(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1),
 				                         HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
 				x = curMousePosition.x - player.GetPos().x;
 				y = curMousePosition.y - player.GetPos().y;
 				arrowDirection = (int)sqrtf(pow(x, 2) + pow(y, 2));
-				attackDirection.SetRect(x / arrowDirection, y / arrowDirection);
+				attackDirection.SetXY(x / arrowDirection, y / arrowDirection);
 			}
 			break;
 		case MOD_EDITOR:

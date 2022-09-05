@@ -1,15 +1,15 @@
 ﻿#pragma once
 #include "GameObject.h"
-#include "Sprite8.h"
-#include "SettingData.h"
 #include "Vector2.h"
+
+class CSprite8;
 
 class Arrow : public GameObject
 {
 public:
 	Arrow();
 	~Arrow();
-	void Initialize(int x, int y, Timer* timer, int moveFrame, CSprite8* arrowSprite);
+	void Initialize(int x, int y, int moveFrame, CSprite8* arrowSprite);
 	void SetSpeedXY(float power, Vector2 direction);
 	void CheckMove();
 	void IsCharging();
@@ -32,21 +32,21 @@ public:
 	Vector2 GetSpeedXY();
 	bool IsHoming();
 private:
-	float m_nSpeedX;
-	float m_nSpeedY;
-	float m_nPower;
-	int draw_x;
-	int draw_y;
-	int m_nCount;
-	int m_nLastMoveTime;
-	int m_nMoveInterval;
-	int m_nTurnRadian;
-	int m_nShootTime;
-	bool m_bIsUse;
-	bool m_bIsHit;
-	bool m_bIsCharging;
-	bool m_bIsHoming;
-	CSprite8* m_pArrowSprite;
-	RECT arrowHitRect[8];
-	GameObject* m_pTarget;
+	float mSpeedX;
+	float mSpeedY;
+	float mPower;
+	int mDrawX;
+	int mDrawY;
+	int mCount;
+	int mLastMoveTime;
+	int mMoveInterval;
+	int mTurnRadian;
+	system_clock::time_point mShootTime;
+	bool mIsUse;
+	bool mIsHit;
+	bool mIsCharging;
+	bool mIsHoming;
+	CSprite8* mArrowSprite;
+	RECT mArrowHitRect[8];
+	GameObject* mTarget;
 };

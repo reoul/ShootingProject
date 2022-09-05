@@ -116,7 +116,7 @@ void MAPEDITOR::SetEndXY(int x, int y)
 		m_endY = _y;
 }
 
-void MAPEDITOR::SetBlock(Block block[][BLOCK_X], Sprite* curBlock, Timer* timer)
+void MAPEDITOR::SetBlock(Block blocks[][BLOCK_X], Sprite* curBlock)
 {
 	int tmp = curBlock->GetNumber();
 	char tmp2[10];
@@ -125,9 +125,9 @@ void MAPEDITOR::SetBlock(Block block[][BLOCK_X], Sprite* curBlock, Timer* timer)
 	{
 		for (int j = m_startY; j < m_endY + 1; j++)
 		{
-			block[j][i].Initialize(curBlock, (i * DEFAULT_BLOCK_SIZE), (j * DEFAULT_BLOCK_SIZE), timer, 0, 150);
-			block[j][i].SetSprite(curBlock);
-			block[j][i].SetState(OBJECT_TYPE::EDITOR_BLOCK);
+			blocks[j][i].Initialize(curBlock, (i * DEFAULT_BLOCK_SIZE), (j * DEFAULT_BLOCK_SIZE), 0, 150);
+			blocks[j][i].SetSprite(curBlock);
+			blocks[j][i].SetState(OBJECT_TYPE::EDITOR_BLOCK);
 			memcpy(m_pBlockData + (j * BLOCK_X) + i * 2, &tmp2, 2);
 			string aa = "";
 			aa += to_string(i);
@@ -135,7 +135,7 @@ void MAPEDITOR::SetBlock(Block block[][BLOCK_X], Sprite* curBlock, Timer* timer)
 			aa += to_string(j);
 			aa += " ";
 			wallData += aa;
-			//block[j][i].GetSprite()->GetBMP()->SaveWorldBMP((i * DEFAULT_BLOCK_SIZE), (j * DEFAULT_BLOCK_SIZE), curEditMap->GetBMPBuffer(), curEditMap->GetBMPBuffer2());
+			//blocks[j][i].GetSprite()->GetBMP()->SaveWorldBMP((i * DEFAULT_BLOCK_SIZE), (j * DEFAULT_BLOCK_SIZE), curEditMap->GetBMPBuffer(), curEditMap->GetBMPBuffer2());
 		}
 	}
 }

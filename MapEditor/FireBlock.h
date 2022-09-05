@@ -12,6 +12,6 @@ private:
 public:
 	FireBlock();
 	~FireBlock();
-	void Initialize(int x, int y, Timer* timer, int frameInterval, Sprite* sprite);
+	void Initialize(int x, int y, int frameInterval, Sprite* sprite);
 	void Draw(LPDIRECTDRAWSURFACE7 surface);
 };

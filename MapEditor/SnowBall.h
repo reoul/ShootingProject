@@ -9,7 +9,7 @@ class SnowBall : public GameObject
 public:
 	SnowBall();
 	~SnowBall();
-	void Initialize(int x, int y, Timer* timer, int moveFrame, Sprite* sprite);
+	void Initialize(int x, int y, int moveFrame, Sprite* sprite);
 	void SetDirection(Vector2 _direction);
 	void CheckMove();
 	void Draw(LPDIRECTDRAWSURFACE7 surface);

@@ -13,224 +13,233 @@ extern Boss boss;
 extern Camera camera;
 
 GameObject::GameObject()
+	: mSprite(nullptr)
+	, mBowSprite(nullptr)
+	, mFrameInterval(0)
+	, mCurrentFrame(0)
+	, mLastFrameTime()
+	, mSkillFrameInterval(0)
+	, mLastSkillFrameTime()
+	, mMoveSpeed(0)
+	, mIsLive(false)
+	, mCurState()
+	, mHitRect()
+	, mHitWallRect()
+	, mDegree(0)
+	, mX(0)
+	, mY(0)
 {
-	m_nCurrentFrame = 0;
-	m_bIsLive = false;
-	Degree = 0;
-	m_direction = Vector2();
-	moveSpeed = 0;
 }
 
 GameObject::~GameObject()
 {
 }
 
-void GameObject::Initialize(Sprite* pSprite, int x, int y, Timer* timer, int CurrentFrame, int FrameInterval,
-                            int SkillFrameInterval)
+void GameObject::Initialize(Sprite* pSprite, int x, int y, int CurrentFrame, int FrameInterval,
+	int SkillFrameInterval)
 {
-	m_pSprite = pSprite;
-	m_nCurrentFrame = CurrentFrame;
-	m_x = x;
-	m_y = y;
-	m_nFrameInterval = FrameInterval;
-	m_nSkillFrameInterval = SkillFrameInterval;
-	m_bIsLive = true;
-	m_pTimer = timer;
-	curState = OBJECT_TYPE::PLYAER;
-	m_nLastFrameTime = m_pTimer->time();
+	mSprite = pSprite;
+	mCurrentFrame = CurrentFrame;
+	mX = static_cast<float>(x);
+	mY = static_cast<float>(y);
+	mFrameInterval = FrameInterval;
+	mSkillFrameInterval = SkillFrameInterval;
+	mIsLive = true;
+	mCurState = OBJECT_TYPE::PLYAER;
+	mLastFrameTime = Timer::Now();
 }
 
 Sprite* GameObject::GetSprite()
 {
-	return m_pSprite;
+	return mSprite;
 }
 
 bool GameObject::IsLive()
 {
-	return m_bIsLive;
+	return mIsLive;
 }
 
 void GameObject::Kill()
 {
-	m_bIsLive = false;
+	mIsLive = false;
 }
 
 void GameObject::SetState(OBJECT_TYPE state)
 {
-	curState = state;
+	mCurState = state;
 }
 
 void GameObject::SetSprite(Sprite* sprite)
 {
-	m_nCurrentFrame = 0;
-	m_pSprite = sprite;
+	mCurrentFrame = 0;
+	mSprite = sprite;
 }
 
 void GameObject::SetSprite(Sprite* sprite, Sprite* bowSprite)
 {
 	if (!player.IsUsingSkill())
-		m_nCurrentFrame = 0;
-	m_pSprite = sprite;
-	m_pBowSprite = bowSprite;
+		mCurrentFrame = 0;
+	mSprite = sprite;
+	mBowSprite = bowSprite;
 }
 
 void GameObject::Draw(bool isMove, int x, int y, LPDIRECTDRAWSURFACE7 lpSurface)
 {
-	if (!m_bIsLive)
+	if (!mIsLive)
 		return;
-	switch (curState)
+	switch (mCurState)
 	{
 	case OBJECT_TYPE::PLYAER: //플레이어
-		if (m_pTimer->elapsed(m_nLastFrameTime, m_nFrameInterval))
+		if (Timer::Elapsed(mLastFrameTime, mFrameInterval))
 		{
-			if ((curPlayerAction == ACTION::ROLL) && ((m_nCurrentFrame + 1) == m_pSprite->GetNumberOfFrame()))
+			if ((curPlayerAction == ACTION::ROLL) && ((mCurrentFrame + 1) == mSprite->GetNumberOfFrame()))
 			{
 				curPlayerAction = ACTION::MOVE;
 				isMove = true;
 				player.MoveANDCheckState();
-				m_nCurrentFrame = m_pSprite->GetNumberOfFrame() - 1;
+				mCurrentFrame = mSprite->GetNumberOfFrame() - 1;
 			}
 			if (isMove)
-				m_nCurrentFrame = ++m_nCurrentFrame % m_pSprite->GetNumberOfFrame();
+				mCurrentFrame = ++mCurrentFrame % mSprite->GetNumberOfFrame();
 			else
-				m_nCurrentFrame = 0;
+				mCurrentFrame = 0;
 		}
-		m_pSprite->Drawing(m_nCurrentFrame, x, y, lpSurface);
+		mSprite->Drawing(mCurrentFrame, x, y, lpSurface);
 		if (curPlayerAction != 6)
-			m_pBowSprite->Drawing(m_nCurrentFrame, x, y, lpSurface);
+			mBowSprite->Drawing(mCurrentFrame, x, y, lpSurface);
 		break;
 	case OBJECT_TYPE::ARROW: //화살
-		m_pSprite->Rotate(m_direction.VectorToAngle(), m_nCurrentFrame);
-		m_pSprite->Drawing(m_nCurrentFrame, x, y, lpSurface);
+		mSprite->Rotate(mDirection.VectorToAngle(), mCurrentFrame);
+		mSprite->Drawing(mCurrentFrame, x, y, lpSurface);
 		break;
 	case OBJECT_TYPE::BOSS: //보스
-		if (m_pTimer->elapsed(m_nLastFrameTime, m_nFrameInterval))
+		if (Timer::Elapsed(mLastFrameTime, mFrameInterval))
 		{
 			if (!(curBossAction == ACTION::DEAD))
 			{
 				if (curBossAction == ACTION::ATTACK)
 				{
-					if (m_nCurrentFrame == 2)
+					if (mCurrentFrame == 2)
 						boss.Attack();
 				}
-				m_nCurrentFrame = ++m_nCurrentFrame % m_pSprite->GetNumberOfFrame();
+				mCurrentFrame = ++mCurrentFrame % mSprite->GetNumberOfFrame();
 				if (curBossAction == ACTION::ATTACK)
-					if (m_nCurrentFrame == 0)
+					if (mCurrentFrame == 0)
 						boss.CheckDirectionState();
 			}
 			else
 			{
-				m_nCurrentFrame = ++m_nCurrentFrame;
-				if (m_nCurrentFrame == m_pSprite->GetNumberOfFrame())
-					m_nCurrentFrame = m_pSprite->GetNumberOfFrame() - 1;
+				mCurrentFrame = ++mCurrentFrame;
+				if (mCurrentFrame == mSprite->GetNumberOfFrame())
+					mCurrentFrame = mSprite->GetNumberOfFrame() - 1;
 			}
 		}
-		m_pSprite->Drawing(m_nCurrentFrame, x, y, lpSurface);
+		mSprite->Drawing(mCurrentFrame, x, y, lpSurface);
 		break;
 	case OBJECT_TYPE::SNOWBALL: //눈덩이
-		m_pSprite->Drawing(m_nCurrentFrame, x, y, lpSurface);
+		mSprite->Drawing(mCurrentFrame, x, y, lpSurface);
 		break;
 	case OBJECT_TYPE::BLOCK: //블럭
-		if (m_pTimer->elapsed(m_nLastFrameTime, m_nFrameInterval))
+		if (Timer::Elapsed(mLastFrameTime, mFrameInterval))
 		{
-			m_nCurrentFrame = ++m_nCurrentFrame % m_pSprite->GetNumberOfFrame();
+			mCurrentFrame = ++mCurrentFrame % mSprite->GetNumberOfFrame();
 		}
-		m_pSprite->Drawing(m_nCurrentFrame, x, y, lpSurface);
+		mSprite->Drawing(mCurrentFrame, x, y, lpSurface);
 		break;
 	case OBJECT_TYPE::EDITOR_BLOCK: //에디터 블록
-		m_pSprite->BlockDrawing(x, y, lpSurface);
+		mSprite->BlockDrawing(x, y, lpSurface);
 		break;
 	case OBJECT_TYPE::ENEMY: //적
-		if (m_pTimer->elapsed(m_nLastFrameTime, m_nFrameInterval))
+		if (Timer::Elapsed(mLastFrameTime, mFrameInterval))
 		{
-			m_nCurrentFrame = ++m_nCurrentFrame % m_pSprite->GetNumberOfFrame();
+			mCurrentFrame = ++mCurrentFrame % mSprite->GetNumberOfFrame();
 		}
-		m_pSprite->Drawing(m_nCurrentFrame, x, y, lpSurface);
+		mSprite->Drawing(mCurrentFrame, x, y, lpSurface);
 		break;
 	default:
-		m_pSprite->Drawing(m_nCurrentFrame, x, y, lpSurface);
+		mSprite->Drawing(mCurrentFrame, x, y, lpSurface);
 		break;
 	}
 }
 
 void GameObject::SkillDraw(int x, int y, LPDIRECTDRAWSURFACE7 lpSurface)
 {
-	if (!m_bIsLive)
+	if (!mIsLive)
 		return;
-	if (m_pTimer->elapsed(m_nLastSkillFrameTime, m_nSkillFrameInterval))
-		m_nCurrentFrame = ++m_nCurrentFrame % m_pSprite->GetNumberOfFrame();
-	m_pSprite->Drawing(m_nCurrentFrame, x, y, lpSurface);
+	if (Timer::Elapsed(mLastSkillFrameTime, mSkillFrameInterval))
+		mCurrentFrame = ++mCurrentFrame % mSprite->GetNumberOfFrame();
+	mSprite->Drawing(mCurrentFrame, x, y, lpSurface);
 }
 
 Vector2 GameObject::GetPos()
 {
-	return Vector2(m_x, m_y);
+	return Vector2(mX, mY);
 }
 
 void GameObject::SetX(float x)
 {
-	m_x = x;
+	mX = x;
 }
 
 void GameObject::SetY(float y)
 {
-	m_y = y;
+	mY = y;
 }
 
 void GameObject::SetXY(float x, float y)
 {
-	m_x = x;
-	m_y = y;
+	mX = x;
+	mY = y;
 }
 
 void GameObject::SetFrameInterval(int frame)
 {
-	m_nFrameInterval = frame;
+	mFrameInterval = frame;
 }
 
 void GameObject::SetHitRect(int left, int top, int right, int bottom)
 {
-	SetRect(&hitRect, left, top, right, bottom);
+	SetRect(&mHitRect, left, top, right, bottom);
 }
 
 void GameObject::SetHitRect(RECT rect)
 {
-	SetRect(&hitRect, rect.left, rect.top, rect.right, rect.bottom);
+	SetRect(&mHitRect, rect.left, rect.top, rect.right, rect.bottom);
 }
 
 void GameObject::SetHitWallRect()
 {
-	SetRect(&hitWallRect, m_pSprite->GetWidth() >> 1, m_pSprite->GetHeight() >> 1, m_pSprite->GetWidth() >> 1,
-	        m_pSprite->GetHeight() >> 1);
+	SetRect(&mHitWallRect, mSprite->GetWidth() >> 1, mSprite->GetHeight() >> 1, mSprite->GetWidth() >> 1,
+		mSprite->GetHeight() >> 1);
 }
 
 RECT GameObject::GetHitRect()
 {
 	RECT rect;
-	rect.left = GetPos().x - hitRect.left;
-	rect.top = GetPos().y - hitRect.top;
-	rect.right = GetPos().x + hitRect.right;
-	rect.bottom = GetPos().y + hitRect.bottom;
+	rect.left = GetPos().x - mHitRect.left;
+	rect.top = GetPos().y - mHitRect.top;
+	rect.right = GetPos().x + mHitRect.right;
+	rect.bottom = GetPos().y + mHitRect.bottom;
 	return rect;
 }
 
 RECT GameObject::GetHitRectImageRect()
 {
 	RECT rect;
-	rect.left = GetPos().x - (m_pSprite->GetWidth() >> 1);
-	rect.top = GetPos().y - (m_pSprite->GetHeight() >> 1);
-	rect.right = GetPos().x + (m_pSprite->GetWidth() >> 1);
-	rect.bottom = GetPos().y + (m_pSprite->GetHeight() >> 1);
+	rect.left = GetPos().x - (mSprite->GetWidth() >> 1);
+	rect.top = GetPos().y - (mSprite->GetHeight() >> 1);
+	rect.right = GetPos().x + (mSprite->GetWidth() >> 1);
+	rect.bottom = GetPos().y + (mSprite->GetHeight() >> 1);
 	return rect;
 }
 
 RECT GameObject::GetHitRectWallRect()
 {
 	RECT rect;
-	rect.left = GetPos().x - hitWallRect.left;
-	rect.top = GetPos().y - hitWallRect.top;
-	rect.right = GetPos().x + hitWallRect.right;
-	rect.bottom = GetPos().y + hitWallRect.bottom;
+	rect.left = GetPos().x - mHitWallRect.left;
+	rect.top = GetPos().y - mHitWallRect.top;
+	rect.right = GetPos().x + mHitWallRect.right;
+	rect.bottom = GetPos().y + mHitWallRect.bottom;
 	return rect;
 }
 
@@ -277,10 +286,10 @@ RECT GameObject::GetHitRect2(RECT rect)
 
 void GameObject::SetDirection(Vector2 _direction)
 {
-	m_direction = _direction;
+	mDirection = _direction;
 }
 
 Vector2 GameObject::GetDirection()
 {
-	return m_direction;
+	return mDirection;
 }

@@ -14,11 +14,11 @@ FireBlock::~FireBlock()
 {
 }
 
-void FireBlock::Initialize(int x, int y, Timer* timer, int frameInterval, Sprite* sprite)
+void FireBlock::Initialize(int x, int y, int frameInterval, Sprite* sprite)
 {
 	draw_x = 0;
 	draw_y = 0;
-	GameObject::Initialize(sprite, x, y, timer, 0, frameInterval, 0);
+	GameObject::Initialize(sprite, x, y, 0, frameInterval, 0);
 }
 
 void FireBlock::Draw(LPDIRECTDRAWSURFACE7 surface)

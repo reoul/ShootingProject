@@ -36,7 +36,6 @@ extern LPDIRECTDRAWSURFACE7 g_lpSecondarySurface;
 extern LPDIRECTDRAW7 g_lpDirectDrawObject;
 extern LPDIRECTINPUT8 g_lpDirectInputObject;
 extern LPDIRECTINPUTDEVICE8 g_lpDirectInputKeyboard;
-extern Timer g_Timer;
 
 extern Sprite grassSprite;
 extern Sprite player_skill;
@@ -123,16 +122,15 @@ extern BOOL m_bGameFirst;
 extern BOOL m_bEditorFirst;
 bool ischeck = false;
 bool isSound = false;
-int time3 = 0;
 int player_lastRollTime;
 int cntVibes;
 bool boss_HitWall;
 bool IsPlayerNoHit;
 extern bool IsSkipTutorial;
 
-int lastFrameTime = 0;
-int lastSkillShootTime = 0;
-int lastPlayerHitTime = 0;
+system_clock::time_point lastFrameTime;
+system_clock::time_point lastSkillShootTime;		// todo : 캐릭터한테 넣기
+system_clock::time_point lastPlayerHitTime;
 
 void GameMain(void)
 {
@@ -150,7 +148,7 @@ void GameMain(void)
 
 		if (!IsPlayerNoHit)
 		{
-			if (g_Timer.elapsed(lastPlayerHitTime, 400))
+			if (Timer::Elapsed(lastPlayerHitTime, 400))
 			{
 				IsPlayerNoHit = true;
 			}
@@ -234,7 +232,7 @@ void GameMain(void)
 
 		if (player.IsUsingSkill())
 		{
-			if (g_Timer.elapsed(lastSkillShootTime, 100))
+			if (Timer::Elapsed(lastSkillShootTime, 100))
 			{
 				player.CreateSkillArrow();
 				SndObjPlay(Sound[3], NULL);
@@ -316,7 +314,7 @@ void GameMain(void)
 					{
 						player.Hit();
 						IsPlayerNoHit = false;
-						lastPlayerHitTime = g_Timer.time();
+						lastPlayerHitTime = Timer::Now();
 					}
 				}
 			}
@@ -407,18 +405,19 @@ void GameMain(void)
 	}
 }
 
+// todo : 프레임 제한 로직 변경하기
 bool FrameRate()
 {
-	int frameDelta = 8;
-	int timeDelta = timeGetTime() - lastFrameTime;
-	if (timeDelta > frameDelta)
+	constexpr int frameDelta = 8;
+	const system_clock::time_point now = Timer::Now();
+	const milliseconds timeDelta = duration_cast<milliseconds>(now - lastFrameTime);
+	if (timeDelta.count() > frameDelta)
 	{
-		g_Timer.deltaTime = timeDelta * 0.001f;
-		lastFrameTime = timeGetTime();
+		lastFrameTime = now;
 		return true;
 	}
-	else
-		return false;
+
+	return false;
 }
 
 void InitGame()
@@ -433,7 +432,7 @@ void InitGame()
 	int i, j, m, m2;
 	if (player.IsLive())
 		player.Kill();
-	player.Initialize(1122, 2664, &g_Timer, 0, 140, 4, 90);
+	player.Initialize(1122, 2664, 0, 140, 4, 90);
 	player.SetWalkSprite(&player_walk);
 	player.SetSpriteAndHitRect();
 	player.SetRollSprite(&player_roll);
@@ -444,43 +443,41 @@ void InitGame()
 	{
 		if (arrow[i].IsLive())
 			arrow[i].Kill();
-		arrow[i].Initialize(player.GetPos().x, player.GetPos().y, &g_Timer, 2, &arrowSprite);
+		arrow[i].Initialize(player.GetPos().x, player.GetPos().y, 2, &arrowSprite);
 		arrow[i].SetState(OBJECT_TYPE::ARROW);
 	}
 	player.SetArrow(&arrow[0]);
 
 	if (boss.IsLive()) boss.Kill();
-	boss.Initialize(1560, 1590, &g_Timer, 0, 20, 4);
+	boss.Initialize(1560, 1590, 0, 20, 4);
 	boss.SetSprite(&boss_sleep, &boss_idle, &boss_roll, &boss_attack, &boss_dead);
 	boss.SetState(OBJECT_TYPE::BOSS);
 
-	fireBlock.Initialize(36 * DEFAULT_BLOCK_SIZE + 16, 83 * DEFAULT_BLOCK_SIZE, &g_Timer, 130, &fireSprite);
+	fireBlock.Initialize(36 * DEFAULT_BLOCK_SIZE + 16, 83 * DEFAULT_BLOCK_SIZE, 130, &fireSprite);
 	fireBlock.SetState(OBJECT_TYPE::BLOCK);
 
 
 	for (i = 0; i < TOTAL_SNOWBALL; i++)
 	{
 		if (snowball[i].IsUse()) snowball[i].SetUse(false);
-		snowball[i].Initialize(boss.GetPos().x, boss.GetPos().y, &g_Timer, 4, &boss_snowball);
+		snowball[i].Initialize(boss.GetPos().x, boss.GetPos().y, 4, &boss_snowball);
 		snowball[i].SetState(OBJECT_TYPE::SNOWBALL);
 	}
 
-	bossHpBarBack.Initialize(1250, SCREEN_HEIGHT >> 1, &boss_hp_window, &g_Timer, 0);
-	bossHpBar.Initialize(1250, SCREEN_HEIGHT >> 1, &boss_hp, &g_Timer, 300);
+	bossHpBarBack.Initialize(1250, SCREEN_HEIGHT >> 1, &boss_hp_window, 0);
+	bossHpBar.Initialize(1250, SCREEN_HEIGHT >> 1, &boss_hp, 300);
 
-	playerHp1.Initialize(50, 43, &player_hp, &g_Timer, 0);
-	playerHp2.Initialize(110, 43, &player_hp, &g_Timer, 0);
-	playerHp3.Initialize(170, 43, &player_hp, &g_Timer, 0);
-	playerHp4.Initialize(230, 43, &player_hp, &g_Timer, 0);
+	playerHp1.Initialize(50, 43, &player_hp, 0);
+	playerHp2.Initialize(110, 43, &player_hp, 0);
+	playerHp3.Initialize(170, 43, &player_hp, 0);
+	playerHp4.Initialize(230, 43, &player_hp, 0);
 
-	tutorial.Initialize(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, &tutorialSprite, &g_Timer, 0);
+	tutorial.Initialize(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, &tutorialSprite, 0);
 
-	skillRoll.Initialize(640, 730, &skill_roll, &g_Timer, 0);
+	skillRoll.Initialize(640, 730, &skill_roll, 0);
 	skillRoll.SetBackGroundSprite(&skill_background);
-	skillCyclone.Initialize(726, 730, &skill_cyclone, &g_Timer, 0);
+	skillCyclone.Initialize(726, 730, &skill_cyclone, 0);
 	skillCyclone.SetBackGroundSprite(&skill_background);
-
-	time3 = g_Timer.time();
 
 	player_lastRollTime = 0;
 	boss_HitWall = false;
@@ -488,7 +485,7 @@ void InitGame()
 	IsPlayerNoHit = true;
 	IsSkipTutorial = false;
 
-	camera.Initialize(&g_Timer);
+	camera.Initialize();
 	m_bIntroFirst = TRUE;
 	m_bGameFirst = FALSE;
 	m_bEditorFirst = TRUE;
