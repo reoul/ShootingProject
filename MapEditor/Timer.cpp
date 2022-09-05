@@ -2,12 +2,12 @@
 #pragma comment(lib,"winmm.lib")
 #include <Windows.h>
 
-float Timer::deltaTime = 0.001f;
 static Timer g_timer;
 
 Timer::Timer()
 	: mStartTime(system_clock::now())
 	, mPrevFrameTime(system_clock::now())
+	, mDeltaTime(0.001f)
 {
 }
 
@@ -34,10 +34,15 @@ bool Timer::Elapsed(system_clock::time_point& time, int interval)
 	return false;
 }
 
+float Timer::GetDeltaTime()
+{
+	return g_timer.mDeltaTime;
+}
+
 void Timer::UpdateDeltaTime()
 {
 	const system_clock::time_point curTime = system_clock::now();
 	const duration<float> frameTime = curTime - g_timer.mPrevFrameTime;
-	Timer::deltaTime = frameTime.count();
+	g_timer.mDeltaTime = frameTime.count();
 	g_timer.mPrevFrameTime = curTime;
 }

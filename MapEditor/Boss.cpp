@@ -220,8 +220,8 @@ void Boss::CheckDirectionState()
 
 void Boss::CheckSpeedXY()
 {
-	m_nSpeedX = playerDirection.x * mMoveSpeed * Timer::deltaTime;
-	m_nSpeedY = playerDirection.y * mMoveSpeed * Timer::deltaTime;
+	m_nSpeedX = playerDirection.x * mMoveSpeed * Timer::GetDeltaTime();
+	m_nSpeedY = playerDirection.y * mMoveSpeed * Timer::GetDeltaTime();
 }
 
 void Boss::CheckSprite()

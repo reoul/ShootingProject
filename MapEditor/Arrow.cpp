@@ -110,8 +110,8 @@ void Arrow::CheckMove()
 	{
 		if (mIsHoming)
 			HomingArrow();
-		SetX(GetPos().x + (mSpeedX * Timer::deltaTime * mMoveSpeed * (mIsHoming ? 4 : 1)));
-		SetY(GetPos().y + (mSpeedY * Timer::deltaTime * mMoveSpeed * (mIsHoming ? 4 : 1)));
+		SetX(GetPos().x + (mSpeedX * Timer::GetDeltaTime() * mMoveSpeed * (mIsHoming ? 4 : 1)));
+		SetY(GetPos().y + (mSpeedY * Timer::GetDeltaTime() * mMoveSpeed * (mIsHoming ? 4 : 1)));
 		RECT rect;
 		if (!((GetPos().x > 1100) && (GetPos().x < 2100) && (GetPos().y > 1400) && (GetPos().y < 2100)))
 		{
@@ -138,8 +138,8 @@ void Arrow::CheckMove()
 
 		if (!mIsHoming)
 		{
-			mSpeedX -= mSpeedX * 0.02f * mCount * mMoveSpeed * Timer::deltaTime;
-			mSpeedY -= mSpeedY * 0.02f * mCount * mMoveSpeed * Timer::deltaTime;
+			mSpeedX -= mSpeedX * 0.02f * mCount * mMoveSpeed * Timer::GetDeltaTime();
+			mSpeedY -= mSpeedY * 0.02f * mCount * mMoveSpeed * Timer::GetDeltaTime();
 		}
 
 		if ((abs(mSpeedX) < 0.1f) && (abs(mSpeedY) < 0.1f))
@@ -279,8 +279,8 @@ void Arrow::HomingArrow()
 
 	mTurnRadian += 1;
 
-	mSpeedX = mDirection.x * 5 * mMoveSpeed * Timer::deltaTime;
-	mSpeedY = mDirection.y * 5 * mMoveSpeed * Timer::deltaTime;
+	mSpeedX = mDirection.x * 5 * mMoveSpeed * Timer::GetDeltaTime();
+	mSpeedY = mDirection.y * 5 * mMoveSpeed * Timer::GetDeltaTime();
 }
 
 Vector2 Arrow::GetSpeedXY()

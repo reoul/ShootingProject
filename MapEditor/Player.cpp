@@ -597,22 +597,22 @@ void Player::Roll()
 
 void Player::Left()
 {
-	m_nSpeedX -= mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime;
+	m_nSpeedX -= mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime();
 }
 
 void Player::Right()
 {
-	m_nSpeedX += mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime;
+	m_nSpeedX += mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime();
 }
 
 void Player::Up()
 {
-	m_nSpeedY -= mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime;
+	m_nSpeedY -= mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime();
 }
 
 void Player::Down()
 {
-	m_nSpeedY += mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime;
+	m_nSpeedY += mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime();
 }
 
 void Player::Hit()
@@ -701,36 +701,36 @@ void Player::MoveANDCheckState()
 		switch (curPlayerDirection)
 		{
 		case DIRECTION::LEFT:
-			m_nSpeedX = -(mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime);
+			m_nSpeedX = -(mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime());
 			m_nSpeedY = 0;
 			break;
 		case DIRECTION::RIGHT:
-			m_nSpeedX = mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime;
+			m_nSpeedX = mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime();
 			m_nSpeedY = 0;
 			break;
 		case DIRECTION::UP:
 			m_nSpeedX = 0;
-			m_nSpeedY = -(mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime);
+			m_nSpeedY = -(mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime());
 			break;
 		case DIRECTION::DOWN:
 			m_nSpeedX = 0;
-			m_nSpeedY = mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime;
+			m_nSpeedY = mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime();
 			break;
 		case DIRECTION::LEFTUP:
-			m_nSpeedX = -(mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime);
-			m_nSpeedY = -(mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime);
+			m_nSpeedX = -(mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime());
+			m_nSpeedY = -(mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime());
 			break;
 		case DIRECTION::RIGHTUP:
-			m_nSpeedX = mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime;
-			m_nSpeedY = -(mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime);
+			m_nSpeedX = mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime();
+			m_nSpeedY = -(mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime());
 			break;
 		case DIRECTION::LEFTDOWN:
-			m_nSpeedX = -(mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime);
-			m_nSpeedY = mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime;
+			m_nSpeedX = -(mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime());
+			m_nSpeedY = mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime();
 			break;
 		case DIRECTION::RIGHTDOWN:
-			m_nSpeedX = mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime;
-			m_nSpeedY = mMoveSpeed * m_nMoveSpeedFold * Timer::deltaTime;
+			m_nSpeedX = mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime();
+			m_nSpeedY = mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime();
 			break;
 		}
 	}
