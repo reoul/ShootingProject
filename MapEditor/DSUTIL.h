@@ -8,7 +8,7 @@ typedef struct
 {
 	BYTE* pbWaveData; // pointer into wave resource (for restore)
 	DWORD cbWaveSize; // size of wave data (for restore)
-	int iAlloc; // number of buffers.
+	int iAlloc; // mNumber of buffers.
 	int iCurrent; // current buffer
 	IDirectSoundBuffer* Buffers[10]; // list of buffers
 } SNDOBJ, *HSNDOBJ;

@@ -31,9 +31,9 @@ extern WorldMap bossMap;
 extern WorldMap bossMapRoof;
 extern WorldMap baseMap;
 extern WorldMap* curEditMap;
-extern MAPEDITOR g_editor;
+extern MapEditor g_editor;
 
-extern EDIT_STATE curEditState;
+extern EEditState curEditState;
 
 void InitEditor();
 extern int cameraPositionX;
@@ -49,7 +49,7 @@ void EditorMain(void)
 		InitEditor();
 	int i, j;
 
-	camera.InitExpantion();
+	camera.InitExpansion();
 
 	//화면이동
 	if (DirectInputKeyboardDown(g_lpDirectInputKeyboard, DIK_A))
@@ -99,5 +99,5 @@ void InitEditor()
 	m_bGameFirst = TRUE;
 	m_bEditorFirst = FALSE;
 	//curEditMap = &baseMap;
-	curEditState = EDIT_STATE::EDIT_BOSS;
+	curEditState = EEditState::Boss;
 }

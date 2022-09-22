@@ -8,19 +8,34 @@ class SnowBall : public GameObject
 {
 public:
 	SnowBall();
-	~SnowBall();
-	void Initialize(int x, int y, int moveFrame, Sprite* sprite);
-	void SetDirection(Vector2 _direction);
+	~SnowBall() = default;
+	void Initialize(int x, int y, int moveFrame, Sprite* spritePtr);
+	void SetDirection(Vector2 direction);
 	void CheckMove();
-	void Draw(LPDIRECTDRAWSURFACE7 surface);
-	void IsHit();
+	void Draw(LPDIRECTDRAWSURFACE7 lpSurface);
 	void SetUse(bool use);
-	bool IsUse();
+	bool IsUse() const;
 private:
-	int draw_x;
-	int draw_y;
-	int m_nLastMoveTime;
-	int m_nMoveInterval;
-	bool m_bIsUse;
-	RECT snowHitRect;
+	int mDrawX;
+	int mDrawY;
+	int mLastMoveTime;
+	int mMoveInterval;
+	bool mIsUse;
+	RECT mSnowHitRect;
 };
+
+inline void SnowBall::SetDirection(Vector2 direction)
+{
+	GameObject::SetDirection(direction);
+	mIsUse = true;
+}
+
+inline void SnowBall::SetUse(bool use)
+{
+	mIsUse = use;
+}
+
+inline bool SnowBall::IsUse() const
+{
+	return mIsUse;
+}

@@ -1,77 +1,60 @@
 ﻿#include "Map.h"
+
+#include <cassert>
+
 #include "WorldMapBmp.h"
 
 Map::Map()
+	: mX(0)
+	, mY(0)
+	, mStage(0)
+	, mBaseWorldMapPtr(nullptr)
+	, mBossWorldMapPtr(nullptr)
+	, mBossWorldMapRoofPtr(nullptr)
 {
-	m_x = 0;
-	m_y = 0;
-	stage = 0;
 }
 
-Map::~Map()
+void Map::SetWorldMap(WorldMap* baseMapPtr, WorldMap* bossWorldMapPtr, WorldMap* bossWorldMapRoofPtr)
 {
-}
-
-void Map::SetWorldMap(WorldMap* baseMap, WorldMap* bossWorldMap, WorldMap* bossWorldMapRoof)
-{
-	m_pbassWorldMap = baseMap;
-	m_pBossWorldMap = bossWorldMap;
-	m_pBossWorldMapRoof = bossWorldMapRoof;
-}
-
-void Map::SetPos(int x, int y)
-{
-	m_x = x;
-	m_y = y;
-}
-
-void Map::SetStage(int _stage)
-{
-	stage = _stage;
+	mBaseWorldMapPtr = baseMapPtr;
+	mBossWorldMapPtr = bossWorldMapPtr;
+	mBossWorldMapRoofPtr = bossWorldMapRoofPtr;
 }
 
 void Map::Init()
 {
-	m_x = 0;
-	m_y = 0;
-	stage = 0;
+	mX = 0;
+	mY = 0;
+	mStage = 0;
 }
 
-int Map::GetStageNum()
+void Map::Drawing(LPDIRECTDRAWSURFACE7 lpSurface, LPDIRECTDRAW7 lpDirectDrawObject) const
 {
-	return stage;
-}
-
-void Map::Drawing(LPDIRECTDRAWSURFACE7 lpsurface, LPDIRECTDRAW7 lpDirectDrawObject)
-{
-	switch (stage)
+	switch (mStage)
 	{
 	case 0:
-		m_pbassWorldMap->Drawing2(m_x, m_y, lpsurface, false, lpDirectDrawObject);
+		mBaseWorldMapPtr->Drawing2(mX, mY, lpSurface, false, lpDirectDrawObject);
 		break;
 	case 1:
-		m_pBossWorldMap->Drawing2(m_x, m_y, lpsurface, false, lpDirectDrawObject);
+		mBossWorldMapPtr->Drawing2(mX, mY, lpSurface, false, lpDirectDrawObject);
 		break;
 	default:
+		assert(false);
 		break;
 	}
 }
 
-void Map::DrawingRoof(LPDIRECTDRAWSURFACE7 lpsurface, LPDIRECTDRAW7 lpDirectDrawObject)
+void Map::DrawingRoof(LPDIRECTDRAWSURFACE7 lpSurface, LPDIRECTDRAW7 lpDirectDrawObject) const
 {
-	switch (stage)
+	switch (mStage)
 	{
 	case 0:
 		break;
 	case 1:
-		m_pBossWorldMapRoof->Drawing2(m_x, m_y, lpsurface, true, lpDirectDrawObject);
+		mBossWorldMapRoofPtr->Drawing2(mX, mY, lpSurface, true, lpDirectDrawObject);
 		break;
 	default:
+		assert(false);
 		break;
 	}
-}
-
-void Map::NextStage()
-{
-	stage++;
 }

@@ -11,7 +11,7 @@
 
 IDirectSoundBuffer* DSLoadSoundBuffer(IDirectSound* pDS, LPCTSTR lpName)
 {
-	IDirectSoundBuffer* pDSB = NULL;
+	IDirectSoundBuffer* pDSB = nullptr;
 	DSBUFFERDESC dsBD = {0};
 	BYTE* pbWaveData;
 	void* pvBase;
@@ -20,34 +20,34 @@ IDirectSoundBuffer* DSLoadSoundBuffer(IDirectSound* pDS, LPCTSTR lpName)
 	dsBD.dwFlags = DSBCAPS_STATIC | DSBCAPS_CTRLVOLUME |
 		DSBCAPS_CTRLFREQUENCY | DSBCAPS_LOCSOFTWARE;
 
-	if (DSGetWaveResource(NULL, lpName, &dsBD.lpwfxFormat, &pbWaveData, &dsBD.dwBufferBytes))
+	if (DSGetWaveResource(nullptr, lpName, &dsBD.lpwfxFormat, &pbWaveData, &dsBD.dwBufferBytes))
 	{
 		if (SUCCEEDED(IDirectSound_CreateSoundBuffer(pDS, &dsBD, &pDSB, NULL)))
 		{
 			if (!DSFillSoundBuffer(pDSB, pbWaveData, dsBD.dwBufferBytes))
 			{
 				IDirectSoundBuffer_Release(pDSB);
-				pDSB = NULL;
+				pDSB = nullptr;
 			}
 		}
 		else
 		{
-			pDSB = NULL;
+			pDSB = nullptr;
 		}
 	}
-	else if (DSGetWaveFile(NULL, lpName, &dsBD.lpwfxFormat, &pbWaveData, &dsBD.dwBufferBytes, &pvBase))
+	else if (DSGetWaveFile(nullptr, lpName, &dsBD.lpwfxFormat, &pbWaveData, &dsBD.dwBufferBytes, &pvBase))
 	{
 		if (SUCCEEDED(IDirectSound_CreateSoundBuffer(pDS, &dsBD, &pDSB, NULL)))
 		{
 			if (!DSFillSoundBuffer(pDSB, pbWaveData, dsBD.dwBufferBytes))
 			{
 				IDirectSoundBuffer_Release(pDSB);
-				pDSB = NULL;
+				pDSB = nullptr;
 			}
 		}
 		else
 		{
-			pDSB = NULL;
+			pDSB = nullptr;
 		}
 
 		UnmapViewOfFile(pvBase);
@@ -60,7 +60,7 @@ IDirectSoundBuffer* DSLoadSoundBuffer(IDirectSound* pDS, LPCTSTR lpName)
 
 IDirectSoundBuffer* DSLoad3DSoundBuffer(IDirectSound* pDS, LPCTSTR lpName)
 {
-	IDirectSoundBuffer* pDSB = NULL;
+	IDirectSoundBuffer* pDSB = nullptr;
 	DSBUFFERDESC dsBD = {0};
 	BYTE* pbWaveData;
 	void* pvBase;
@@ -69,34 +69,34 @@ IDirectSoundBuffer* DSLoad3DSoundBuffer(IDirectSound* pDS, LPCTSTR lpName)
 	dsBD.dwFlags = DSBCAPS_STATIC | DSBCAPS_CTRL3D | DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLFREQUENCY | DSBCAPS_LOCSOFTWARE |
 		DSBCAPS_STICKYFOCUS;
 
-	if (DSGetWaveResource(NULL, lpName, &dsBD.lpwfxFormat, &pbWaveData, &dsBD.dwBufferBytes))
+	if (DSGetWaveResource(nullptr, lpName, &dsBD.lpwfxFormat, &pbWaveData, &dsBD.dwBufferBytes))
 	{
 		if (SUCCEEDED(IDirectSound_CreateSoundBuffer(pDS, &dsBD, &pDSB, NULL)))
 		{
 			if (!DSFillSoundBuffer(pDSB, pbWaveData, dsBD.dwBufferBytes))
 			{
 				IDirectSoundBuffer_Release(pDSB);
-				pDSB = NULL;
+				pDSB = nullptr;
 			}
 		}
 		else
 		{
-			pDSB = NULL;
+			pDSB = nullptr;
 		}
 	}
-	else if (DSGetWaveFile(NULL, lpName, &dsBD.lpwfxFormat, &pbWaveData, &dsBD.dwBufferBytes, &pvBase))
+	else if (DSGetWaveFile(nullptr, lpName, &dsBD.lpwfxFormat, &pbWaveData, &dsBD.dwBufferBytes, &pvBase))
 	{
 		if (SUCCEEDED(IDirectSound_CreateSoundBuffer(pDS, &dsBD, &pDSB, NULL)))
 		{
 			if (!DSFillSoundBuffer(pDSB, pbWaveData, dsBD.dwBufferBytes))
 			{
 				IDirectSoundBuffer_Release(pDSB);
-				pDSB = NULL;
+				pDSB = nullptr;
 			}
 		}
 		else
 		{
-			pDSB = NULL;
+			pDSB = nullptr;
 		}
 		UnmapViewOfFile(pvBase);
 	}
@@ -113,7 +113,7 @@ BOOL DSReloadSoundBuffer(IDirectSoundBuffer* pDSB, LPCTSTR lpName)
 	DWORD cbWaveSize;
 	void* pvBase;
 
-	if (DSGetWaveResource(NULL, lpName, NULL, &pbWaveData, &cbWaveSize))
+	if (DSGetWaveResource(nullptr, lpName, nullptr, &pbWaveData, &cbWaveSize))
 	{
 		if (SUCCEEDED(IDirectSoundBuffer_Restore(pDSB)) &&
 			DSFillSoundBuffer(pDSB, pbWaveData, cbWaveSize))
@@ -121,7 +121,7 @@ BOOL DSReloadSoundBuffer(IDirectSoundBuffer* pDSB, LPCTSTR lpName)
 			result = TRUE;
 		}
 	}
-	else if (DSGetWaveFile(NULL, lpName, NULL, &pbWaveData, &cbWaveSize, &pvBase))
+	else if (DSGetWaveFile(nullptr, lpName, nullptr, &pbWaveData, &cbWaveSize, &pvBase))
 	{
 		if (SUCCEEDED(IDirectSoundBuffer_Restore(pDSB)) &&
 			DSFillSoundBuffer(pDSB, pbWaveData, cbWaveSize))
@@ -144,9 +144,9 @@ BOOL DSGetWaveResource(HMODULE hModule, LPCTSTR lpName,
 	HGLOBAL hResData;
 	void* pvRes;
 
-	if (((hResInfo = FindResource(hModule, lpName, c_szWAV)) != NULL) &&
-		((hResData = LoadResource(hModule, hResInfo)) != NULL) &&
-		((pvRes = LockResource(hResData)) != NULL) &&
+	if (((hResInfo = FindResource(hModule, lpName, c_szWAV)) != nullptr) &&
+		((hResData = LoadResource(hModule, hResInfo)) != nullptr) &&
+		((pvRes = LockResource(hResData)) != nullptr) &&
 		DSParseWaveResource(pvRes, ppWaveHeader, ppbWaveData, pcbWaveSize))
 	{
 		return TRUE;
@@ -162,11 +162,11 @@ BOOL DSGetWaveFile(HMODULE hModule, LPCTSTR lpName, WAVEFORMATEX** ppWaveHeader,
 	void* pvRes;
 	HANDLE hFile, hMapping;
 
-	*ppvBase = NULL;
-	hFile = CreateFile(lpName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+	*ppvBase = nullptr;
+	hFile = CreateFile(lpName, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
 	if (hFile == INVALID_HANDLE_VALUE)return FALSE;
 
-	hMapping = CreateFileMapping(hFile, NULL, PAGE_READONLY, 0, 0, NULL);
+	hMapping = CreateFileMapping(hFile, nullptr, PAGE_READONLY, 0, 0, nullptr);
 	if (hMapping == INVALID_HANDLE_VALUE)
 	{
 		CloseHandle(hFile);
@@ -176,7 +176,7 @@ BOOL DSGetWaveFile(HMODULE hModule, LPCTSTR lpName, WAVEFORMATEX** ppWaveHeader,
 
 
 	pvRes = MapViewOfFile(hMapping, FILE_MAP_READ, 0, 0, 0);
-	if (pvRes == NULL)
+	if (pvRes == nullptr)
 	{
 		CloseHandle(hMapping);
 		return FALSE;
@@ -199,7 +199,7 @@ BOOL DSGetWaveFile(HMODULE hModule, LPCTSTR lpName, WAVEFORMATEX** ppWaveHeader,
 
 SNDOBJ* SndObjCreate(IDirectSound* pDS, LPCTSTR lpName, int iConcurrent)
 {
-	SNDOBJ* pSO = NULL;
+	SNDOBJ* pSO = nullptr;
 	LPWAVEFORMATEX pWaveHeader;
 	BOOL fFound = FALSE;
 	BYTE* pbData;
@@ -207,9 +207,9 @@ SNDOBJ* SndObjCreate(IDirectSound* pDS, LPCTSTR lpName, int iConcurrent)
 	void* pvBase;
 
 
-	if (DSGetWaveResource(NULL, lpName, &pWaveHeader, &pbData, &cbData))
+	if (DSGetWaveResource(nullptr, lpName, &pWaveHeader, &pbData, &cbData))
 		fFound = TRUE;
-	if (DSGetWaveFile(NULL, lpName, &pWaveHeader, &pbData, &cbData, &pvBase))
+	if (DSGetWaveFile(nullptr, lpName, &pWaveHeader, &pbData, &cbData, &pvBase))
 	{
 		fFound = TRUE;
 		UnmapViewOfFile(pvBase);
@@ -221,7 +221,7 @@ SNDOBJ* SndObjCreate(IDirectSound* pDS, LPCTSTR lpName, int iConcurrent)
 			iConcurrent = 1;
 
 		if ((pSO = (SNDOBJ*)LocalAlloc(LPTR, sizeof(SNDOBJ) + (iConcurrent - 1) *
-		                               sizeof(IDirectSoundBuffer*))) != NULL)
+		                               sizeof(IDirectSoundBuffer*))) != nullptr)
 		{
 			int i;
 
@@ -238,7 +238,7 @@ SNDOBJ* SndObjCreate(IDirectSound* pDS, LPCTSTR lpName, int iConcurrent)
 					if (!pSO->Buffers[i])
 					{
 						SndObjDestroy(pSO);
-						pSO = NULL;
+						pSO = nullptr;
 						break;
 					}
 				}
@@ -260,7 +260,7 @@ void SndObjDestroy(SNDOBJ* pSO)
 			if (pSO->Buffers[i])
 			{
 				IDirectSoundBuffer_Release(pSO->Buffers[i]);
-				pSO->Buffers[i] = NULL;
+				pSO->Buffers[i] = nullptr;
 			}
 		}
 		LocalFree((HANDLE)pSO);
@@ -272,8 +272,8 @@ IDirectSoundBuffer* SndObjGetFreeBuffer(SNDOBJ* pSO)
 {
 	IDirectSoundBuffer* pDSB;
 
-	if (pSO == NULL)
-		return NULL;
+	if (pSO == nullptr)
+		return nullptr;
 
 	if (pDSB = pSO->Buffers[pSO->iCurrent])
 	{
@@ -301,7 +301,7 @@ IDirectSoundBuffer* SndObjGetFreeBuffer(SNDOBJ* pSO)
 			}
 			else
 			{
-				pDSB = NULL;
+				pDSB = nullptr;
 			}
 		}
 
@@ -310,7 +310,7 @@ IDirectSoundBuffer* SndObjGetFreeBuffer(SNDOBJ* pSO)
 			if (FAILED(IDirectSoundBuffer_Restore(pDSB)) ||
 				!DSFillSoundBuffer(pDSB, pSO->pbWaveData, pSO->cbWaveSize))
 			{
-				pDSB = NULL;
+				pDSB = nullptr;
 			}
 		}
 	}
@@ -322,13 +322,13 @@ BOOL SndObjPlay(SNDOBJ* pSO, DWORD dwPlayFlags)
 {
 	BOOL result = FALSE;
 
-	if (pSO == NULL) return FALSE;
+	if (pSO == nullptr) return FALSE;
 
 	if (!(dwPlayFlags & DSBPLAY_LOOPING) || (pSO->iAlloc == 1))
 	{
 		IDirectSoundBuffer* pDSB = SndObjGetFreeBuffer(pSO);
 
-		if (pDSB != NULL)
+		if (pDSB != nullptr)
 		{
 			result = SUCCEEDED(IDirectSoundBuffer_Play(pDSB, 0, 0, dwPlayFlags));
 		}
@@ -346,7 +346,7 @@ BOOL SndObjStop(SNDOBJ* pSO)
 {
 	int i;
 
-	if (pSO == NULL)
+	if (pSO == nullptr)
 		return FALSE;
 
 	for (i = 0; i < pSO->iAlloc; i++)
@@ -393,10 +393,10 @@ BOOL DSParseWaveResource(void* pvRes, WAVEFORMATEX** ppWaveHeader, BYTE** ppbWav
 	DWORD dwLength;
 
 	if (ppWaveHeader)
-		*ppWaveHeader = NULL;
+		*ppWaveHeader = nullptr;
 
 	if (ppbWaveData)
-		*ppbWaveData = NULL;
+		*ppbWaveData = nullptr;
 
 	if (pcbWaveSize)
 		*pcbWaveSize = 0;

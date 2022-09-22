@@ -35,7 +35,6 @@
 #include "Map.h"
 #include <string>
 #include "Fireblock.h"
-#include "Enemy.h"
 #include "SkillUI.h"
 
 using namespace std;
@@ -56,12 +55,12 @@ HINSTANCE g_hInstance;
 
 HDC hdc;
 
-LPDIRECTDRAW7 g_lpDirectDrawObject = NULL;
-LPDIRECTDRAWSURFACE7 g_lpPrimarySurface = NULL;
-LPDIRECTDRAWSURFACE7 g_lpSecondarySurface = NULL;
+LPDIRECTDRAW7 g_lpDirectDrawObject = nullptr;
+LPDIRECTDRAWSURFACE7 g_lpPrimarySurface = nullptr;
+LPDIRECTDRAWSURFACE7 g_lpSecondarySurface = nullptr;
 
-LPDIRECTINPUT8 g_lpDirectInputObject = NULL;
-LPDIRECTINPUTDEVICE8 g_lpDirectInputKeyboard = NULL;
+LPDIRECTINPUT8 g_lpDirectInputObject = nullptr;
+LPDIRECTINPUTDEVICE8 g_lpDirectInputKeyboard = nullptr;
 
 Block g_blocks[BLOCK_Y][BLOCK_X];
 Sprite blockSprite[4][TOTAL_BLOCK_SPRITE];
@@ -87,17 +86,17 @@ Sprite enemy_hide_right;
 Sprite enemy_attack_left;
 Sprite enemy_attack_right;
 
-CSprite8 player_walk;
-CSprite8 player_roll;
-CSprite8 player_dead;
-CSprite8 bow_walk;
-CSprite8 bow_roll;
-CSprite8 bow_attack;
-CSprite8 arrowSprite;
-CSprite8 boss_idle;
-CSprite8 boss_roll;
-CSprite8 boss_attack;
-CSprite8 boss_dead;
+Sprite8 player_walk;
+Sprite8 player_roll;
+Sprite8 player_dead;
+Sprite8 bow_walk;
+Sprite8 bow_roll;
+Sprite8 bow_attack;
+Sprite8 arrowSprite;
+Sprite8 boss_idle;
+Sprite8 boss_roll;
+Sprite8 boss_attack;
+Sprite8 boss_dead;
 
 Sprite boss_sleep;
 Sprite boss_snowball;
@@ -115,7 +114,6 @@ Sprite tutorialSprite;
 
 Arrow arrow[TOTAL_ARROW];
 SnowBall snowball[TOTAL_SNOWBALL];
-Enemy enemy[TOTAL_ENEMY];
 
 IntroSprite introSprite;
 IntroSprite introButton;
@@ -139,19 +137,19 @@ Gui tutorial;
 SkillUI skillRoll;
 SkillUI skillCyclone;
 
-MOD curMod; //현재 모드
+EMod curMod; //현재 모드
 
-DIRECTION curPlayerDirection;
-DIRECTION curBossDirection;
+EDirection curPlayerDirection;
+EDirection curBossDirection;
 
-ACTION curPlayerAction;
-ACTION curBossAction;
+EAction curPlayerAction;
+EAction curBossAction;
 
-EDIT_STATE curEditState;
+EEditState curEditState;
 
-EDIT_WINDOW curEditWindow; //현재 에디터 창
+EEditWindow curEditWindow; //현재 에디터 창
 
-MAPEDITOR g_editor; //맵에디터 변수
+MapEditor g_editor; //맵에디터 변수
 
 bool g_bActiveApp = false;
 bool g_bIsFirst;
@@ -182,19 +180,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	wndclass.cbClsExtra = wndclass.cbWndExtra = 0;
 	wndclass.hInstance = hInstance;
 	wndclass.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_APPLICATION));
-	wndclass.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wndclass.hCursor = LoadCursor(nullptr, IDC_ARROW);
 	wndclass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
-	wndclass.lpszMenuName = NULL;
+	wndclass.lpszMenuName = nullptr;
 	wndclass.lpszClassName = CLASS_NAME;
 	wndclass.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_APPLICATION));
 
 	if (RegisterClassEx(&wndclass) == 0)
 		return 0;
 	g_hwnd = CreateWindowEx(WS_EX_TOPMOST, CLASS_NAME, CLASS_NAME, WS_POPUP | WS_VISIBLE,
-	                        GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN),
-	                        SCREEN_WIDTH, SCREEN_HEIGHT, NULL, NULL, hInstance, NULL);
-
-	if (g_hwnd == NULL) return 0;
+		GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN),
+		SCREEN_WIDTH, SCREEN_HEIGHT, nullptr, nullptr, hInstance, nullptr);
+	
+	if (g_hwnd == nullptr) return 0;
 	g_hInstance = hInstance;
 	cameraPositionX = 0;
 	cameraPositionY = 0;
@@ -221,9 +219,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	MSG msg;
 	while (true)
 	{
-		if (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
+		if (PeekMessage(&msg, nullptr, 0, 0, PM_NOREMOVE))
 		{
-			if (!GetMessage(&msg, NULL, 0, 0))
+			if (!GetMessage(&msg, nullptr, 0, 0))
 				return (int)msg.wParam;
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
@@ -233,18 +231,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			Timer::UpdateDeltaTime();
 			switch (curMod)
 			{
-			case MOD_INTRO:
+			case EMod::Intro:
 				IntroMain();
 				break;
-			case MOD_GAME:
+			case EMod::Game:
 				GameMain();
 				break;
-			case MOD_EDITOR:
+			case EMod::Editor:
 				EditorMain();
 				break;
-			case MOD_QUIT: 
+			case EMod::Quit:
 				break;
-			default: 
+			default:
 				assert(false);
 			}
 		}
@@ -254,7 +252,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	if (curMod == MOD_QUIT && !g_bIsQuit)
+	if (curMod == EMod::Quit && !g_bIsQuit)
 	{
 		g_bIsQuit = true;
 		DestroyWindow(hwnd);
@@ -296,23 +294,23 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			g_bActiveApp = false;
 		break;
 	case WM_KEYDOWN:
-		if (wParam == 'Y') curMod = MOD_INTRO;
+		if (wParam == 'Y') curMod = EMod::Intro;
 		if (wParam == VK_RETURN) IsSkipTutorial = true;
 		if (wParam == VK_ESCAPE) DestroyWindow(hwnd);
 		break;
 	case WM_LBUTTONDOWN:
 		switch (curMod)
 		{
-		case MOD_INTRO:
+		case EMod::Intro:
 			break;
-		case MOD_GAME:
-			if (!(curPlayerAction == ACTION::ROLL))
-				if (!player.IsArrowNull() && !(curPlayerAction == ACTION::DEAD) && !camera.GetIsFirstAlpha())
+		case EMod::Game:
+			if (!(curPlayerAction == EAction::Roll))
+				if (!player.IsArrowNull() && !(curPlayerAction == EAction::Dead) && !camera.GetIsFirstAlpha())
 				{
 					firstPosition.SetXY(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1),
-					                      HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
+						HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
 					curMousePosition.SetXY(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1),
-					                         HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
+						HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
 					camera.SetIsExpansion(true);
 					player.GetCurArrow()->SetCharging(true);
 					x = curMousePosition.x - player.GetPos().x;
@@ -321,29 +319,29 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 					attackDirection.SetXY(x / arrowDirection, y / arrowDirection);
 				}
 			break;
-		case MOD_EDITOR:
+		case EMod::Editor:
 			g_editor.CheckChoiceWindow(LOWORD(lParam), HIWORD(lParam));
 			if (!g_editor.IsChoiceWindow())
 				g_editor.SetStartXY(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1),
-				                    HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
+					HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
 			else
 				g_editor.GetChoiceWindow()->CheckBlockClick(LOWORD(lParam), HIWORD(lParam));
 			break;
-		case MOD_QUIT:
+		case EMod::Quit:
 			break;
 		}
 		break;
 	case WM_LBUTTONUP:
 		switch (curMod)
 		{
-		case MOD_INTRO:
+		case EMod::Intro:
 			break;
-		case MOD_GAME:
+		case EMod::Game:
 			if (!camera.GetIsFirstAlpha())
 			{
 				isSound = false;
 				curMousePosition.SetXY(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1),
-				                         HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
+					HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
 				camera.SetIsExpansion(false);
 				x = curMousePosition.x - player.GetPos().x;
 				y = curMousePosition.y - player.GetPos().y;
@@ -351,11 +349,11 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 				attackDirection.SetXY(x / arrowDirection, y / arrowDirection);
 			}
 			break;
-		case MOD_EDITOR:
+		case EMod::Editor:
 			if (!g_editor.IsChoiceWindow())
 			{
 				g_editor.SetEndXY(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1),
-				                  HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
+					HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
 				g_editor.SetBlock(g_blocks, curBlock.GetSprite());
 				g_editor.SaveWallData();
 			}
@@ -364,31 +362,31 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 				g_editor.GetChoiceWindow()->SetCanMove(false);
 			}
 			break;
-		case MOD_QUIT:
+		case EMod::Quit:
 			break;
 		}
 		break;
 	case WM_MOUSEMOVE:
 		switch (curMod)
 		{
-		case MOD_INTRO:
+		case EMod::Intro:
 			break;
-		case MOD_GAME:
+		case EMod::Game:
 			if (camera.GetIsExpansion() && !camera.GetIsFirstAlpha())
 			{
 				curMousePosition.SetXY(LOWORD(lParam) + camera.GetX() - (SCREEN_WIDTH >> 1),
-				                         HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
+					HIWORD(lParam) + camera.GetY() - (SCREEN_HEIGHT >> 1));
 				x = curMousePosition.x - player.GetPos().x;
 				y = curMousePosition.y - player.GetPos().y;
 				arrowDirection = (int)sqrtf(pow(x, 2) + pow(y, 2));
 				attackDirection.SetXY(x / arrowDirection, y / arrowDirection);
 			}
 			break;
-		case MOD_EDITOR:
-			if (g_editor.GetChoiceWindow()->GetCanMove())
+		case EMod::Editor:
+			if (g_editor.GetChoiceWindow()->CanMove())
 				g_editor.GetChoiceWindow()->SetXY(LOWORD(lParam), HIWORD(lParam));
 			break;
-		case MOD_QUIT:
+		case EMod::Quit:
 			break;
 		}
 		break;
@@ -424,9 +422,6 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			player_dead.ReleaseAll();
 			boss_dead.ReleaseAll();
 			fireSprite.ReleaseAll();
-
-			boss_sleep.ReleaseAll();
-			boss_snowball.ReleaseAll();
 
 			boss_hp_window.ReleaseAll();
 			boss_hp.ReleaseAll();
@@ -472,9 +467,9 @@ bool LoadWorldMapBlock()
 	HANDLE hfile;
 	DWORD actualRead;
 
-	hfile = CreateFile(TEXT("data\\blockData.txt"), GENERIC_READ, FILE_SHARE_READ, (LPSECURITY_ATTRIBUTES)NULL,
-	                   OPEN_EXISTING,
-	                   FILE_ATTRIBUTE_NORMAL, (HANDLE)NULL);
+	hfile = CreateFile(TEXT("data\\blockData.txt"), GENERIC_READ, FILE_SHARE_READ, (LPSECURITY_ATTRIBUTES)nullptr,
+		OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL, (HANDLE)nullptr);
 
 	if (hfile == INVALID_HANDLE_VALUE)
 	{
@@ -486,7 +481,7 @@ bool LoadWorldMapBlock()
 
 	MapData = new unsigned char[BLOCK_X * BLOCK_Y * 2];
 
-	if (!ReadFile(hfile, MapData, BLOCK_X * BLOCK_Y * 2, &actualRead, NULL)) //비트맵파일 자체의 정보를 읽을수 없다면
+	if (!ReadFile(hfile, MapData, BLOCK_X * BLOCK_Y * 2, &actualRead, nullptr)) //비트맵파일 자체의 정보를 읽을수 없다면
 	{
 		CloseHandle(hfile); //핸들을 반납해주고
 		return false; //false를 반환해준다
@@ -509,9 +504,9 @@ bool LoadWorldMapBlock()
 
 	CloseHandle(hfile);
 
-	hfile = CreateFile(TEXT("data\\blockData2.txt"), GENERIC_READ, FILE_SHARE_READ, (LPSECURITY_ATTRIBUTES)NULL,
-	                   OPEN_EXISTING,
-	                   FILE_ATTRIBUTE_NORMAL, (HANDLE)NULL);
+	hfile = CreateFile(TEXT("data\\blockData2.txt"), GENERIC_READ, FILE_SHARE_READ, (LPSECURITY_ATTRIBUTES)nullptr,
+		OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL, (HANDLE)nullptr);
 
 	if (hfile == INVALID_HANDLE_VALUE)
 	{
@@ -521,7 +516,7 @@ bool LoadWorldMapBlock()
 
 	MapData = new unsigned char[BLOCK_X * BLOCK_Y * 2];
 
-	if (!ReadFile(hfile, MapData, BLOCK_X * BLOCK_Y * 2, &actualRead, NULL)) //비트맵파일 자체의 정보를 읽을수 없다면
+	if (!ReadFile(hfile, MapData, BLOCK_X * BLOCK_Y * 2, &actualRead, nullptr)) //비트맵파일 자체의 정보를 읽을수 없다면
 	{
 		CloseHandle(hfile); //핸들을 반납해주고
 		return false; //false를 반환해준다
@@ -1075,7 +1070,7 @@ bool LoadBMPandInitSurface()
 	curBlock.SetSprite(&blockSprite[0][10]);
 #pragma endregion
 
-	curMod = MOD_INTRO;
+	curMod = EMod::Intro;
 
 	baseMap.LoadBMPFile("image\\map\\basemap.bmp");
 	baseMap.CopyBufferToSurface4(g_lpDirectDrawObject);
@@ -1087,7 +1082,7 @@ bool LoadBMPandInitSurface()
 	bossMapRoof.CopyBufferToSurface3(g_lpDirectDrawObject);
 
 	curEditMap = &baseMap;
-	curEditWindow = EDIT_WINDOW::EDIT_BLOCK_WINDOW2;
+	curEditWindow = EEditWindow::BlockWindow2;
 
 	player_walk.Init();
 	player_roll.Init();
@@ -1104,281 +1099,281 @@ bool LoadBMPandInitSurface()
 #pragma region player_sprite
 
 #pragma region player_walk
-	if (!player_walk.GetSprite(DIRECTION::LEFT)->InitSprite(6, 20, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!player_walk.GetSprite(EDirection::Left)->InitSprite(6, 20, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!player_walk.GetSprite(DIRECTION::LEFT)->LoadFrame(0, "image\\me\\walk\\me_walk_left00.bmp"))
+	if (!player_walk.GetSprite(EDirection::Left)->LoadFrame(0, "image\\me\\walk\\me_walk_left00.bmp"))
 		return false;
-	if (!player_walk.GetSprite(DIRECTION::LEFT)->LoadFrame(1, "image\\me\\walk\\me_walk_left01.bmp"))
+	if (!player_walk.GetSprite(EDirection::Left)->LoadFrame(1, "image\\me\\walk\\me_walk_left01.bmp"))
 		return false;
-	if (!player_walk.GetSprite(DIRECTION::LEFT)->LoadFrame(2, "image\\me\\walk\\me_walk_left02.bmp"))
+	if (!player_walk.GetSprite(EDirection::Left)->LoadFrame(2, "image\\me\\walk\\me_walk_left02.bmp"))
 		return false;
-	if (!player_walk.GetSprite(DIRECTION::LEFT)->LoadFrame(3, "image\\me\\walk\\me_walk_left03.bmp"))
+	if (!player_walk.GetSprite(EDirection::Left)->LoadFrame(3, "image\\me\\walk\\me_walk_left03.bmp"))
 		return false;
-	if (!player_walk.GetSprite(DIRECTION::LEFT)->LoadFrame(4, "image\\me\\walk\\me_walk_left04.bmp"))
+	if (!player_walk.GetSprite(EDirection::Left)->LoadFrame(4, "image\\me\\walk\\me_walk_left04.bmp"))
 		return false;
-	if (!player_walk.GetSprite(DIRECTION::LEFT)->LoadFrame(5, "image\\me\\walk\\me_walk_left05.bmp"))
-		return false;
-
-	if (!player_walk.GetSprite(DIRECTION::LEFTUP)->InitSprite(6, 20, 32, COLOR_KEY, g_lpDirectDrawObject))
-		return false;
-	if (!player_walk.GetSprite(DIRECTION::LEFTUP)->LoadFrame(0, "image\\me\\walk\\me_walk_leftup00.bmp"))
-		return false;
-	if (!player_walk.GetSprite(DIRECTION::LEFTUP)->LoadFrame(1, "image\\me\\walk\\me_walk_leftup01.bmp"))
-		return false;
-	if (!player_walk.GetSprite(DIRECTION::LEFTUP)->LoadFrame(2, "image\\me\\walk\\me_walk_leftup02.bmp"))
-		return false;
-	if (!player_walk.GetSprite(DIRECTION::LEFTUP)->LoadFrame(3, "image\\me\\walk\\me_walk_leftup03.bmp"))
-		return false;
-	if (!player_walk.GetSprite(DIRECTION::LEFTUP)->LoadFrame(4, "image\\me\\walk\\me_walk_leftup04.bmp"))
-		return false;
-	if (!player_walk.GetSprite(DIRECTION::LEFTUP)->LoadFrame(5, "image\\me\\walk\\me_walk_leftup05.bmp"))
+	if (!player_walk.GetSprite(EDirection::Left)->LoadFrame(5, "image\\me\\walk\\me_walk_left05.bmp"))
 		return false;
 
-	if (!player_walk.GetSprite(DIRECTION::LEFTDOWN)->InitSprite(6, 20, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!player_walk.GetSprite(EDirection::LeftUp)->InitSprite(6, 20, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!player_walk.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(0, "image\\me\\walk\\me_walk_leftdown00.bmp"))
+	if (!player_walk.GetSprite(EDirection::LeftUp)->LoadFrame(0, "image\\me\\walk\\me_walk_leftup00.bmp"))
 		return false;
-	if (!player_walk.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(1, "image\\me\\walk\\me_walk_leftdown01.bmp"))
+	if (!player_walk.GetSprite(EDirection::LeftUp)->LoadFrame(1, "image\\me\\walk\\me_walk_leftup01.bmp"))
 		return false;
-	if (!player_walk.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(2, "image\\me\\walk\\me_walk_leftdown02.bmp"))
+	if (!player_walk.GetSprite(EDirection::LeftUp)->LoadFrame(2, "image\\me\\walk\\me_walk_leftup02.bmp"))
 		return false;
-	if (!player_walk.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(3, "image\\me\\walk\\me_walk_leftdown03.bmp"))
+	if (!player_walk.GetSprite(EDirection::LeftUp)->LoadFrame(3, "image\\me\\walk\\me_walk_leftup03.bmp"))
 		return false;
-	if (!player_walk.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(4, "image\\me\\walk\\me_walk_leftdown04.bmp"))
+	if (!player_walk.GetSprite(EDirection::LeftUp)->LoadFrame(4, "image\\me\\walk\\me_walk_leftup04.bmp"))
 		return false;
-	if (!player_walk.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(5, "image\\me\\walk\\me_walk_leftdown05.bmp"))
-		return false;
-
-	if (!player_walk.GetSprite(DIRECTION::RIGHT)->InitSprite(6, 20, 32, COLOR_KEY, g_lpDirectDrawObject))
-		return false;
-	if (!player_walk.GetSprite(DIRECTION::RIGHT)->LoadFrame(0, "image\\me\\walk\\me_walk_right00.bmp"))
-		return false;
-	if (!player_walk.GetSprite(DIRECTION::RIGHT)->LoadFrame(1, "image\\me\\walk\\me_walk_right01.bmp"))
-		return false;
-	if (!player_walk.GetSprite(DIRECTION::RIGHT)->LoadFrame(2, "image\\me\\walk\\me_walk_right02.bmp"))
-		return false;
-	if (!player_walk.GetSprite(DIRECTION::RIGHT)->LoadFrame(3, "image\\me\\walk\\me_walk_right03.bmp"))
-		return false;
-	if (!player_walk.GetSprite(DIRECTION::RIGHT)->LoadFrame(4, "image\\me\\walk\\me_walk_right04.bmp"))
-		return false;
-	if (!player_walk.GetSprite(DIRECTION::RIGHT)->LoadFrame(5, "image\\me\\walk\\me_walk_right05.bmp"))
+	if (!player_walk.GetSprite(EDirection::LeftUp)->LoadFrame(5, "image\\me\\walk\\me_walk_leftup05.bmp"))
 		return false;
 
-	if (!player_walk.GetSprite(DIRECTION::RIGHTUP)->InitSprite(6, 20, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!player_walk.GetSprite(EDirection::LeftDown)->InitSprite(6, 20, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!player_walk.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(0, "image\\me\\walk\\me_walk_rightup00.bmp"))
+	if (!player_walk.GetSprite(EDirection::LeftDown)->LoadFrame(0, "image\\me\\walk\\me_walk_leftdown00.bmp"))
 		return false;
-	if (!player_walk.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(1, "image\\me\\walk\\me_walk_rightup01.bmp"))
+	if (!player_walk.GetSprite(EDirection::LeftDown)->LoadFrame(1, "image\\me\\walk\\me_walk_leftdown01.bmp"))
 		return false;
-	if (!player_walk.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(2, "image\\me\\walk\\me_walk_rightup02.bmp"))
+	if (!player_walk.GetSprite(EDirection::LeftDown)->LoadFrame(2, "image\\me\\walk\\me_walk_leftdown02.bmp"))
 		return false;
-	if (!player_walk.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(3, "image\\me\\walk\\me_walk_rightup03.bmp"))
+	if (!player_walk.GetSprite(EDirection::LeftDown)->LoadFrame(3, "image\\me\\walk\\me_walk_leftdown03.bmp"))
 		return false;
-	if (!player_walk.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(4, "image\\me\\walk\\me_walk_rightup04.bmp"))
+	if (!player_walk.GetSprite(EDirection::LeftDown)->LoadFrame(4, "image\\me\\walk\\me_walk_leftdown04.bmp"))
 		return false;
-	if (!player_walk.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(5, "image\\me\\walk\\me_walk_rightup05.bmp"))
-		return false;
-
-	if (!player_walk.GetSprite(DIRECTION::RIGHTDOWN)->InitSprite(6, 20, 32, COLOR_KEY, g_lpDirectDrawObject))
-		return false;
-	if (!player_walk.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(0, "image\\me\\walk\\me_walk_rightdown00.bmp"))
-		return false;
-	if (!player_walk.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(1, "image\\me\\walk\\me_walk_rightdown01.bmp"))
-		return false;
-	if (!player_walk.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(2, "image\\me\\walk\\me_walk_rightdown02.bmp"))
-		return false;
-	if (!player_walk.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(3, "image\\me\\walk\\me_walk_rightdown03.bmp"))
-		return false;
-	if (!player_walk.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(4, "image\\me\\walk\\me_walk_rightdown04.bmp"))
-		return false;
-	if (!player_walk.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(5, "image\\me\\walk\\me_walk_rightdown05.bmp"))
+	if (!player_walk.GetSprite(EDirection::LeftDown)->LoadFrame(5, "image\\me\\walk\\me_walk_leftdown05.bmp"))
 		return false;
 
-	if (!player_walk.GetSprite(DIRECTION::UP)->InitSprite(6, 20, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!player_walk.GetSprite(EDirection::Right)->InitSprite(6, 20, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!player_walk.GetSprite(DIRECTION::UP)->LoadFrame(0, "image\\me\\walk\\me_walk_up00.bmp"))
+	if (!player_walk.GetSprite(EDirection::Right)->LoadFrame(0, "image\\me\\walk\\me_walk_right00.bmp"))
 		return false;
-	if (!player_walk.GetSprite(DIRECTION::UP)->LoadFrame(1, "image\\me\\walk\\me_walk_up01.bmp"))
+	if (!player_walk.GetSprite(EDirection::Right)->LoadFrame(1, "image\\me\\walk\\me_walk_right01.bmp"))
 		return false;
-	if (!player_walk.GetSprite(DIRECTION::UP)->LoadFrame(2, "image\\me\\walk\\me_walk_up02.bmp"))
+	if (!player_walk.GetSprite(EDirection::Right)->LoadFrame(2, "image\\me\\walk\\me_walk_right02.bmp"))
 		return false;
-	if (!player_walk.GetSprite(DIRECTION::UP)->LoadFrame(3, "image\\me\\walk\\me_walk_up03.bmp"))
+	if (!player_walk.GetSprite(EDirection::Right)->LoadFrame(3, "image\\me\\walk\\me_walk_right03.bmp"))
 		return false;
-	if (!player_walk.GetSprite(DIRECTION::UP)->LoadFrame(4, "image\\me\\walk\\me_walk_up04.bmp"))
+	if (!player_walk.GetSprite(EDirection::Right)->LoadFrame(4, "image\\me\\walk\\me_walk_right04.bmp"))
 		return false;
-	if (!player_walk.GetSprite(DIRECTION::UP)->LoadFrame(5, "image\\me\\walk\\me_walk_up05.bmp"))
+	if (!player_walk.GetSprite(EDirection::Right)->LoadFrame(5, "image\\me\\walk\\me_walk_right05.bmp"))
 		return false;
 
-	if (!player_walk.GetSprite(DIRECTION::DOWN)->InitSprite(6, 20, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!player_walk.GetSprite(EDirection::RightUp)->InitSprite(6, 20, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!player_walk.GetSprite(DIRECTION::DOWN)->LoadFrame(0, "image\\me\\walk\\me_walk_down00.bmp"))
+	if (!player_walk.GetSprite(EDirection::RightUp)->LoadFrame(0, "image\\me\\walk\\me_walk_rightup00.bmp"))
 		return false;
-	if (!player_walk.GetSprite(DIRECTION::DOWN)->LoadFrame(1, "image\\me\\walk\\me_walk_down01.bmp"))
+	if (!player_walk.GetSprite(EDirection::RightUp)->LoadFrame(1, "image\\me\\walk\\me_walk_rightup01.bmp"))
 		return false;
-	if (!player_walk.GetSprite(DIRECTION::DOWN)->LoadFrame(2, "image\\me\\walk\\me_walk_down02.bmp"))
+	if (!player_walk.GetSprite(EDirection::RightUp)->LoadFrame(2, "image\\me\\walk\\me_walk_rightup02.bmp"))
 		return false;
-	if (!player_walk.GetSprite(DIRECTION::DOWN)->LoadFrame(3, "image\\me\\walk\\me_walk_down03.bmp"))
+	if (!player_walk.GetSprite(EDirection::RightUp)->LoadFrame(3, "image\\me\\walk\\me_walk_rightup03.bmp"))
 		return false;
-	if (!player_walk.GetSprite(DIRECTION::DOWN)->LoadFrame(4, "image\\me\\walk\\me_walk_down04.bmp"))
+	if (!player_walk.GetSprite(EDirection::RightUp)->LoadFrame(4, "image\\me\\walk\\me_walk_rightup04.bmp"))
 		return false;
-	if (!player_walk.GetSprite(DIRECTION::DOWN)->LoadFrame(5, "image\\me\\walk\\me_walk_down05.bmp"))
+	if (!player_walk.GetSprite(EDirection::RightUp)->LoadFrame(5, "image\\me\\walk\\me_walk_rightup05.bmp"))
+		return false;
+
+	if (!player_walk.GetSprite(EDirection::RightDown)->InitSprite(6, 20, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_walk.GetSprite(EDirection::RightDown)->LoadFrame(0, "image\\me\\walk\\me_walk_rightdown00.bmp"))
+		return false;
+	if (!player_walk.GetSprite(EDirection::RightDown)->LoadFrame(1, "image\\me\\walk\\me_walk_rightdown01.bmp"))
+		return false;
+	if (!player_walk.GetSprite(EDirection::RightDown)->LoadFrame(2, "image\\me\\walk\\me_walk_rightdown02.bmp"))
+		return false;
+	if (!player_walk.GetSprite(EDirection::RightDown)->LoadFrame(3, "image\\me\\walk\\me_walk_rightdown03.bmp"))
+		return false;
+	if (!player_walk.GetSprite(EDirection::RightDown)->LoadFrame(4, "image\\me\\walk\\me_walk_rightdown04.bmp"))
+		return false;
+	if (!player_walk.GetSprite(EDirection::RightDown)->LoadFrame(5, "image\\me\\walk\\me_walk_rightdown05.bmp"))
+		return false;
+
+	if (!player_walk.GetSprite(EDirection::Up)->InitSprite(6, 20, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_walk.GetSprite(EDirection::Up)->LoadFrame(0, "image\\me\\walk\\me_walk_up00.bmp"))
+		return false;
+	if (!player_walk.GetSprite(EDirection::Up)->LoadFrame(1, "image\\me\\walk\\me_walk_up01.bmp"))
+		return false;
+	if (!player_walk.GetSprite(EDirection::Up)->LoadFrame(2, "image\\me\\walk\\me_walk_up02.bmp"))
+		return false;
+	if (!player_walk.GetSprite(EDirection::Up)->LoadFrame(3, "image\\me\\walk\\me_walk_up03.bmp"))
+		return false;
+	if (!player_walk.GetSprite(EDirection::Up)->LoadFrame(4, "image\\me\\walk\\me_walk_up04.bmp"))
+		return false;
+	if (!player_walk.GetSprite(EDirection::Up)->LoadFrame(5, "image\\me\\walk\\me_walk_up05.bmp"))
+		return false;
+
+	if (!player_walk.GetSprite(EDirection::Down)->InitSprite(6, 20, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_walk.GetSprite(EDirection::Down)->LoadFrame(0, "image\\me\\walk\\me_walk_down00.bmp"))
+		return false;
+	if (!player_walk.GetSprite(EDirection::Down)->LoadFrame(1, "image\\me\\walk\\me_walk_down01.bmp"))
+		return false;
+	if (!player_walk.GetSprite(EDirection::Down)->LoadFrame(2, "image\\me\\walk\\me_walk_down02.bmp"))
+		return false;
+	if (!player_walk.GetSprite(EDirection::Down)->LoadFrame(3, "image\\me\\walk\\me_walk_down03.bmp"))
+		return false;
+	if (!player_walk.GetSprite(EDirection::Down)->LoadFrame(4, "image\\me\\walk\\me_walk_down04.bmp"))
+		return false;
+	if (!player_walk.GetSprite(EDirection::Down)->LoadFrame(5, "image\\me\\walk\\me_walk_down05.bmp"))
 		return false;
 #pragma endregion
 
 #pragma region player_roll
-	if (!player_roll.GetSprite(DIRECTION::LEFT)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!player_roll.GetSprite(EDirection::Left)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!player_roll.GetSprite(DIRECTION::LEFT)->LoadFrame(0, "image\\me\\roll\\left\\left_00.bmp"))
+	if (!player_roll.GetSprite(EDirection::Left)->LoadFrame(0, "image\\me\\roll\\left\\left_00.bmp"))
 		return false;
-	if (!player_roll.GetSprite(DIRECTION::LEFT)->LoadFrame(1, "image\\me\\roll\\left\\left_01.bmp"))
+	if (!player_roll.GetSprite(EDirection::Left)->LoadFrame(1, "image\\me\\roll\\left\\left_01.bmp"))
 		return false;
-	if (!player_roll.GetSprite(DIRECTION::LEFT)->LoadFrame(2, "image\\me\\roll\\left\\left_02.bmp"))
+	if (!player_roll.GetSprite(EDirection::Left)->LoadFrame(2, "image\\me\\roll\\left\\left_02.bmp"))
 		return false;
-	if (!player_roll.GetSprite(DIRECTION::LEFT)->LoadFrame(3, "image\\me\\roll\\left\\left_03.bmp"))
+	if (!player_roll.GetSprite(EDirection::Left)->LoadFrame(3, "image\\me\\roll\\left\\left_03.bmp"))
 		return false;
-	if (!player_roll.GetSprite(DIRECTION::LEFT)->LoadFrame(4, "image\\me\\roll\\left\\left_04.bmp"))
+	if (!player_roll.GetSprite(EDirection::Left)->LoadFrame(4, "image\\me\\roll\\left\\left_04.bmp"))
 		return false;
-	if (!player_roll.GetSprite(DIRECTION::LEFT)->LoadFrame(5, "image\\me\\roll\\left\\left_05.bmp"))
-		return false;
-
-	if (!player_roll.GetSprite(DIRECTION::LEFTUP)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
-		return false;
-	if (!player_roll.GetSprite(DIRECTION::LEFTUP)->LoadFrame(0, "image\\me\\roll\\leftup\\leftup_00.bmp"))
-		return false;
-	if (!player_roll.GetSprite(DIRECTION::LEFTUP)->LoadFrame(1, "image\\me\\roll\\leftup\\leftup_01.bmp"))
-		return false;
-	if (!player_roll.GetSprite(DIRECTION::LEFTUP)->LoadFrame(2, "image\\me\\roll\\leftup\\leftup_02.bmp"))
-		return false;
-	if (!player_roll.GetSprite(DIRECTION::LEFTUP)->LoadFrame(3, "image\\me\\roll\\leftup\\leftup_03.bmp"))
-		return false;
-	if (!player_roll.GetSprite(DIRECTION::LEFTUP)->LoadFrame(4, "image\\me\\roll\\leftup\\leftup_04.bmp"))
-		return false;
-	if (!player_roll.GetSprite(DIRECTION::LEFTUP)->LoadFrame(5, "image\\me\\roll\\leftup\\leftup_05.bmp"))
+	if (!player_roll.GetSprite(EDirection::Left)->LoadFrame(5, "image\\me\\roll\\left\\left_05.bmp"))
 		return false;
 
-	if (!player_roll.GetSprite(DIRECTION::LEFTDOWN)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!player_roll.GetSprite(EDirection::LeftUp)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!player_roll.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(0, "image\\me\\roll\\leftdown\\leftdown_00.bmp"))
+	if (!player_roll.GetSprite(EDirection::LeftUp)->LoadFrame(0, "image\\me\\roll\\leftup\\leftup_00.bmp"))
 		return false;
-	if (!player_roll.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(1, "image\\me\\roll\\leftdown\\leftdown_01.bmp"))
+	if (!player_roll.GetSprite(EDirection::LeftUp)->LoadFrame(1, "image\\me\\roll\\leftup\\leftup_01.bmp"))
 		return false;
-	if (!player_roll.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(2, "image\\me\\roll\\leftdown\\leftdown_02.bmp"))
+	if (!player_roll.GetSprite(EDirection::LeftUp)->LoadFrame(2, "image\\me\\roll\\leftup\\leftup_02.bmp"))
 		return false;
-	if (!player_roll.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(3, "image\\me\\roll\\leftdown\\leftdown_03.bmp"))
+	if (!player_roll.GetSprite(EDirection::LeftUp)->LoadFrame(3, "image\\me\\roll\\leftup\\leftup_03.bmp"))
 		return false;
-	if (!player_roll.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(4, "image\\me\\roll\\leftdown\\leftdown_04.bmp"))
+	if (!player_roll.GetSprite(EDirection::LeftUp)->LoadFrame(4, "image\\me\\roll\\leftup\\leftup_04.bmp"))
 		return false;
-	if (!player_roll.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(5, "image\\me\\roll\\leftdown\\leftdown_05.bmp"))
-		return false;
-
-	if (!player_roll.GetSprite(DIRECTION::RIGHT)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
-		return false;
-	if (!player_roll.GetSprite(DIRECTION::RIGHT)->LoadFrame(0, "image\\me\\roll\\right\\right_00.bmp"))
-		return false;
-	if (!player_roll.GetSprite(DIRECTION::RIGHT)->LoadFrame(1, "image\\me\\roll\\right\\right_01.bmp"))
-		return false;
-	if (!player_roll.GetSprite(DIRECTION::RIGHT)->LoadFrame(2, "image\\me\\roll\\right\\right_02.bmp"))
-		return false;
-	if (!player_roll.GetSprite(DIRECTION::RIGHT)->LoadFrame(3, "image\\me\\roll\\right\\right_03.bmp"))
-		return false;
-	if (!player_roll.GetSprite(DIRECTION::RIGHT)->LoadFrame(4, "image\\me\\roll\\right\\right_04.bmp"))
-		return false;
-	if (!player_roll.GetSprite(DIRECTION::RIGHT)->LoadFrame(5, "image\\me\\roll\\right\\right_05.bmp"))
+	if (!player_roll.GetSprite(EDirection::LeftUp)->LoadFrame(5, "image\\me\\roll\\leftup\\leftup_05.bmp"))
 		return false;
 
-	if (!player_roll.GetSprite(DIRECTION::RIGHTUP)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!player_roll.GetSprite(EDirection::LeftDown)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!player_roll.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(0, "image\\me\\roll\\rightup\\rightup_00.bmp"))
+	if (!player_roll.GetSprite(EDirection::LeftDown)->LoadFrame(0, "image\\me\\roll\\leftdown\\leftdown_00.bmp"))
 		return false;
-	if (!player_roll.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(1, "image\\me\\roll\\rightup\\rightup_01.bmp"))
+	if (!player_roll.GetSprite(EDirection::LeftDown)->LoadFrame(1, "image\\me\\roll\\leftdown\\leftdown_01.bmp"))
 		return false;
-	if (!player_roll.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(2, "image\\me\\roll\\rightup\\rightup_02.bmp"))
+	if (!player_roll.GetSprite(EDirection::LeftDown)->LoadFrame(2, "image\\me\\roll\\leftdown\\leftdown_02.bmp"))
 		return false;
-	if (!player_roll.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(3, "image\\me\\roll\\rightup\\rightup_03.bmp"))
+	if (!player_roll.GetSprite(EDirection::LeftDown)->LoadFrame(3, "image\\me\\roll\\leftdown\\leftdown_03.bmp"))
 		return false;
-	if (!player_roll.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(4, "image\\me\\roll\\rightup\\rightup_04.bmp"))
+	if (!player_roll.GetSprite(EDirection::LeftDown)->LoadFrame(4, "image\\me\\roll\\leftdown\\leftdown_04.bmp"))
 		return false;
-	if (!player_roll.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(5, "image\\me\\roll\\rightup\\rightup_05.bmp"))
-		return false;
-
-	if (!player_roll.GetSprite(DIRECTION::RIGHTDOWN)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
-		return false;
-	if (!player_roll.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(0, "image\\me\\roll\\rightdown\\rightdown_00.bmp"))
-		return false;
-	if (!player_roll.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(1, "image\\me\\roll\\rightdown\\rightdown_01.bmp"))
-		return false;
-	if (!player_roll.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(2, "image\\me\\roll\\rightdown\\rightdown_02.bmp"))
-		return false;
-	if (!player_roll.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(3, "image\\me\\roll\\rightdown\\rightdown_03.bmp"))
-		return false;
-	if (!player_roll.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(4, "image\\me\\roll\\rightdown\\rightdown_04.bmp"))
-		return false;
-	if (!player_roll.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(5, "image\\me\\roll\\rightdown\\rightdown_05.bmp"))
+	if (!player_roll.GetSprite(EDirection::LeftDown)->LoadFrame(5, "image\\me\\roll\\leftdown\\leftdown_05.bmp"))
 		return false;
 
-	if (!player_roll.GetSprite(DIRECTION::UP)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!player_roll.GetSprite(EDirection::Right)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!player_roll.GetSprite(DIRECTION::UP)->LoadFrame(0, "image\\me\\roll\\up\\up_00.bmp"))
+	if (!player_roll.GetSprite(EDirection::Right)->LoadFrame(0, "image\\me\\roll\\right\\right_00.bmp"))
 		return false;
-	if (!player_roll.GetSprite(DIRECTION::UP)->LoadFrame(1, "image\\me\\roll\\up\\up_01.bmp"))
+	if (!player_roll.GetSprite(EDirection::Right)->LoadFrame(1, "image\\me\\roll\\right\\right_01.bmp"))
 		return false;
-	if (!player_roll.GetSprite(DIRECTION::UP)->LoadFrame(2, "image\\me\\roll\\up\\up_02.bmp"))
+	if (!player_roll.GetSprite(EDirection::Right)->LoadFrame(2, "image\\me\\roll\\right\\right_02.bmp"))
 		return false;
-	if (!player_roll.GetSprite(DIRECTION::UP)->LoadFrame(3, "image\\me\\roll\\up\\up_03.bmp"))
+	if (!player_roll.GetSprite(EDirection::Right)->LoadFrame(3, "image\\me\\roll\\right\\right_03.bmp"))
 		return false;
-	if (!player_roll.GetSprite(DIRECTION::UP)->LoadFrame(4, "image\\me\\roll\\up\\up_04.bmp"))
+	if (!player_roll.GetSprite(EDirection::Right)->LoadFrame(4, "image\\me\\roll\\right\\right_04.bmp"))
 		return false;
-	if (!player_roll.GetSprite(DIRECTION::UP)->LoadFrame(5, "image\\me\\roll\\up\\up_05.bmp"))
+	if (!player_roll.GetSprite(EDirection::Right)->LoadFrame(5, "image\\me\\roll\\right\\right_05.bmp"))
 		return false;
 
-	if (!player_roll.GetSprite(DIRECTION::DOWN)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!player_roll.GetSprite(EDirection::RightUp)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!player_roll.GetSprite(DIRECTION::DOWN)->LoadFrame(0, "image\\me\\roll\\down\\down_00.bmp"))
+	if (!player_roll.GetSprite(EDirection::RightUp)->LoadFrame(0, "image\\me\\roll\\rightup\\rightup_00.bmp"))
 		return false;
-	if (!player_roll.GetSprite(DIRECTION::DOWN)->LoadFrame(1, "image\\me\\roll\\down\\down_01.bmp"))
+	if (!player_roll.GetSprite(EDirection::RightUp)->LoadFrame(1, "image\\me\\roll\\rightup\\rightup_01.bmp"))
 		return false;
-	if (!player_roll.GetSprite(DIRECTION::DOWN)->LoadFrame(2, "image\\me\\roll\\down\\down_02.bmp"))
+	if (!player_roll.GetSprite(EDirection::RightUp)->LoadFrame(2, "image\\me\\roll\\rightup\\rightup_02.bmp"))
 		return false;
-	if (!player_roll.GetSprite(DIRECTION::DOWN)->LoadFrame(3, "image\\me\\roll\\down\\down_03.bmp"))
+	if (!player_roll.GetSprite(EDirection::RightUp)->LoadFrame(3, "image\\me\\roll\\rightup\\rightup_03.bmp"))
 		return false;
-	if (!player_roll.GetSprite(DIRECTION::DOWN)->LoadFrame(4, "image\\me\\roll\\down\\down_04.bmp"))
+	if (!player_roll.GetSprite(EDirection::RightUp)->LoadFrame(4, "image\\me\\roll\\rightup\\rightup_04.bmp"))
 		return false;
-	if (!player_roll.GetSprite(DIRECTION::DOWN)->LoadFrame(5, "image\\me\\roll\\down\\down_05.bmp"))
+	if (!player_roll.GetSprite(EDirection::RightUp)->LoadFrame(5, "image\\me\\roll\\rightup\\rightup_05.bmp"))
+		return false;
+
+	if (!player_roll.GetSprite(EDirection::RightDown)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_roll.GetSprite(EDirection::RightDown)->LoadFrame(0, "image\\me\\roll\\rightdown\\rightdown_00.bmp"))
+		return false;
+	if (!player_roll.GetSprite(EDirection::RightDown)->LoadFrame(1, "image\\me\\roll\\rightdown\\rightdown_01.bmp"))
+		return false;
+	if (!player_roll.GetSprite(EDirection::RightDown)->LoadFrame(2, "image\\me\\roll\\rightdown\\rightdown_02.bmp"))
+		return false;
+	if (!player_roll.GetSprite(EDirection::RightDown)->LoadFrame(3, "image\\me\\roll\\rightdown\\rightdown_03.bmp"))
+		return false;
+	if (!player_roll.GetSprite(EDirection::RightDown)->LoadFrame(4, "image\\me\\roll\\rightdown\\rightdown_04.bmp"))
+		return false;
+	if (!player_roll.GetSprite(EDirection::RightDown)->LoadFrame(5, "image\\me\\roll\\rightdown\\rightdown_05.bmp"))
+		return false;
+
+	if (!player_roll.GetSprite(EDirection::Up)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_roll.GetSprite(EDirection::Up)->LoadFrame(0, "image\\me\\roll\\up\\up_00.bmp"))
+		return false;
+	if (!player_roll.GetSprite(EDirection::Up)->LoadFrame(1, "image\\me\\roll\\up\\up_01.bmp"))
+		return false;
+	if (!player_roll.GetSprite(EDirection::Up)->LoadFrame(2, "image\\me\\roll\\up\\up_02.bmp"))
+		return false;
+	if (!player_roll.GetSprite(EDirection::Up)->LoadFrame(3, "image\\me\\roll\\up\\up_03.bmp"))
+		return false;
+	if (!player_roll.GetSprite(EDirection::Up)->LoadFrame(4, "image\\me\\roll\\up\\up_04.bmp"))
+		return false;
+	if (!player_roll.GetSprite(EDirection::Up)->LoadFrame(5, "image\\me\\roll\\up\\up_05.bmp"))
+		return false;
+
+	if (!player_roll.GetSprite(EDirection::Down)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!player_roll.GetSprite(EDirection::Down)->LoadFrame(0, "image\\me\\roll\\down\\down_00.bmp"))
+		return false;
+	if (!player_roll.GetSprite(EDirection::Down)->LoadFrame(1, "image\\me\\roll\\down\\down_01.bmp"))
+		return false;
+	if (!player_roll.GetSprite(EDirection::Down)->LoadFrame(2, "image\\me\\roll\\down\\down_02.bmp"))
+		return false;
+	if (!player_roll.GetSprite(EDirection::Down)->LoadFrame(3, "image\\me\\roll\\down\\down_03.bmp"))
+		return false;
+	if (!player_roll.GetSprite(EDirection::Down)->LoadFrame(4, "image\\me\\roll\\down\\down_04.bmp"))
+		return false;
+	if (!player_roll.GetSprite(EDirection::Down)->LoadFrame(5, "image\\me\\roll\\down\\down_05.bmp"))
 		return false;
 #pragma endregion
 
 #pragma region player_dead
-	if (!player_dead.GetSprite(DIRECTION::LEFT)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!player_dead.GetSprite(EDirection::Left)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!player_dead.GetSprite(DIRECTION::LEFT)->LoadFrame(0, "image\\me\\dead\\left.bmp"))
+	if (!player_dead.GetSprite(EDirection::Left)->LoadFrame(0, "image\\me\\dead\\left.bmp"))
 		return false;
-	if (!player_dead.GetSprite(DIRECTION::LEFTUP)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!player_dead.GetSprite(EDirection::LeftUp)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!player_dead.GetSprite(DIRECTION::LEFTUP)->LoadFrame(0, "image\\me\\dead\\leftup.bmp"))
+	if (!player_dead.GetSprite(EDirection::LeftUp)->LoadFrame(0, "image\\me\\dead\\leftup.bmp"))
 		return false;
-	if (!player_dead.GetSprite(DIRECTION::LEFTDOWN)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!player_dead.GetSprite(EDirection::LeftDown)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!player_dead.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(0, "image\\me\\dead\\leftdown.bmp"))
+	if (!player_dead.GetSprite(EDirection::LeftDown)->LoadFrame(0, "image\\me\\dead\\leftdown.bmp"))
 		return false;
-	if (!player_dead.GetSprite(DIRECTION::RIGHT)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!player_dead.GetSprite(EDirection::Right)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!player_dead.GetSprite(DIRECTION::RIGHT)->LoadFrame(0, "image\\me\\dead\\right.bmp"))
+	if (!player_dead.GetSprite(EDirection::Right)->LoadFrame(0, "image\\me\\dead\\right.bmp"))
 		return false;
-	if (!player_dead.GetSprite(DIRECTION::RIGHTUP)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!player_dead.GetSprite(EDirection::RightUp)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!player_dead.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(0, "image\\me\\dead\\rightup.bmp"))
+	if (!player_dead.GetSprite(EDirection::RightUp)->LoadFrame(0, "image\\me\\dead\\rightup.bmp"))
 		return false;
-	if (!player_dead.GetSprite(DIRECTION::RIGHTDOWN)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!player_dead.GetSprite(EDirection::RightDown)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!player_dead.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(0, "image\\me\\dead\\rightdown.bmp"))
+	if (!player_dead.GetSprite(EDirection::RightDown)->LoadFrame(0, "image\\me\\dead\\rightdown.bmp"))
 		return false;
-	if (!player_dead.GetSprite(DIRECTION::UP)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!player_dead.GetSprite(EDirection::Up)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!player_dead.GetSprite(DIRECTION::UP)->LoadFrame(0, "image\\me\\dead\\up.bmp"))
+	if (!player_dead.GetSprite(EDirection::Up)->LoadFrame(0, "image\\me\\dead\\up.bmp"))
 		return false;
-	if (!player_dead.GetSprite(DIRECTION::DOWN)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!player_dead.GetSprite(EDirection::Down)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!player_dead.GetSprite(DIRECTION::DOWN)->LoadFrame(0, "image\\me\\dead\\down.bmp"))
+	if (!player_dead.GetSprite(EDirection::Down)->LoadFrame(0, "image\\me\\dead\\down.bmp"))
 		return false;
 #pragma endregion
 
@@ -1414,342 +1409,342 @@ bool LoadBMPandInitSurface()
 #pragma region bow_arrow_sprite
 
 #pragma region bow_walk
-	if (!bow_walk.GetSprite(DIRECTION::LEFT)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!bow_walk.GetSprite(EDirection::Left)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::LEFT)->LoadFrame(0, "image\\bow\\walk\\left\\bow_walk_left_00.bmp"))
+	if (!bow_walk.GetSprite(EDirection::Left)->LoadFrame(0, "image\\bow\\walk\\left\\bow_walk_left_00.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::LEFT)->LoadFrame(1, "image\\bow\\walk\\left\\bow_walk_left_01.bmp"))
+	if (!bow_walk.GetSprite(EDirection::Left)->LoadFrame(1, "image\\bow\\walk\\left\\bow_walk_left_01.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::LEFT)->LoadFrame(2, "image\\bow\\walk\\left\\bow_walk_left_02.bmp"))
+	if (!bow_walk.GetSprite(EDirection::Left)->LoadFrame(2, "image\\bow\\walk\\left\\bow_walk_left_02.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::LEFT)->LoadFrame(3, "image\\bow\\walk\\left\\bow_walk_left_03.bmp"))
+	if (!bow_walk.GetSprite(EDirection::Left)->LoadFrame(3, "image\\bow\\walk\\left\\bow_walk_left_03.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::LEFT)->LoadFrame(4, "image\\bow\\walk\\left\\bow_walk_left_04.bmp"))
+	if (!bow_walk.GetSprite(EDirection::Left)->LoadFrame(4, "image\\bow\\walk\\left\\bow_walk_left_04.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::LEFT)->LoadFrame(5, "image\\bow\\walk\\left\\bow_walk_left_05.bmp"))
-		return false;
-
-	if (!bow_walk.GetSprite(DIRECTION::LEFTUP)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
-		return false;
-	if (!bow_walk.GetSprite(DIRECTION::LEFTUP)->LoadFrame(0, "image\\bow\\walk\\leftup\\bow_walk_leftup_00.bmp"))
-		return false;
-	if (!bow_walk.GetSprite(DIRECTION::LEFTUP)->LoadFrame(1, "image\\bow\\walk\\leftup\\bow_walk_leftup_01.bmp"))
-		return false;
-	if (!bow_walk.GetSprite(DIRECTION::LEFTUP)->LoadFrame(2, "image\\bow\\walk\\leftup\\bow_walk_leftup_02.bmp"))
-		return false;
-	if (!bow_walk.GetSprite(DIRECTION::LEFTUP)->LoadFrame(3, "image\\bow\\walk\\leftup\\bow_walk_leftup_03.bmp"))
-		return false;
-	if (!bow_walk.GetSprite(DIRECTION::LEFTUP)->LoadFrame(4, "image\\bow\\walk\\leftup\\bow_walk_leftup_04.bmp"))
-		return false;
-	if (!bow_walk.GetSprite(DIRECTION::LEFTUP)->LoadFrame(5, "image\\bow\\walk\\leftup\\bow_walk_leftup_05.bmp"))
+	if (!bow_walk.GetSprite(EDirection::Left)->LoadFrame(5, "image\\bow\\walk\\left\\bow_walk_left_05.bmp"))
 		return false;
 
-	if (!bow_walk.GetSprite(DIRECTION::LEFTDOWN)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!bow_walk.GetSprite(EDirection::LeftUp)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(0, "image\\bow\\walk\\leftdown\\bow_walk_leftdown_00.bmp"))
+	if (!bow_walk.GetSprite(EDirection::LeftUp)->LoadFrame(0, "image\\bow\\walk\\leftup\\bow_walk_leftup_00.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(1, "image\\bow\\walk\\leftdown\\bow_walk_leftdown_01.bmp"))
+	if (!bow_walk.GetSprite(EDirection::LeftUp)->LoadFrame(1, "image\\bow\\walk\\leftup\\bow_walk_leftup_01.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(2, "image\\bow\\walk\\leftdown\\bow_walk_leftdown_02.bmp"))
+	if (!bow_walk.GetSprite(EDirection::LeftUp)->LoadFrame(2, "image\\bow\\walk\\leftup\\bow_walk_leftup_02.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(3, "image\\bow\\walk\\leftdown\\bow_walk_leftdown_03.bmp"))
+	if (!bow_walk.GetSprite(EDirection::LeftUp)->LoadFrame(3, "image\\bow\\walk\\leftup\\bow_walk_leftup_03.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(4, "image\\bow\\walk\\leftdown\\bow_walk_leftdown_04.bmp"))
+	if (!bow_walk.GetSprite(EDirection::LeftUp)->LoadFrame(4, "image\\bow\\walk\\leftup\\bow_walk_leftup_04.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(5, "image\\bow\\walk\\leftdown\\bow_walk_leftdown_05.bmp"))
-		return false;
-
-	if (!bow_walk.GetSprite(DIRECTION::RIGHT)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
-		return false;
-	if (!bow_walk.GetSprite(DIRECTION::RIGHT)->LoadFrame(0, "image\\bow\\walk\\right\\bow_walk_right_00.bmp"))
-		return false;
-	if (!bow_walk.GetSprite(DIRECTION::RIGHT)->LoadFrame(1, "image\\bow\\walk\\right\\bow_walk_right_01.bmp"))
-		return false;
-	if (!bow_walk.GetSprite(DIRECTION::RIGHT)->LoadFrame(2, "image\\bow\\walk\\right\\bow_walk_right_02.bmp"))
-		return false;
-	if (!bow_walk.GetSprite(DIRECTION::RIGHT)->LoadFrame(3, "image\\bow\\walk\\right\\bow_walk_right_03.bmp"))
-		return false;
-	if (!bow_walk.GetSprite(DIRECTION::RIGHT)->LoadFrame(4, "image\\bow\\walk\\right\\bow_walk_right_04.bmp"))
-		return false;
-	if (!bow_walk.GetSprite(DIRECTION::RIGHT)->LoadFrame(5, "image\\bow\\walk\\right\\bow_walk_right_05.bmp"))
+	if (!bow_walk.GetSprite(EDirection::LeftUp)->LoadFrame(5, "image\\bow\\walk\\leftup\\bow_walk_leftup_05.bmp"))
 		return false;
 
-	if (!bow_walk.GetSprite(DIRECTION::RIGHTUP)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!bow_walk.GetSprite(EDirection::LeftDown)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(0, "image\\bow\\walk\\rightup\\bow_walk_rightup_00.bmp"))
+	if (!bow_walk.GetSprite(EDirection::LeftDown)->LoadFrame(0, "image\\bow\\walk\\leftdown\\bow_walk_leftdown_00.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(1, "image\\bow\\walk\\rightup\\bow_walk_rightup_01.bmp"))
+	if (!bow_walk.GetSprite(EDirection::LeftDown)->LoadFrame(1, "image\\bow\\walk\\leftdown\\bow_walk_leftdown_01.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(2, "image\\bow\\walk\\rightup\\bow_walk_rightup_02.bmp"))
+	if (!bow_walk.GetSprite(EDirection::LeftDown)->LoadFrame(2, "image\\bow\\walk\\leftdown\\bow_walk_leftdown_02.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(3, "image\\bow\\walk\\rightup\\bow_walk_rightup_03.bmp"))
+	if (!bow_walk.GetSprite(EDirection::LeftDown)->LoadFrame(3, "image\\bow\\walk\\leftdown\\bow_walk_leftdown_03.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(4, "image\\bow\\walk\\rightup\\bow_walk_rightup_04.bmp"))
+	if (!bow_walk.GetSprite(EDirection::LeftDown)->LoadFrame(4, "image\\bow\\walk\\leftdown\\bow_walk_leftdown_04.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(5, "image\\bow\\walk\\rightup\\bow_walk_rightup_05.bmp"))
+	if (!bow_walk.GetSprite(EDirection::LeftDown)->LoadFrame(5, "image\\bow\\walk\\leftdown\\bow_walk_leftdown_05.bmp"))
 		return false;
 
-	if (!bow_walk.GetSprite(DIRECTION::RIGHTDOWN)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!bow_walk.GetSprite(EDirection::Right)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(
+	if (!bow_walk.GetSprite(EDirection::Right)->LoadFrame(0, "image\\bow\\walk\\right\\bow_walk_right_00.bmp"))
+		return false;
+	if (!bow_walk.GetSprite(EDirection::Right)->LoadFrame(1, "image\\bow\\walk\\right\\bow_walk_right_01.bmp"))
+		return false;
+	if (!bow_walk.GetSprite(EDirection::Right)->LoadFrame(2, "image\\bow\\walk\\right\\bow_walk_right_02.bmp"))
+		return false;
+	if (!bow_walk.GetSprite(EDirection::Right)->LoadFrame(3, "image\\bow\\walk\\right\\bow_walk_right_03.bmp"))
+		return false;
+	if (!bow_walk.GetSprite(EDirection::Right)->LoadFrame(4, "image\\bow\\walk\\right\\bow_walk_right_04.bmp"))
+		return false;
+	if (!bow_walk.GetSprite(EDirection::Right)->LoadFrame(5, "image\\bow\\walk\\right\\bow_walk_right_05.bmp"))
+		return false;
+
+	if (!bow_walk.GetSprite(EDirection::RightUp)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_walk.GetSprite(EDirection::RightUp)->LoadFrame(0, "image\\bow\\walk\\rightup\\bow_walk_rightup_00.bmp"))
+		return false;
+	if (!bow_walk.GetSprite(EDirection::RightUp)->LoadFrame(1, "image\\bow\\walk\\rightup\\bow_walk_rightup_01.bmp"))
+		return false;
+	if (!bow_walk.GetSprite(EDirection::RightUp)->LoadFrame(2, "image\\bow\\walk\\rightup\\bow_walk_rightup_02.bmp"))
+		return false;
+	if (!bow_walk.GetSprite(EDirection::RightUp)->LoadFrame(3, "image\\bow\\walk\\rightup\\bow_walk_rightup_03.bmp"))
+		return false;
+	if (!bow_walk.GetSprite(EDirection::RightUp)->LoadFrame(4, "image\\bow\\walk\\rightup\\bow_walk_rightup_04.bmp"))
+		return false;
+	if (!bow_walk.GetSprite(EDirection::RightUp)->LoadFrame(5, "image\\bow\\walk\\rightup\\bow_walk_rightup_05.bmp"))
+		return false;
+
+	if (!bow_walk.GetSprite(EDirection::RightDown)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_walk.GetSprite(EDirection::RightDown)->LoadFrame(
 		0, "image\\bow\\walk\\rightdown\\bow_walk_rightdown_00.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(
+	if (!bow_walk.GetSprite(EDirection::RightDown)->LoadFrame(
 		1, "image\\bow\\walk\\rightdown\\bow_walk_rightdown_01.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(
+	if (!bow_walk.GetSprite(EDirection::RightDown)->LoadFrame(
 		2, "image\\bow\\walk\\rightdown\\bow_walk_rightdown_02.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(
+	if (!bow_walk.GetSprite(EDirection::RightDown)->LoadFrame(
 		3, "image\\bow\\walk\\rightdown\\bow_walk_rightdown_03.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(
+	if (!bow_walk.GetSprite(EDirection::RightDown)->LoadFrame(
 		4, "image\\bow\\walk\\rightdown\\bow_walk_rightdown_04.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(
+	if (!bow_walk.GetSprite(EDirection::RightDown)->LoadFrame(
 		5, "image\\bow\\walk\\rightdown\\bow_walk_rightdown_05.bmp"))
 		return false;
 
-	if (!bow_walk.GetSprite(DIRECTION::UP)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!bow_walk.GetSprite(EDirection::Up)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::UP)->LoadFrame(0, "image\\bow\\walk\\up\\bow_walk_up_00.bmp"))
+	if (!bow_walk.GetSprite(EDirection::Up)->LoadFrame(0, "image\\bow\\walk\\up\\bow_walk_up_00.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::UP)->LoadFrame(1, "image\\bow\\walk\\up\\bow_walk_up_01.bmp"))
+	if (!bow_walk.GetSprite(EDirection::Up)->LoadFrame(1, "image\\bow\\walk\\up\\bow_walk_up_01.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::UP)->LoadFrame(2, "image\\bow\\walk\\up\\bow_walk_up_02.bmp"))
+	if (!bow_walk.GetSprite(EDirection::Up)->LoadFrame(2, "image\\bow\\walk\\up\\bow_walk_up_02.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::UP)->LoadFrame(3, "image\\bow\\walk\\up\\bow_walk_up_03.bmp"))
+	if (!bow_walk.GetSprite(EDirection::Up)->LoadFrame(3, "image\\bow\\walk\\up\\bow_walk_up_03.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::UP)->LoadFrame(4, "image\\bow\\walk\\up\\bow_walk_up_04.bmp"))
+	if (!bow_walk.GetSprite(EDirection::Up)->LoadFrame(4, "image\\bow\\walk\\up\\bow_walk_up_04.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::UP)->LoadFrame(5, "image\\bow\\walk\\up\\bow_walk_up_05.bmp"))
+	if (!bow_walk.GetSprite(EDirection::Up)->LoadFrame(5, "image\\bow\\walk\\up\\bow_walk_up_05.bmp"))
 		return false;
 
-	if (!bow_walk.GetSprite(DIRECTION::DOWN)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!bow_walk.GetSprite(EDirection::Down)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::DOWN)->LoadFrame(0, "image\\bow\\walk\\down\\bow_walk_down_00.bmp"))
+	if (!bow_walk.GetSprite(EDirection::Down)->LoadFrame(0, "image\\bow\\walk\\down\\bow_walk_down_00.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::DOWN)->LoadFrame(1, "image\\bow\\walk\\down\\bow_walk_down_01.bmp"))
+	if (!bow_walk.GetSprite(EDirection::Down)->LoadFrame(1, "image\\bow\\walk\\down\\bow_walk_down_01.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::DOWN)->LoadFrame(2, "image\\bow\\walk\\down\\bow_walk_down_02.bmp"))
+	if (!bow_walk.GetSprite(EDirection::Down)->LoadFrame(2, "image\\bow\\walk\\down\\bow_walk_down_02.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::DOWN)->LoadFrame(3, "image\\bow\\walk\\down\\bow_walk_down_03.bmp"))
+	if (!bow_walk.GetSprite(EDirection::Down)->LoadFrame(3, "image\\bow\\walk\\down\\bow_walk_down_03.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::DOWN)->LoadFrame(4, "image\\bow\\walk\\down\\bow_walk_down_04.bmp"))
+	if (!bow_walk.GetSprite(EDirection::Down)->LoadFrame(4, "image\\bow\\walk\\down\\bow_walk_down_04.bmp"))
 		return false;
-	if (!bow_walk.GetSprite(DIRECTION::DOWN)->LoadFrame(5, "image\\bow\\walk\\down\\bow_walk_down_05.bmp"))
+	if (!bow_walk.GetSprite(EDirection::Down)->LoadFrame(5, "image\\bow\\walk\\down\\bow_walk_down_05.bmp"))
 		return false;
 #pragma endregion
 
 #pragma region bow_roll
-	if (!bow_roll.GetSprite(DIRECTION::LEFT)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!bow_roll.GetSprite(EDirection::Left)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::LEFT)->LoadFrame(0, "image\\bow\\roll\\left\\bow_roll_left_00.bmp"))
+	if (!bow_roll.GetSprite(EDirection::Left)->LoadFrame(0, "image\\bow\\roll\\left\\bow_roll_left_00.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::LEFT)->LoadFrame(1, "image\\bow\\roll\\left\\bow_roll_left_01.bmp"))
+	if (!bow_roll.GetSprite(EDirection::Left)->LoadFrame(1, "image\\bow\\roll\\left\\bow_roll_left_01.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::LEFT)->LoadFrame(2, "image\\bow\\roll\\left\\bow_roll_left_02.bmp"))
+	if (!bow_roll.GetSprite(EDirection::Left)->LoadFrame(2, "image\\bow\\roll\\left\\bow_roll_left_02.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::LEFT)->LoadFrame(3, "image\\bow\\roll\\left\\bow_roll_left_03.bmp"))
+	if (!bow_roll.GetSprite(EDirection::Left)->LoadFrame(3, "image\\bow\\roll\\left\\bow_roll_left_03.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::LEFT)->LoadFrame(4, "image\\bow\\roll\\left\\bow_roll_left_04.bmp"))
+	if (!bow_roll.GetSprite(EDirection::Left)->LoadFrame(4, "image\\bow\\roll\\left\\bow_roll_left_04.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::LEFT)->LoadFrame(5, "image\\bow\\roll\\left\\bow_roll_left_05.bmp"))
-		return false;
-
-	if (!bow_roll.GetSprite(DIRECTION::LEFTUP)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
-		return false;
-	if (!bow_roll.GetSprite(DIRECTION::LEFTUP)->LoadFrame(0, "image\\bow\\roll\\leftup\\bow_roll_leftup_00.bmp"))
-		return false;
-	if (!bow_roll.GetSprite(DIRECTION::LEFTUP)->LoadFrame(1, "image\\bow\\roll\\leftup\\bow_roll_leftup_01.bmp"))
-		return false;
-	if (!bow_roll.GetSprite(DIRECTION::LEFTUP)->LoadFrame(2, "image\\bow\\roll\\leftup\\bow_roll_leftup_02.bmp"))
-		return false;
-	if (!bow_roll.GetSprite(DIRECTION::LEFTUP)->LoadFrame(3, "image\\bow\\roll\\leftup\\bow_roll_leftup_03.bmp"))
-		return false;
-	if (!bow_roll.GetSprite(DIRECTION::LEFTUP)->LoadFrame(4, "image\\bow\\roll\\leftup\\bow_roll_leftup_04.bmp"))
-		return false;
-	if (!bow_roll.GetSprite(DIRECTION::LEFTUP)->LoadFrame(5, "image\\bow\\roll\\leftup\\bow_roll_leftup_05.bmp"))
+	if (!bow_roll.GetSprite(EDirection::Left)->LoadFrame(5, "image\\bow\\roll\\left\\bow_roll_left_05.bmp"))
 		return false;
 
-	if (!bow_roll.GetSprite(DIRECTION::LEFTDOWN)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!bow_roll.GetSprite(EDirection::LeftUp)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(0, "image\\bow\\roll\\leftdown\\bow_roll_leftdown_00.bmp"))
+	if (!bow_roll.GetSprite(EDirection::LeftUp)->LoadFrame(0, "image\\bow\\roll\\leftup\\bow_roll_leftup_00.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(1, "image\\bow\\roll\\leftdown\\bow_roll_leftdown_01.bmp"))
+	if (!bow_roll.GetSprite(EDirection::LeftUp)->LoadFrame(1, "image\\bow\\roll\\leftup\\bow_roll_leftup_01.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(2, "image\\bow\\roll\\leftdown\\bow_roll_leftdown_02.bmp"))
+	if (!bow_roll.GetSprite(EDirection::LeftUp)->LoadFrame(2, "image\\bow\\roll\\leftup\\bow_roll_leftup_02.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(3, "image\\bow\\roll\\leftdown\\bow_roll_leftdown_03.bmp"))
+	if (!bow_roll.GetSprite(EDirection::LeftUp)->LoadFrame(3, "image\\bow\\roll\\leftup\\bow_roll_leftup_03.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(4, "image\\bow\\roll\\leftdown\\bow_roll_leftdown_04.bmp"))
+	if (!bow_roll.GetSprite(EDirection::LeftUp)->LoadFrame(4, "image\\bow\\roll\\leftup\\bow_roll_leftup_04.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(5, "image\\bow\\roll\\leftdown\\bow_roll_leftdown_05.bmp"))
-		return false;
-
-	if (!bow_roll.GetSprite(DIRECTION::RIGHT)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
-		return false;
-	if (!bow_roll.GetSprite(DIRECTION::RIGHT)->LoadFrame(0, "image\\bow\\roll\\right\\bow_roll_right_00.bmp"))
-		return false;
-	if (!bow_roll.GetSprite(DIRECTION::RIGHT)->LoadFrame(1, "image\\bow\\roll\\right\\bow_roll_right_01.bmp"))
-		return false;
-	if (!bow_roll.GetSprite(DIRECTION::RIGHT)->LoadFrame(2, "image\\bow\\roll\\right\\bow_roll_right_02.bmp"))
-		return false;
-	if (!bow_roll.GetSprite(DIRECTION::RIGHT)->LoadFrame(3, "image\\bow\\roll\\right\\bow_roll_right_03.bmp"))
-		return false;
-	if (!bow_roll.GetSprite(DIRECTION::RIGHT)->LoadFrame(4, "image\\bow\\roll\\right\\bow_roll_right_04.bmp"))
-		return false;
-	if (!bow_roll.GetSprite(DIRECTION::RIGHT)->LoadFrame(5, "image\\bow\\roll\\right\\bow_roll_right_05.bmp"))
+	if (!bow_roll.GetSprite(EDirection::LeftUp)->LoadFrame(5, "image\\bow\\roll\\leftup\\bow_roll_leftup_05.bmp"))
 		return false;
 
-	if (!bow_roll.GetSprite(DIRECTION::RIGHTUP)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!bow_roll.GetSprite(EDirection::LeftDown)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(0, "image\\bow\\roll\\rightup\\bow_roll_rightup_00.bmp"))
+	if (!bow_roll.GetSprite(EDirection::LeftDown)->LoadFrame(0, "image\\bow\\roll\\leftdown\\bow_roll_leftdown_00.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(1, "image\\bow\\roll\\rightup\\bow_roll_rightup_01.bmp"))
+	if (!bow_roll.GetSprite(EDirection::LeftDown)->LoadFrame(1, "image\\bow\\roll\\leftdown\\bow_roll_leftdown_01.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(2, "image\\bow\\roll\\rightup\\bow_roll_rightup_02.bmp"))
+	if (!bow_roll.GetSprite(EDirection::LeftDown)->LoadFrame(2, "image\\bow\\roll\\leftdown\\bow_roll_leftdown_02.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(3, "image\\bow\\roll\\rightup\\bow_roll_rightup_03.bmp"))
+	if (!bow_roll.GetSprite(EDirection::LeftDown)->LoadFrame(3, "image\\bow\\roll\\leftdown\\bow_roll_leftdown_03.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(4, "image\\bow\\roll\\rightup\\bow_roll_rightup_04.bmp"))
+	if (!bow_roll.GetSprite(EDirection::LeftDown)->LoadFrame(4, "image\\bow\\roll\\leftdown\\bow_roll_leftdown_04.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(5, "image\\bow\\roll\\rightup\\bow_roll_rightup_05.bmp"))
+	if (!bow_roll.GetSprite(EDirection::LeftDown)->LoadFrame(5, "image\\bow\\roll\\leftdown\\bow_roll_leftdown_05.bmp"))
 		return false;
 
-	if (!bow_roll.GetSprite(DIRECTION::RIGHTDOWN)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!bow_roll.GetSprite(EDirection::Right)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(
+	if (!bow_roll.GetSprite(EDirection::Right)->LoadFrame(0, "image\\bow\\roll\\right\\bow_roll_right_00.bmp"))
+		return false;
+	if (!bow_roll.GetSprite(EDirection::Right)->LoadFrame(1, "image\\bow\\roll\\right\\bow_roll_right_01.bmp"))
+		return false;
+	if (!bow_roll.GetSprite(EDirection::Right)->LoadFrame(2, "image\\bow\\roll\\right\\bow_roll_right_02.bmp"))
+		return false;
+	if (!bow_roll.GetSprite(EDirection::Right)->LoadFrame(3, "image\\bow\\roll\\right\\bow_roll_right_03.bmp"))
+		return false;
+	if (!bow_roll.GetSprite(EDirection::Right)->LoadFrame(4, "image\\bow\\roll\\right\\bow_roll_right_04.bmp"))
+		return false;
+	if (!bow_roll.GetSprite(EDirection::Right)->LoadFrame(5, "image\\bow\\roll\\right\\bow_roll_right_05.bmp"))
+		return false;
+
+	if (!bow_roll.GetSprite(EDirection::RightUp)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_roll.GetSprite(EDirection::RightUp)->LoadFrame(0, "image\\bow\\roll\\rightup\\bow_roll_rightup_00.bmp"))
+		return false;
+	if (!bow_roll.GetSprite(EDirection::RightUp)->LoadFrame(1, "image\\bow\\roll\\rightup\\bow_roll_rightup_01.bmp"))
+		return false;
+	if (!bow_roll.GetSprite(EDirection::RightUp)->LoadFrame(2, "image\\bow\\roll\\rightup\\bow_roll_rightup_02.bmp"))
+		return false;
+	if (!bow_roll.GetSprite(EDirection::RightUp)->LoadFrame(3, "image\\bow\\roll\\rightup\\bow_roll_rightup_03.bmp"))
+		return false;
+	if (!bow_roll.GetSprite(EDirection::RightUp)->LoadFrame(4, "image\\bow\\roll\\rightup\\bow_roll_rightup_04.bmp"))
+		return false;
+	if (!bow_roll.GetSprite(EDirection::RightUp)->LoadFrame(5, "image\\bow\\roll\\rightup\\bow_roll_rightup_05.bmp"))
+		return false;
+
+	if (!bow_roll.GetSprite(EDirection::RightDown)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_roll.GetSprite(EDirection::RightDown)->LoadFrame(
 		0, "image\\bow\\roll\\rightdown\\bow_roll_rightdown_00.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(
+	if (!bow_roll.GetSprite(EDirection::RightDown)->LoadFrame(
 		1, "image\\bow\\roll\\rightdown\\bow_roll_rightdown_01.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(
+	if (!bow_roll.GetSprite(EDirection::RightDown)->LoadFrame(
 		2, "image\\bow\\roll\\rightdown\\bow_roll_rightdown_02.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(
+	if (!bow_roll.GetSprite(EDirection::RightDown)->LoadFrame(
 		3, "image\\bow\\roll\\rightdown\\bow_roll_rightdown_03.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(
+	if (!bow_roll.GetSprite(EDirection::RightDown)->LoadFrame(
 		4, "image\\bow\\roll\\rightdown\\bow_roll_rightdown_04.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(
+	if (!bow_roll.GetSprite(EDirection::RightDown)->LoadFrame(
 		5, "image\\bow\\roll\\rightdown\\bow_roll_rightdown_05.bmp"))
 		return false;
 
-	if (!bow_roll.GetSprite(DIRECTION::UP)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!bow_roll.GetSprite(EDirection::Up)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::UP)->LoadFrame(0, "image\\bow\\roll\\up\\bow_roll_up_00.bmp"))
+	if (!bow_roll.GetSprite(EDirection::Up)->LoadFrame(0, "image\\bow\\roll\\up\\bow_roll_up_00.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::UP)->LoadFrame(1, "image\\bow\\roll\\up\\bow_roll_up_01.bmp"))
+	if (!bow_roll.GetSprite(EDirection::Up)->LoadFrame(1, "image\\bow\\roll\\up\\bow_roll_up_01.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::UP)->LoadFrame(2, "image\\bow\\roll\\up\\bow_roll_up_02.bmp"))
+	if (!bow_roll.GetSprite(EDirection::Up)->LoadFrame(2, "image\\bow\\roll\\up\\bow_roll_up_02.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::UP)->LoadFrame(3, "image\\bow\\roll\\up\\bow_roll_up_03.bmp"))
+	if (!bow_roll.GetSprite(EDirection::Up)->LoadFrame(3, "image\\bow\\roll\\up\\bow_roll_up_03.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::UP)->LoadFrame(4, "image\\bow\\roll\\up\\bow_roll_up_04.bmp"))
+	if (!bow_roll.GetSprite(EDirection::Up)->LoadFrame(4, "image\\bow\\roll\\up\\bow_roll_up_04.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::UP)->LoadFrame(5, "image\\bow\\roll\\up\\bow_roll_up_05.bmp"))
+	if (!bow_roll.GetSprite(EDirection::Up)->LoadFrame(5, "image\\bow\\roll\\up\\bow_roll_up_05.bmp"))
 		return false;
 
-	if (!bow_roll.GetSprite(DIRECTION::DOWN)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!bow_roll.GetSprite(EDirection::Down)->InitSprite(6, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::DOWN)->LoadFrame(0, "image\\bow\\roll\\down\\bow_roll_down_00.bmp"))
+	if (!bow_roll.GetSprite(EDirection::Down)->LoadFrame(0, "image\\bow\\roll\\down\\bow_roll_down_00.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::DOWN)->LoadFrame(1, "image\\bow\\roll\\down\\bow_roll_down_01.bmp"))
+	if (!bow_roll.GetSprite(EDirection::Down)->LoadFrame(1, "image\\bow\\roll\\down\\bow_roll_down_01.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::DOWN)->LoadFrame(2, "image\\bow\\roll\\down\\bow_roll_down_02.bmp"))
+	if (!bow_roll.GetSprite(EDirection::Down)->LoadFrame(2, "image\\bow\\roll\\down\\bow_roll_down_02.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::DOWN)->LoadFrame(3, "image\\bow\\roll\\down\\bow_roll_down_03.bmp"))
+	if (!bow_roll.GetSprite(EDirection::Down)->LoadFrame(3, "image\\bow\\roll\\down\\bow_roll_down_03.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::DOWN)->LoadFrame(4, "image\\bow\\roll\\down\\bow_roll_down_04.bmp"))
+	if (!bow_roll.GetSprite(EDirection::Down)->LoadFrame(4, "image\\bow\\roll\\down\\bow_roll_down_04.bmp"))
 		return false;
-	if (!bow_roll.GetSprite(DIRECTION::DOWN)->LoadFrame(5, "image\\bow\\roll\\down\\bow_roll_down_05.bmp"))
+	if (!bow_roll.GetSprite(EDirection::Down)->LoadFrame(5, "image\\bow\\roll\\down\\bow_roll_down_05.bmp"))
 		return false;
 #pragma endregion
 
 #pragma region bow_attack
-	if (!bow_attack.GetSprite(DIRECTION::LEFT)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!bow_attack.GetSprite(EDirection::Left)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!bow_attack.GetSprite(DIRECTION::LEFT)->LoadFrame(0, "image\\bow\\attack\\bow_attack_left.bmp"))
-		return false;
-
-	if (!bow_attack.GetSprite(DIRECTION::LEFTUP)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
-		return false;
-	if (!bow_attack.GetSprite(DIRECTION::LEFTUP)->LoadFrame(0, "image\\bow\\attack\\bow_attack_leftup.bmp"))
+	if (!bow_attack.GetSprite(EDirection::Left)->LoadFrame(0, "image\\bow\\attack\\bow_attack_left.bmp"))
 		return false;
 
-	if (!bow_attack.GetSprite(DIRECTION::LEFTDOWN)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!bow_attack.GetSprite(EDirection::LeftUp)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!bow_attack.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(0, "image\\bow\\attack\\bow_attack_leftdown.bmp"))
-		return false;
-
-	if (!bow_attack.GetSprite(DIRECTION::RIGHT)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
-		return false;
-	if (!bow_attack.GetSprite(DIRECTION::RIGHT)->LoadFrame(0, "image\\bow\\attack\\bow_attack_right.bmp"))
+	if (!bow_attack.GetSprite(EDirection::LeftUp)->LoadFrame(0, "image\\bow\\attack\\bow_attack_leftup.bmp"))
 		return false;
 
-	if (!bow_attack.GetSprite(DIRECTION::RIGHTUP)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!bow_attack.GetSprite(EDirection::LeftDown)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!bow_attack.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(0, "image\\bow\\attack\\bow_attack_rightup.bmp"))
-		return false;
-
-	if (!bow_attack.GetSprite(DIRECTION::RIGHTDOWN)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
-		return false;
-	if (!bow_attack.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(0, "image\\bow\\attack\\bow_attack_rightdown.bmp"))
+	if (!bow_attack.GetSprite(EDirection::LeftDown)->LoadFrame(0, "image\\bow\\attack\\bow_attack_leftdown.bmp"))
 		return false;
 
-	if (!bow_attack.GetSprite(DIRECTION::UP)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!bow_attack.GetSprite(EDirection::Right)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!bow_attack.GetSprite(DIRECTION::UP)->LoadFrame(0, "image\\bow\\attack\\bow_attack_up.bmp"))
+	if (!bow_attack.GetSprite(EDirection::Right)->LoadFrame(0, "image\\bow\\attack\\bow_attack_right.bmp"))
 		return false;
 
-	if (!bow_attack.GetSprite(DIRECTION::DOWN)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+	if (!bow_attack.GetSprite(EDirection::RightUp)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!bow_attack.GetSprite(DIRECTION::DOWN)->LoadFrame(0, "image\\bow\\attack\\bow_attack_down.bmp"))
+	if (!bow_attack.GetSprite(EDirection::RightUp)->LoadFrame(0, "image\\bow\\attack\\bow_attack_rightup.bmp"))
+		return false;
+
+	if (!bow_attack.GetSprite(EDirection::RightDown)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_attack.GetSprite(EDirection::RightDown)->LoadFrame(0, "image\\bow\\attack\\bow_attack_rightdown.bmp"))
+		return false;
+
+	if (!bow_attack.GetSprite(EDirection::Up)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_attack.GetSprite(EDirection::Up)->LoadFrame(0, "image\\bow\\attack\\bow_attack_up.bmp"))
+		return false;
+
+	if (!bow_attack.GetSprite(EDirection::Down)->InitSprite(1, 32, 32, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!bow_attack.GetSprite(EDirection::Down)->LoadFrame(0, "image\\bow\\attack\\bow_attack_down.bmp"))
 		return false;
 #pragma endregion
 
 #pragma region arrow
-	if (!arrowSprite.GetSprite(DIRECTION::LEFT)->InitSprite(1, 130, 130, COLOR_KEY, g_lpDirectDrawObject))
+	if (!arrowSprite.GetSprite(EDirection::Left)->InitSprite(1, 130, 130, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!arrowSprite.GetSprite(DIRECTION::LEFT)->LoadFrame(0, "image\\arrow\\arrow_left.bmp"))
-		return false;
-
-	if (!arrowSprite.GetSprite(DIRECTION::LEFTUP)->InitSprite(1, 130, 130, COLOR_KEY, g_lpDirectDrawObject))
-		return false;
-	if (!arrowSprite.GetSprite(DIRECTION::LEFTUP)->LoadFrame(0, "image\\arrow\\arrow_leftup.bmp"))
+	if (!arrowSprite.GetSprite(EDirection::Left)->LoadFrame(0, "image\\arrow\\arrow_left.bmp"))
 		return false;
 
-	if (!arrowSprite.GetSprite(DIRECTION::LEFTDOWN)->InitSprite(1, 130, 130, COLOR_KEY, g_lpDirectDrawObject))
+	if (!arrowSprite.GetSprite(EDirection::LeftUp)->InitSprite(1, 130, 130, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!arrowSprite.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(0, "image\\arrow\\arrow_leftdown.bmp"))
-		return false;
-
-	if (!arrowSprite.GetSprite(DIRECTION::RIGHT)->InitSprite(1, 130, 130, COLOR_KEY, g_lpDirectDrawObject))
-		return false;
-	if (!arrowSprite.GetSprite(DIRECTION::RIGHT)->LoadFrame(0, "image\\arrow\\arrow_right.bmp"))
+	if (!arrowSprite.GetSprite(EDirection::LeftUp)->LoadFrame(0, "image\\arrow\\arrow_leftup.bmp"))
 		return false;
 
-	if (!arrowSprite.GetSprite(DIRECTION::RIGHTUP)->InitSprite(1, 130, 130, COLOR_KEY, g_lpDirectDrawObject))
+	if (!arrowSprite.GetSprite(EDirection::LeftDown)->InitSprite(1, 130, 130, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!arrowSprite.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(0, "image\\arrow\\arrow_rightup.bmp"))
-		return false;
-
-	if (!arrowSprite.GetSprite(DIRECTION::RIGHTDOWN)->InitSprite(1, 130, 130, COLOR_KEY, g_lpDirectDrawObject))
-		return false;
-	if (!arrowSprite.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(0, "image\\arrow\\arrow_rightdown.bmp"))
+	if (!arrowSprite.GetSprite(EDirection::LeftDown)->LoadFrame(0, "image\\arrow\\arrow_leftdown.bmp"))
 		return false;
 
-	if (!arrowSprite.GetSprite(DIRECTION::UP)->InitSprite(1, 130, 130, COLOR_KEY, g_lpDirectDrawObject))
+	if (!arrowSprite.GetSprite(EDirection::Right)->InitSprite(1, 130, 130, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!arrowSprite.GetSprite(DIRECTION::UP)->LoadFrame(0, "image\\arrow\\arrow_up.bmp"))
+	if (!arrowSprite.GetSprite(EDirection::Right)->LoadFrame(0, "image\\arrow\\arrow_right.bmp"))
 		return false;
 
-	if (!arrowSprite.GetSprite(DIRECTION::DOWN)->InitSprite(1, 130, 130, COLOR_KEY, g_lpDirectDrawObject))
+	if (!arrowSprite.GetSprite(EDirection::RightUp)->InitSprite(1, 130, 130, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!arrowSprite.GetSprite(DIRECTION::DOWN)->LoadFrame(0, "image\\arrow\\arrow_down.bmp"))
+	if (!arrowSprite.GetSprite(EDirection::RightUp)->LoadFrame(0, "image\\arrow\\arrow_rightup.bmp"))
+		return false;
+
+	if (!arrowSprite.GetSprite(EDirection::RightDown)->InitSprite(1, 130, 130, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!arrowSprite.GetSprite(EDirection::RightDown)->LoadFrame(0, "image\\arrow\\arrow_rightdown.bmp"))
+		return false;
+
+	if (!arrowSprite.GetSprite(EDirection::Up)->InitSprite(1, 130, 130, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!arrowSprite.GetSprite(EDirection::Up)->LoadFrame(0, "image\\arrow\\arrow_up.bmp"))
+		return false;
+
+	if (!arrowSprite.GetSprite(EDirection::Down)->InitSprite(1, 130, 130, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!arrowSprite.GetSprite(EDirection::Down)->LoadFrame(0, "image\\arrow\\arrow_down.bmp"))
 		return false;
 #pragma endregion
 
@@ -1768,298 +1763,298 @@ bool LoadBMPandInitSurface()
 	if (!boss_snowball.LoadFrame(0, "image\\boss\\weapon\\snowball.bmp"))
 		return false;
 
-	if (!boss_idle.GetSprite(DIRECTION::LEFT)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+	if (!boss_idle.GetSprite(EDirection::Left)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!boss_idle.GetSprite(DIRECTION::LEFT)->LoadFrame(0, "image\\boss\\idle\\left\\00.bmp"))
+	if (!boss_idle.GetSprite(EDirection::Left)->LoadFrame(0, "image\\boss\\idle\\left\\00.bmp"))
 		return false;
-	if (!boss_idle.GetSprite(DIRECTION::LEFT)->LoadFrame(1, "image\\boss\\idle\\left\\01.bmp"))
+	if (!boss_idle.GetSprite(EDirection::Left)->LoadFrame(1, "image\\boss\\idle\\left\\01.bmp"))
 		return false;
-	if (!boss_idle.GetSprite(DIRECTION::LEFT)->LoadFrame(2, "image\\boss\\idle\\left\\02.bmp"))
-		return false;
-
-	if (!boss_idle.GetSprite(DIRECTION::LEFTUP)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
-		return false;
-	if (!boss_idle.GetSprite(DIRECTION::LEFTUP)->LoadFrame(0, "image\\boss\\idle\\leftup\\00.bmp"))
-		return false;
-	if (!boss_idle.GetSprite(DIRECTION::LEFTUP)->LoadFrame(1, "image\\boss\\idle\\leftup\\01.bmp"))
-		return false;
-	if (!boss_idle.GetSprite(DIRECTION::LEFTUP)->LoadFrame(2, "image\\boss\\idle\\leftup\\02.bmp"))
+	if (!boss_idle.GetSprite(EDirection::Left)->LoadFrame(2, "image\\boss\\idle\\left\\02.bmp"))
 		return false;
 
-	if (!boss_idle.GetSprite(DIRECTION::LEFTDOWN)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+	if (!boss_idle.GetSprite(EDirection::LeftUp)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!boss_idle.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(0, "image\\boss\\idle\\leftdown\\00.bmp"))
+	if (!boss_idle.GetSprite(EDirection::LeftUp)->LoadFrame(0, "image\\boss\\idle\\leftup\\00.bmp"))
 		return false;
-	if (!boss_idle.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(1, "image\\boss\\idle\\leftdown\\01.bmp"))
+	if (!boss_idle.GetSprite(EDirection::LeftUp)->LoadFrame(1, "image\\boss\\idle\\leftup\\01.bmp"))
 		return false;
-	if (!boss_idle.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(2, "image\\boss\\idle\\leftdown\\02.bmp"))
-		return false;
-
-	if (!boss_idle.GetSprite(DIRECTION::RIGHT)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
-		return false;
-	if (!boss_idle.GetSprite(DIRECTION::RIGHT)->LoadFrame(0, "image\\boss\\idle\\right\\00.bmp"))
-		return false;
-	if (!boss_idle.GetSprite(DIRECTION::RIGHT)->LoadFrame(1, "image\\boss\\idle\\right\\01.bmp"))
-		return false;
-	if (!boss_idle.GetSprite(DIRECTION::RIGHT)->LoadFrame(2, "image\\boss\\idle\\right\\02.bmp"))
+	if (!boss_idle.GetSprite(EDirection::LeftUp)->LoadFrame(2, "image\\boss\\idle\\leftup\\02.bmp"))
 		return false;
 
-	if (!boss_idle.GetSprite(DIRECTION::RIGHTUP)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+	if (!boss_idle.GetSprite(EDirection::LeftDown)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!boss_idle.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(0, "image\\boss\\idle\\rightup\\00.bmp"))
+	if (!boss_idle.GetSprite(EDirection::LeftDown)->LoadFrame(0, "image\\boss\\idle\\leftdown\\00.bmp"))
 		return false;
-	if (!boss_idle.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(1, "image\\boss\\idle\\rightup\\01.bmp"))
+	if (!boss_idle.GetSprite(EDirection::LeftDown)->LoadFrame(1, "image\\boss\\idle\\leftdown\\01.bmp"))
 		return false;
-	if (!boss_idle.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(2, "image\\boss\\idle\\rightup\\02.bmp"))
-		return false;
-
-	if (!boss_idle.GetSprite(DIRECTION::RIGHTDOWN)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
-		return false;
-	if (!boss_idle.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(0, "image\\boss\\idle\\rightdown\\00.bmp"))
-		return false;
-	if (!boss_idle.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(1, "image\\boss\\idle\\rightdown\\01.bmp"))
-		return false;
-	if (!boss_idle.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(2, "image\\boss\\idle\\rightdown\\02.bmp"))
+	if (!boss_idle.GetSprite(EDirection::LeftDown)->LoadFrame(2, "image\\boss\\idle\\leftdown\\02.bmp"))
 		return false;
 
-	if (!boss_idle.GetSprite(DIRECTION::UP)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+	if (!boss_idle.GetSprite(EDirection::Right)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!boss_idle.GetSprite(DIRECTION::UP)->LoadFrame(0, "image\\boss\\idle\\up\\00.bmp"))
+	if (!boss_idle.GetSprite(EDirection::Right)->LoadFrame(0, "image\\boss\\idle\\right\\00.bmp"))
 		return false;
-	if (!boss_idle.GetSprite(DIRECTION::UP)->LoadFrame(1, "image\\boss\\idle\\up\\01.bmp"))
+	if (!boss_idle.GetSprite(EDirection::Right)->LoadFrame(1, "image\\boss\\idle\\right\\01.bmp"))
 		return false;
-	if (!boss_idle.GetSprite(DIRECTION::UP)->LoadFrame(2, "image\\boss\\idle\\up\\02.bmp"))
+	if (!boss_idle.GetSprite(EDirection::Right)->LoadFrame(2, "image\\boss\\idle\\right\\02.bmp"))
 		return false;
 
-	if (!boss_idle.GetSprite(DIRECTION::DOWN)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+	if (!boss_idle.GetSprite(EDirection::RightUp)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!boss_idle.GetSprite(DIRECTION::DOWN)->LoadFrame(0, "image\\boss\\idle\\down\\00.bmp"))
+	if (!boss_idle.GetSprite(EDirection::RightUp)->LoadFrame(0, "image\\boss\\idle\\rightup\\00.bmp"))
 		return false;
-	if (!boss_idle.GetSprite(DIRECTION::DOWN)->LoadFrame(1, "image\\boss\\idle\\down\\01.bmp"))
+	if (!boss_idle.GetSprite(EDirection::RightUp)->LoadFrame(1, "image\\boss\\idle\\rightup\\01.bmp"))
 		return false;
-	if (!boss_idle.GetSprite(DIRECTION::DOWN)->LoadFrame(2, "image\\boss\\idle\\down\\02.bmp"))
+	if (!boss_idle.GetSprite(EDirection::RightUp)->LoadFrame(2, "image\\boss\\idle\\rightup\\02.bmp"))
+		return false;
+
+	if (!boss_idle.GetSprite(EDirection::RightDown)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_idle.GetSprite(EDirection::RightDown)->LoadFrame(0, "image\\boss\\idle\\rightdown\\00.bmp"))
+		return false;
+	if (!boss_idle.GetSprite(EDirection::RightDown)->LoadFrame(1, "image\\boss\\idle\\rightdown\\01.bmp"))
+		return false;
+	if (!boss_idle.GetSprite(EDirection::RightDown)->LoadFrame(2, "image\\boss\\idle\\rightdown\\02.bmp"))
+		return false;
+
+	if (!boss_idle.GetSprite(EDirection::Up)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_idle.GetSprite(EDirection::Up)->LoadFrame(0, "image\\boss\\idle\\up\\00.bmp"))
+		return false;
+	if (!boss_idle.GetSprite(EDirection::Up)->LoadFrame(1, "image\\boss\\idle\\up\\01.bmp"))
+		return false;
+	if (!boss_idle.GetSprite(EDirection::Up)->LoadFrame(2, "image\\boss\\idle\\up\\02.bmp"))
+		return false;
+
+	if (!boss_idle.GetSprite(EDirection::Down)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_idle.GetSprite(EDirection::Down)->LoadFrame(0, "image\\boss\\idle\\down\\00.bmp"))
+		return false;
+	if (!boss_idle.GetSprite(EDirection::Down)->LoadFrame(1, "image\\boss\\idle\\down\\01.bmp"))
+		return false;
+	if (!boss_idle.GetSprite(EDirection::Down)->LoadFrame(2, "image\\boss\\idle\\down\\02.bmp"))
 		return false;
 #pragma endregion
 
 #pragma region boss_roll
-	if (!boss_roll.GetSprite(DIRECTION::LEFT)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+	if (!boss_roll.GetSprite(EDirection::Left)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!boss_roll.GetSprite(DIRECTION::LEFT)->LoadFrame(0, "image\\boss\\roll\\left\\00.bmp"))
+	if (!boss_roll.GetSprite(EDirection::Left)->LoadFrame(0, "image\\boss\\roll\\left\\00.bmp"))
 		return false;
-	if (!boss_roll.GetSprite(DIRECTION::LEFT)->LoadFrame(1, "image\\boss\\roll\\left\\01.bmp"))
+	if (!boss_roll.GetSprite(EDirection::Left)->LoadFrame(1, "image\\boss\\roll\\left\\01.bmp"))
 		return false;
-	if (!boss_roll.GetSprite(DIRECTION::LEFT)->LoadFrame(2, "image\\boss\\roll\\left\\02.bmp"))
-		return false;
-
-	if (!boss_roll.GetSprite(DIRECTION::LEFTUP)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
-		return false;
-	if (!boss_roll.GetSprite(DIRECTION::LEFTUP)->LoadFrame(0, "image\\boss\\roll\\leftup\\00.bmp"))
-		return false;
-	if (!boss_roll.GetSprite(DIRECTION::LEFTUP)->LoadFrame(1, "image\\boss\\roll\\leftup\\01.bmp"))
-		return false;
-	if (!boss_roll.GetSprite(DIRECTION::LEFTUP)->LoadFrame(2, "image\\boss\\roll\\leftup\\02.bmp"))
+	if (!boss_roll.GetSprite(EDirection::Left)->LoadFrame(2, "image\\boss\\roll\\left\\02.bmp"))
 		return false;
 
-	if (!boss_roll.GetSprite(DIRECTION::LEFTDOWN)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+	if (!boss_roll.GetSprite(EDirection::LeftUp)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!boss_roll.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(0, "image\\boss\\roll\\leftdown\\00.bmp"))
+	if (!boss_roll.GetSprite(EDirection::LeftUp)->LoadFrame(0, "image\\boss\\roll\\leftup\\00.bmp"))
 		return false;
-	if (!boss_roll.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(1, "image\\boss\\roll\\leftdown\\01.bmp"))
+	if (!boss_roll.GetSprite(EDirection::LeftUp)->LoadFrame(1, "image\\boss\\roll\\leftup\\01.bmp"))
 		return false;
-	if (!boss_roll.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(2, "image\\boss\\roll\\leftdown\\02.bmp"))
-		return false;
-
-	if (!boss_roll.GetSprite(DIRECTION::RIGHT)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
-		return false;
-	if (!boss_roll.GetSprite(DIRECTION::RIGHT)->LoadFrame(0, "image\\boss\\roll\\right\\00.bmp"))
-		return false;
-	if (!boss_roll.GetSprite(DIRECTION::RIGHT)->LoadFrame(1, "image\\boss\\roll\\right\\01.bmp"))
-		return false;
-	if (!boss_roll.GetSprite(DIRECTION::RIGHT)->LoadFrame(2, "image\\boss\\roll\\right\\02.bmp"))
+	if (!boss_roll.GetSprite(EDirection::LeftUp)->LoadFrame(2, "image\\boss\\roll\\leftup\\02.bmp"))
 		return false;
 
-	if (!boss_roll.GetSprite(DIRECTION::RIGHTUP)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+	if (!boss_roll.GetSprite(EDirection::LeftDown)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!boss_roll.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(0, "image\\boss\\roll\\rightup\\00.bmp"))
+	if (!boss_roll.GetSprite(EDirection::LeftDown)->LoadFrame(0, "image\\boss\\roll\\leftdown\\00.bmp"))
 		return false;
-	if (!boss_roll.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(1, "image\\boss\\roll\\rightup\\01.bmp"))
+	if (!boss_roll.GetSprite(EDirection::LeftDown)->LoadFrame(1, "image\\boss\\roll\\leftdown\\01.bmp"))
 		return false;
-	if (!boss_roll.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(2, "image\\boss\\roll\\rightup\\02.bmp"))
-		return false;
-
-	if (!boss_roll.GetSprite(DIRECTION::RIGHTDOWN)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
-		return false;
-	if (!boss_roll.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(0, "image\\boss\\roll\\rightdown\\00.bmp"))
-		return false;
-	if (!boss_roll.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(1, "image\\boss\\roll\\rightdown\\01.bmp"))
-		return false;
-	if (!boss_roll.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(2, "image\\boss\\roll\\rightdown\\02.bmp"))
+	if (!boss_roll.GetSprite(EDirection::LeftDown)->LoadFrame(2, "image\\boss\\roll\\leftdown\\02.bmp"))
 		return false;
 
-	if (!boss_roll.GetSprite(DIRECTION::UP)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+	if (!boss_roll.GetSprite(EDirection::Right)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!boss_roll.GetSprite(DIRECTION::UP)->LoadFrame(0, "image\\boss\\roll\\up\\00.bmp"))
+	if (!boss_roll.GetSprite(EDirection::Right)->LoadFrame(0, "image\\boss\\roll\\right\\00.bmp"))
 		return false;
-	if (!boss_roll.GetSprite(DIRECTION::UP)->LoadFrame(1, "image\\boss\\roll\\up\\01.bmp"))
+	if (!boss_roll.GetSprite(EDirection::Right)->LoadFrame(1, "image\\boss\\roll\\right\\01.bmp"))
 		return false;
-	if (!boss_roll.GetSprite(DIRECTION::UP)->LoadFrame(2, "image\\boss\\roll\\up\\02.bmp"))
+	if (!boss_roll.GetSprite(EDirection::Right)->LoadFrame(2, "image\\boss\\roll\\right\\02.bmp"))
 		return false;
 
-	if (!boss_roll.GetSprite(DIRECTION::DOWN)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+	if (!boss_roll.GetSprite(EDirection::RightUp)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!boss_roll.GetSprite(DIRECTION::DOWN)->LoadFrame(0, "image\\boss\\roll\\down\\00.bmp"))
+	if (!boss_roll.GetSprite(EDirection::RightUp)->LoadFrame(0, "image\\boss\\roll\\rightup\\00.bmp"))
 		return false;
-	if (!boss_roll.GetSprite(DIRECTION::DOWN)->LoadFrame(1, "image\\boss\\roll\\down\\01.bmp"))
+	if (!boss_roll.GetSprite(EDirection::RightUp)->LoadFrame(1, "image\\boss\\roll\\rightup\\01.bmp"))
 		return false;
-	if (!boss_roll.GetSprite(DIRECTION::DOWN)->LoadFrame(2, "image\\boss\\roll\\down\\02.bmp"))
+	if (!boss_roll.GetSprite(EDirection::RightUp)->LoadFrame(2, "image\\boss\\roll\\rightup\\02.bmp"))
+		return false;
+
+	if (!boss_roll.GetSprite(EDirection::RightDown)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_roll.GetSprite(EDirection::RightDown)->LoadFrame(0, "image\\boss\\roll\\rightdown\\00.bmp"))
+		return false;
+	if (!boss_roll.GetSprite(EDirection::RightDown)->LoadFrame(1, "image\\boss\\roll\\rightdown\\01.bmp"))
+		return false;
+	if (!boss_roll.GetSprite(EDirection::RightDown)->LoadFrame(2, "image\\boss\\roll\\rightdown\\02.bmp"))
+		return false;
+
+	if (!boss_roll.GetSprite(EDirection::Up)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_roll.GetSprite(EDirection::Up)->LoadFrame(0, "image\\boss\\roll\\up\\00.bmp"))
+		return false;
+	if (!boss_roll.GetSprite(EDirection::Up)->LoadFrame(1, "image\\boss\\roll\\up\\01.bmp"))
+		return false;
+	if (!boss_roll.GetSprite(EDirection::Up)->LoadFrame(2, "image\\boss\\roll\\up\\02.bmp"))
+		return false;
+
+	if (!boss_roll.GetSprite(EDirection::Down)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_roll.GetSprite(EDirection::Down)->LoadFrame(0, "image\\boss\\roll\\down\\00.bmp"))
+		return false;
+	if (!boss_roll.GetSprite(EDirection::Down)->LoadFrame(1, "image\\boss\\roll\\down\\01.bmp"))
+		return false;
+	if (!boss_roll.GetSprite(EDirection::Down)->LoadFrame(2, "image\\boss\\roll\\down\\02.bmp"))
 		return false;
 #pragma endregion
 
 #pragma region boss_attack
-	if (!boss_attack.GetSprite(DIRECTION::LEFT)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+	if (!boss_attack.GetSprite(EDirection::Left)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!boss_attack.GetSprite(DIRECTION::LEFT)->LoadFrame(0, "image\\boss\\attack\\left\\00.bmp"))
+	if (!boss_attack.GetSprite(EDirection::Left)->LoadFrame(0, "image\\boss\\attack\\left\\00.bmp"))
 		return false;
-	if (!boss_attack.GetSprite(DIRECTION::LEFT)->LoadFrame(1, "image\\boss\\attack\\left\\01.bmp"))
+	if (!boss_attack.GetSprite(EDirection::Left)->LoadFrame(1, "image\\boss\\attack\\left\\01.bmp"))
 		return false;
-	if (!boss_attack.GetSprite(DIRECTION::LEFT)->LoadFrame(2, "image\\boss\\attack\\left\\02.bmp"))
-		return false;
-
-	if (!boss_attack.GetSprite(DIRECTION::LEFTUP)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
-		return false;
-	if (!boss_attack.GetSprite(DIRECTION::LEFTUP)->LoadFrame(0, "image\\boss\\attack\\leftup\\00.bmp"))
-		return false;
-	if (!boss_attack.GetSprite(DIRECTION::LEFTUP)->LoadFrame(1, "image\\boss\\attack\\leftup\\01.bmp"))
-		return false;
-	if (!boss_attack.GetSprite(DIRECTION::LEFTUP)->LoadFrame(2, "image\\boss\\attack\\leftup\\02.bmp"))
+	if (!boss_attack.GetSprite(EDirection::Left)->LoadFrame(2, "image\\boss\\attack\\left\\02.bmp"))
 		return false;
 
-	if (!boss_attack.GetSprite(DIRECTION::LEFTDOWN)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+	if (!boss_attack.GetSprite(EDirection::LeftUp)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!boss_attack.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(0, "image\\boss\\attack\\leftdown\\00.bmp"))
+	if (!boss_attack.GetSprite(EDirection::LeftUp)->LoadFrame(0, "image\\boss\\attack\\leftup\\00.bmp"))
 		return false;
-	if (!boss_attack.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(1, "image\\boss\\attack\\leftdown\\01.bmp"))
+	if (!boss_attack.GetSprite(EDirection::LeftUp)->LoadFrame(1, "image\\boss\\attack\\leftup\\01.bmp"))
 		return false;
-	if (!boss_attack.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(2, "image\\boss\\attack\\leftdown\\02.bmp"))
-		return false;
-
-	if (!boss_attack.GetSprite(DIRECTION::RIGHT)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
-		return false;
-	if (!boss_attack.GetSprite(DIRECTION::RIGHT)->LoadFrame(0, "image\\boss\\attack\\right\\00.bmp"))
-		return false;
-	if (!boss_attack.GetSprite(DIRECTION::RIGHT)->LoadFrame(1, "image\\boss\\attack\\right\\01.bmp"))
-		return false;
-	if (!boss_attack.GetSprite(DIRECTION::RIGHT)->LoadFrame(2, "image\\boss\\attack\\right\\02.bmp"))
+	if (!boss_attack.GetSprite(EDirection::LeftUp)->LoadFrame(2, "image\\boss\\attack\\leftup\\02.bmp"))
 		return false;
 
-	if (!boss_attack.GetSprite(DIRECTION::RIGHTUP)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+	if (!boss_attack.GetSprite(EDirection::LeftDown)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!boss_attack.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(0, "image\\boss\\attack\\rightup\\00.bmp"))
+	if (!boss_attack.GetSprite(EDirection::LeftDown)->LoadFrame(0, "image\\boss\\attack\\leftdown\\00.bmp"))
 		return false;
-	if (!boss_attack.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(1, "image\\boss\\attack\\rightup\\01.bmp"))
+	if (!boss_attack.GetSprite(EDirection::LeftDown)->LoadFrame(1, "image\\boss\\attack\\leftdown\\01.bmp"))
 		return false;
-	if (!boss_attack.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(2, "image\\boss\\attack\\rightup\\02.bmp"))
-		return false;
-
-	if (!boss_attack.GetSprite(DIRECTION::RIGHTDOWN)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
-		return false;
-	if (!boss_attack.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(0, "image\\boss\\attack\\rightdown\\00.bmp"))
-		return false;
-	if (!boss_attack.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(1, "image\\boss\\attack\\rightdown\\01.bmp"))
-		return false;
-	if (!boss_attack.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(2, "image\\boss\\attack\\rightdown\\02.bmp"))
+	if (!boss_attack.GetSprite(EDirection::LeftDown)->LoadFrame(2, "image\\boss\\attack\\leftdown\\02.bmp"))
 		return false;
 
-	if (!boss_attack.GetSprite(DIRECTION::UP)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+	if (!boss_attack.GetSprite(EDirection::Right)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!boss_attack.GetSprite(DIRECTION::UP)->LoadFrame(0, "image\\boss\\attack\\up\\00.bmp"))
+	if (!boss_attack.GetSprite(EDirection::Right)->LoadFrame(0, "image\\boss\\attack\\right\\00.bmp"))
 		return false;
-	if (!boss_attack.GetSprite(DIRECTION::UP)->LoadFrame(1, "image\\boss\\attack\\up\\01.bmp"))
+	if (!boss_attack.GetSprite(EDirection::Right)->LoadFrame(1, "image\\boss\\attack\\right\\01.bmp"))
 		return false;
-	if (!boss_attack.GetSprite(DIRECTION::UP)->LoadFrame(2, "image\\boss\\attack\\up\\02.bmp"))
+	if (!boss_attack.GetSprite(EDirection::Right)->LoadFrame(2, "image\\boss\\attack\\right\\02.bmp"))
 		return false;
 
-	if (!boss_attack.GetSprite(DIRECTION::DOWN)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+	if (!boss_attack.GetSprite(EDirection::RightUp)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!boss_attack.GetSprite(DIRECTION::DOWN)->LoadFrame(0, "image\\boss\\attack\\down\\00.bmp"))
+	if (!boss_attack.GetSprite(EDirection::RightUp)->LoadFrame(0, "image\\boss\\attack\\rightup\\00.bmp"))
 		return false;
-	if (!boss_attack.GetSprite(DIRECTION::DOWN)->LoadFrame(1, "image\\boss\\attack\\down\\01.bmp"))
+	if (!boss_attack.GetSprite(EDirection::RightUp)->LoadFrame(1, "image\\boss\\attack\\rightup\\01.bmp"))
 		return false;
-	if (!boss_attack.GetSprite(DIRECTION::DOWN)->LoadFrame(2, "image\\boss\\attack\\down\\02.bmp"))
+	if (!boss_attack.GetSprite(EDirection::RightUp)->LoadFrame(2, "image\\boss\\attack\\rightup\\02.bmp"))
+		return false;
+
+	if (!boss_attack.GetSprite(EDirection::RightDown)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_attack.GetSprite(EDirection::RightDown)->LoadFrame(0, "image\\boss\\attack\\rightdown\\00.bmp"))
+		return false;
+	if (!boss_attack.GetSprite(EDirection::RightDown)->LoadFrame(1, "image\\boss\\attack\\rightdown\\01.bmp"))
+		return false;
+	if (!boss_attack.GetSprite(EDirection::RightDown)->LoadFrame(2, "image\\boss\\attack\\rightdown\\02.bmp"))
+		return false;
+
+	if (!boss_attack.GetSprite(EDirection::Up)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_attack.GetSprite(EDirection::Up)->LoadFrame(0, "image\\boss\\attack\\up\\00.bmp"))
+		return false;
+	if (!boss_attack.GetSprite(EDirection::Up)->LoadFrame(1, "image\\boss\\attack\\up\\01.bmp"))
+		return false;
+	if (!boss_attack.GetSprite(EDirection::Up)->LoadFrame(2, "image\\boss\\attack\\up\\02.bmp"))
+		return false;
+
+	if (!boss_attack.GetSprite(EDirection::Down)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_attack.GetSprite(EDirection::Down)->LoadFrame(0, "image\\boss\\attack\\down\\00.bmp"))
+		return false;
+	if (!boss_attack.GetSprite(EDirection::Down)->LoadFrame(1, "image\\boss\\attack\\down\\01.bmp"))
+		return false;
+	if (!boss_attack.GetSprite(EDirection::Down)->LoadFrame(2, "image\\boss\\attack\\down\\02.bmp"))
 		return false;
 #pragma endregion
 
 #pragma region boss_dead
-	if (!boss_dead.GetSprite(DIRECTION::LEFT)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+	if (!boss_dead.GetSprite(EDirection::Left)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!boss_dead.GetSprite(DIRECTION::LEFT)->LoadFrame(0, "image\\boss\\dead\\left\\00.bmp"))
+	if (!boss_dead.GetSprite(EDirection::Left)->LoadFrame(0, "image\\boss\\dead\\left\\00.bmp"))
 		return false;
-	if (!boss_dead.GetSprite(DIRECTION::LEFT)->LoadFrame(1, "image\\boss\\dead\\left\\01.bmp"))
+	if (!boss_dead.GetSprite(EDirection::Left)->LoadFrame(1, "image\\boss\\dead\\left\\01.bmp"))
 		return false;
-	if (!boss_dead.GetSprite(DIRECTION::LEFT)->LoadFrame(2, "image\\boss\\dead\\left\\02.bmp"))
-		return false;
-
-	if (!boss_dead.GetSprite(DIRECTION::LEFTUP)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
-		return false;
-	if (!boss_dead.GetSprite(DIRECTION::LEFTUP)->LoadFrame(0, "image\\boss\\dead\\leftup\\00.bmp"))
-		return false;
-	if (!boss_dead.GetSprite(DIRECTION::LEFTUP)->LoadFrame(1, "image\\boss\\dead\\leftup\\01.bmp"))
-		return false;
-	if (!boss_dead.GetSprite(DIRECTION::LEFTUP)->LoadFrame(2, "image\\boss\\dead\\leftup\\02.bmp"))
+	if (!boss_dead.GetSprite(EDirection::Left)->LoadFrame(2, "image\\boss\\dead\\left\\02.bmp"))
 		return false;
 
-	if (!boss_dead.GetSprite(DIRECTION::LEFTDOWN)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+	if (!boss_dead.GetSprite(EDirection::LeftUp)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!boss_dead.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(0, "image\\boss\\dead\\leftdown\\00.bmp"))
+	if (!boss_dead.GetSprite(EDirection::LeftUp)->LoadFrame(0, "image\\boss\\dead\\leftup\\00.bmp"))
 		return false;
-	if (!boss_dead.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(1, "image\\boss\\dead\\leftdown\\01.bmp"))
+	if (!boss_dead.GetSprite(EDirection::LeftUp)->LoadFrame(1, "image\\boss\\dead\\leftup\\01.bmp"))
 		return false;
-	if (!boss_dead.GetSprite(DIRECTION::LEFTDOWN)->LoadFrame(2, "image\\boss\\dead\\leftdown\\02.bmp"))
-		return false;
-
-	if (!boss_dead.GetSprite(DIRECTION::RIGHT)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
-		return false;
-	if (!boss_dead.GetSprite(DIRECTION::RIGHT)->LoadFrame(0, "image\\boss\\dead\\right\\00.bmp"))
-		return false;
-	if (!boss_dead.GetSprite(DIRECTION::RIGHT)->LoadFrame(1, "image\\boss\\dead\\right\\01.bmp"))
-		return false;
-	if (!boss_dead.GetSprite(DIRECTION::RIGHT)->LoadFrame(2, "image\\boss\\dead\\right\\02.bmp"))
+	if (!boss_dead.GetSprite(EDirection::LeftUp)->LoadFrame(2, "image\\boss\\dead\\leftup\\02.bmp"))
 		return false;
 
-	if (!boss_dead.GetSprite(DIRECTION::RIGHTUP)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+	if (!boss_dead.GetSprite(EDirection::LeftDown)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!boss_dead.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(0, "image\\boss\\dead\\rightup\\00.bmp"))
+	if (!boss_dead.GetSprite(EDirection::LeftDown)->LoadFrame(0, "image\\boss\\dead\\leftdown\\00.bmp"))
 		return false;
-	if (!boss_dead.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(1, "image\\boss\\dead\\rightup\\01.bmp"))
+	if (!boss_dead.GetSprite(EDirection::LeftDown)->LoadFrame(1, "image\\boss\\dead\\leftdown\\01.bmp"))
 		return false;
-	if (!boss_dead.GetSprite(DIRECTION::RIGHTUP)->LoadFrame(2, "image\\boss\\dead\\rightup\\02.bmp"))
-		return false;
-
-	if (!boss_dead.GetSprite(DIRECTION::RIGHTDOWN)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
-		return false;
-	if (!boss_dead.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(0, "image\\boss\\dead\\rightdown\\00.bmp"))
-		return false;
-	if (!boss_dead.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(1, "image\\boss\\dead\\rightdown\\01.bmp"))
-		return false;
-	if (!boss_dead.GetSprite(DIRECTION::RIGHTDOWN)->LoadFrame(2, "image\\boss\\dead\\rightdown\\02.bmp"))
+	if (!boss_dead.GetSprite(EDirection::LeftDown)->LoadFrame(2, "image\\boss\\dead\\leftdown\\02.bmp"))
 		return false;
 
-	if (!boss_dead.GetSprite(DIRECTION::UP)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+	if (!boss_dead.GetSprite(EDirection::Right)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!boss_dead.GetSprite(DIRECTION::UP)->LoadFrame(0, "image\\boss\\dead\\up\\00.bmp"))
+	if (!boss_dead.GetSprite(EDirection::Right)->LoadFrame(0, "image\\boss\\dead\\right\\00.bmp"))
 		return false;
-	if (!boss_dead.GetSprite(DIRECTION::UP)->LoadFrame(1, "image\\boss\\dead\\up\\01.bmp"))
+	if (!boss_dead.GetSprite(EDirection::Right)->LoadFrame(1, "image\\boss\\dead\\right\\01.bmp"))
 		return false;
-	if (!boss_dead.GetSprite(DIRECTION::UP)->LoadFrame(2, "image\\boss\\dead\\up\\02.bmp"))
+	if (!boss_dead.GetSprite(EDirection::Right)->LoadFrame(2, "image\\boss\\dead\\right\\02.bmp"))
 		return false;
 
-	if (!boss_dead.GetSprite(DIRECTION::DOWN)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+	if (!boss_dead.GetSprite(EDirection::RightUp)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
 		return false;
-	if (!boss_dead.GetSprite(DIRECTION::DOWN)->LoadFrame(0, "image\\boss\\dead\\down\\00.bmp"))
+	if (!boss_dead.GetSprite(EDirection::RightUp)->LoadFrame(0, "image\\boss\\dead\\rightup\\00.bmp"))
 		return false;
-	if (!boss_dead.GetSprite(DIRECTION::DOWN)->LoadFrame(1, "image\\boss\\dead\\down\\01.bmp"))
+	if (!boss_dead.GetSprite(EDirection::RightUp)->LoadFrame(1, "image\\boss\\dead\\rightup\\01.bmp"))
 		return false;
-	if (!boss_dead.GetSprite(DIRECTION::DOWN)->LoadFrame(2, "image\\boss\\dead\\down\\02.bmp"))
+	if (!boss_dead.GetSprite(EDirection::RightUp)->LoadFrame(2, "image\\boss\\dead\\rightup\\02.bmp"))
+		return false;
+
+	if (!boss_dead.GetSprite(EDirection::RightDown)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_dead.GetSprite(EDirection::RightDown)->LoadFrame(0, "image\\boss\\dead\\rightdown\\00.bmp"))
+		return false;
+	if (!boss_dead.GetSprite(EDirection::RightDown)->LoadFrame(1, "image\\boss\\dead\\rightdown\\01.bmp"))
+		return false;
+	if (!boss_dead.GetSprite(EDirection::RightDown)->LoadFrame(2, "image\\boss\\dead\\rightdown\\02.bmp"))
+		return false;
+
+	if (!boss_dead.GetSprite(EDirection::Up)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_dead.GetSprite(EDirection::Up)->LoadFrame(0, "image\\boss\\dead\\up\\00.bmp"))
+		return false;
+	if (!boss_dead.GetSprite(EDirection::Up)->LoadFrame(1, "image\\boss\\dead\\up\\01.bmp"))
+		return false;
+	if (!boss_dead.GetSprite(EDirection::Up)->LoadFrame(2, "image\\boss\\dead\\up\\02.bmp"))
+		return false;
+
+	if (!boss_dead.GetSprite(EDirection::Down)->InitSprite(3, 192, 192, COLOR_KEY, g_lpDirectDrawObject))
+		return false;
+	if (!boss_dead.GetSprite(EDirection::Down)->LoadFrame(0, "image\\boss\\dead\\down\\00.bmp"))
+		return false;
+	if (!boss_dead.GetSprite(EDirection::Down)->LoadFrame(1, "image\\boss\\dead\\down\\01.bmp"))
+		return false;
+	if (!boss_dead.GetSprite(EDirection::Down)->LoadFrame(2, "image\\boss\\dead\\down\\02.bmp"))
 		return false;
 #pragma endregion
 

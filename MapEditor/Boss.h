@@ -9,60 +9,88 @@
 class Boss : public GameObject
 {
 public:
-	int m_nHp; // todo : public 변수 private으로 옮기기
-public:
 	Boss();
-	~Boss();
-	bool GetIsRoll();
+	~Boss() = default;
+	bool GetIsRoll() const;
 	void Initialize(int x, int y, int currentFrame, int frameInterval, int moveInterval);
-	void SetSprite(Sprite* _sleep, CSprite8* _idle, CSprite8* _roll, CSprite8* _attack, CSprite8* _dead);
+	void SetSprite(Sprite* _sleep, Sprite8* _idle, Sprite8* _roll, Sprite8* _attack, Sprite8* _dead);
 	void Draw(LPDIRECTDRAWSURFACE7 surface);
 	bool CanMove();
 	void MoveANDCheckState();
 	void MoveInit();
 	void NextPattern();
-	float GetSpeedX();
-	float GetSpeedY();
+	float GetSpeedX() const;
+	float GetSpeedY() const;
 	void Attack();
-	void Hit(int damege);
+	void Hit(int damage);
 	void CheckPlayerDirection();
 	void CheckDirectionState();
 	void CheckSpeedXY();
 	void CheckSprite();
-	int GetCntAttack();
-	int GetHp();
-	Vector2 GetPlayerDirection();
+	int GetCntAttack() const;
+	int GetHp() const;
+	Vector2 GetPlayerDirection() const;
 private:
-	bool m_bIsRoll;
-	bool m_bIsHitWall;
-	bool m_bIsRoar;
-	system_clock::time_point m_nLastMoveTime;
-	int m_nMoveInterval;
-	int m_nMoveSpeed;
-	float m_nSpeedX;
-	float m_nSpeedY;
-	float m_nMoveSpeedFold; //움직임 속도의 배율(1이 기본, 2는 2배)
-	int draw_x; //캐릭터를 화면에 그려줄때 그려주는 x좌표
-	int draw_y; //캐릭터를 화면에 그려줄때 그려주는 y좌표
-	int pattern[9];
-	int curPattern;
-	int cntAttack;
-	int cntHitWall;
-	system_clock::time_point m_nLastIdleTime;
-	int m_nIdleFrameInterval;
-	Vector2 playerDirection;
+	bool mIsRoll;
+	bool mIsHitWall;
+	bool mIsRoar;
+	system_clock::time_point mLastMoveTime;
+	int mMoveInterval;
+	float mSpeedX;
+	float mSpeedY;
+	float mMoveSpeedFold; //움직임 속도의 배율(1이 기본, 2는 2배)
+	int mDrawX; //캐릭터를 화면에 그려줄때 그려주는 x좌표
+	int mDrawY; //캐릭터를 화면에 그려줄때 그려주는 y좌표
+	int mHp;
+	EAction mPattern[9];
+	int mCurPatternIndex;
+	int mAttackCnt;
+	int mHitWallCnt;
+	system_clock::time_point mLastIdleTime;
+	int mIdleFrameInterval;
+	Vector2 mPlayerDirection;
 
-	RECT idleHitRect[8];
-	RECT rollHitRect;
-	RECT attackHitRect[8];
-	RECT sleepHitRect;
+	RECT mIdleHitRect[8];
+	RECT mRollHitRect;
+	RECT mAttackHitRect[8];
+	RECT mSleepHitRect;
 
-	Sprite* m_pCurSprite;
-	Sprite* m_pOldSprite;
-	Sprite* m_pBoss_SleepSprite;
+	Sprite* mCurSpritePtr;
+	Sprite* mOldSpritePtr;
+	Sprite* mSleepSpritePtr;
 
-	CSprite8* m_pBoss_IdleSprite;
-	CSprite8* m_pBoss_RollSprite;
-	CSprite8* m_pBoss_AttackSprite;
-	CSprite8* m_pBoss_DeadSprite;
+	Sprite8* mIdleSpritePtr;
+	Sprite8* mRollSpritePtr;
+	Sprite8* mAttackSpritePtr;
+	Sprite8* mDeadSpritePtr;
 };
+
+inline int Boss::GetHp() const
+{
+	return mHp;
+}
+
+inline bool Boss::GetIsRoll() const
+{
+	return mIsRoll;
+}
+
+inline float Boss::GetSpeedX() const
+{
+	return mSpeedX;
+}
+
+inline float Boss::GetSpeedY() const
+{
+	return mSpeedY;
+}
+
+inline int Boss::GetCntAttack() const
+{
+	return mAttackCnt;
+}
+
+inline Vector2 Boss::GetPlayerDirection() const
+{
+	return mPlayerDirection;
+}

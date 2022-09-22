@@ -19,9 +19,9 @@ extern Camera camera;
 extern BOOL DirectInputKeyboardDown(LPDIRECTINPUTDEVICE8 lpKeyboard, int dikcode);
 extern LPDIRECTINPUTDEVICE8 g_lpDirectInputKeyboard;
 
-extern DIRECTION curPlayerDirection;
-extern ACTION curPlayerAction;
-extern ACTION curBossAction;
+extern EDirection curPlayerDirection;
+extern EAction curPlayerAction;
+extern EAction curBossAction;
 
 extern Arrow arrow[TOTAL_ARROW];
 extern Vector2 attackDirection;
@@ -35,124 +35,128 @@ extern Gui playerHp3;
 extern Gui playerHp4;
 
 Player::Player()
+	: GameObject()
+	, mIsSkill(false)
+	, mIsMove(false)
+	, mIsUseBow(false)
+	, mIsRoll(false)
+	, mLastMoveTime(Timer::Now())
+	, mMoveInterval(0)
+	, mLastSkillTime(Timer::Now())
+	, mLastRollTime(Timer::Now())
+	, mSpeedX(0)
+	, mSpeedY(0)
+	, mOldX(0)
+	, mOldY(0)
+	, mMoveSpeedFold(2)
+	, mDrawX(0)
+	, mDrawY(0)
+	, mHp(8)
+	, mCurArrowPtr(nullptr)
+	, mCurSpritePtr(nullptr)
+	, mOldSpritePtr(nullptr)
+	, mCurBowSpritePtr(nullptr)
+	, mOldBowSpritePtr(nullptr)
+	, mSkillSpritePtr(nullptr)
+	, mWalkSpritePtr(nullptr)
+	, mRollSpritePtr(nullptr)
+	, mDeadSpritePtr(nullptr)
+	, mBowWalkSpritePtr(nullptr)
+	, mBowRollSpritePtr(nullptr)
+	, mBowAttackSpritePtr(nullptr)
 {
-}
+	curPlayerDirection = EDirection::Down;
+	curPlayerAction = EAction::Faint;
+	mCurState = EObjectType::Player;
+	mMoveSpeed = 60;
 
-Player::~Player()
-{
+	int a = 0, b = 0;
+	SetRect(&mWalkHitRect[a++], 4, 12, 6, 10);
+	SetRect(&mWalkHitRect[a++], 6, 12, 4, 12);
+	SetRect(&mWalkHitRect[a++], 6, 12, 6, 12);
+	SetRect(&mWalkHitRect[a++], 6, 12, 6, 12);
+	SetRect(&mWalkHitRect[a++], 4, 12, 7, 12);
+	SetRect(&mWalkHitRect[a++], 7, 12, 5, 12);
+	SetRect(&mWalkHitRect[a++], 6, 12, 7, 12);
+	SetRect(&mWalkHitRect[a], 7, 12, 6, 12);
+	a = 0;
+	SetRect(&mRollHitRect[a][b++], 4, 8, 4, 14);
+	SetRect(&mRollHitRect[a][b++], 8, 2, 8, 10);
+	SetRect(&mRollHitRect[a][b++], 6, 2, 6, 14);
+	SetRect(&mRollHitRect[a][b++], 6, 0, 6, 14);
+	SetRect(&mRollHitRect[a][b++], 8, 2, 10, 10);
+	SetRect(&mRollHitRect[a][b], 4, 14, 4, 6);
+	a++;
+	b = 0;
+	SetRect(&mRollHitRect[a][b++], 8, 8, 2, 12);
+	SetRect(&mRollHitRect[a][b++], 8, 2, 8, 10);
+	SetRect(&mRollHitRect[a][b++], 6, 2, 8, 16);
+	SetRect(&mRollHitRect[a][b++], 8, -4, 6, 16);
+	SetRect(&mRollHitRect[a][b++], 10, 2, 6, 10);
+	SetRect(&mRollHitRect[a][b], 4, 14, 4, 6);
+	a++;
+	b = 0;
+	SetRect(&mRollHitRect[a][b++], 6, 10, 6, 14);
+	SetRect(&mRollHitRect[a][b++], 6, 6, 6, 12);
+	SetRect(&mRollHitRect[a][b++], 6, 0, 6, 16);
+	SetRect(&mRollHitRect[a][b++], 6, 0, 6, 16);
+	SetRect(&mRollHitRect[a][b++], 6, 4, 6, 12);
+	SetRect(&mRollHitRect[a][b], 8, 8, 6, 6);
+	a++;
+	b = 0;
+	SetRect(&mRollHitRect[a][b++], 6, 12, 6, 14);
+	SetRect(&mRollHitRect[a][b++], 6, 6, 6, 12);
+	SetRect(&mRollHitRect[a][b++], 6, 0, 6, 16);
+	SetRect(&mRollHitRect[a][b++], 6, 0, 6, 16);
+	SetRect(&mRollHitRect[a][b++], 6, 4, 6, 10);
+	SetRect(&mRollHitRect[a][b], 6, 10, 6, 6);
+	a++;
+	b = 0;
+	SetRect(&mRollHitRect[a][b++], 8, 10, 4, 12);
+	SetRect(&mRollHitRect[a][b++], 10, 2, 8, 10);
+	SetRect(&mRollHitRect[a][b++], 8, -2, 4, 16);
+	SetRect(&mRollHitRect[a][b++], 6, 0, 6, 16);
+	SetRect(&mRollHitRect[a][b++], 7, -2, 8, 12);
+	SetRect(&mRollHitRect[a][b], 6, 14, 4, 8);
+	a++;
+	b = 0;
+	SetRect(&mRollHitRect[a][b++], 10, 10, 2, 12);
+	SetRect(&mRollHitRect[a][b++], 8, 2, 12, 10);
+	SetRect(&mRollHitRect[a][b++], 4, -2, 8, 16);
+	SetRect(&mRollHitRect[a][b++], 6, 0, 6, 16);
+	SetRect(&mRollHitRect[a][b++], 8, -2, 6, 12);
+	SetRect(&mRollHitRect[a][b], 4, 14, 6, 8);
+	a++;
+	b = 0;
+	SetRect(&mRollHitRect[a][b++], 6, 10, 6, 12);
+	SetRect(&mRollHitRect[a][b++], 10, 4, 4, 10);
+	SetRect(&mRollHitRect[a][b++], 8, -2, 4, 16);
+	SetRect(&mRollHitRect[a][b++], 6, 0, 6, 16);
+	SetRect(&mRollHitRect[a][b++], 2, 2, 8, 14);
+	SetRect(&mRollHitRect[a][b], 8, 14, 6, 6);
+	a++;
+	b = 0;
+	SetRect(&mRollHitRect[a][b++], 10, 8, 4, 12);
+	SetRect(&mRollHitRect[a][b++], 6, 4, 12, 10);
+	SetRect(&mRollHitRect[a][b++], 6, -4, 10, 14);
+	SetRect(&mRollHitRect[a][b++], 6, 0, 6, 16);
+	SetRect(&mRollHitRect[a][b++], 10, 0, 4, 14);
+	SetRect(&mRollHitRect[a][b], 8, 14, 8, 6);
 }
 
 void Player::Initialize(int x, int y, int currentFrame, int frameInterval, int moveInterval,
-                        int skillFrameInterval)
+	int skillFrameInterval)
 {
-	m_nHp = 8;
-	draw_x = x;
-	draw_y = y;
-	m_nOldX = x;
-	m_nOldY = y;
-	curPlayerDirection = DIRECTION::DOWN;
-	curPlayerAction = ACTION::FAINT;
-	mCurState = OBJECT_TYPE::PLYAER;
-	mMoveSpeed = 60;
-	m_nMoveSpeedFold = 2;
-	m_bIsSkill = false;
-	m_bIsRoll = false;
-	m_nSpeedX = 0;
-	m_nSpeedY = 0;
-	m_bIsUseBow = false;
-	int a = 0, b = 0;
-	SetRect(&walkHitRect[a++], 4, 12, 6, 10);
-	SetRect(&walkHitRect[a++], 6, 12, 4, 12);
-	SetRect(&walkHitRect[a++], 6, 12, 6, 12);
-	SetRect(&walkHitRect[a++], 6, 12, 6, 12);
-	SetRect(&walkHitRect[a++], 4, 12, 7, 12);
-	SetRect(&walkHitRect[a++], 7, 12, 5, 12);
-	SetRect(&walkHitRect[a++], 6, 12, 7, 12);
-	SetRect(&walkHitRect[a], 7, 12, 6, 12);
-	a = 0;
-	SetRect(&rollHitRect[a][b++], 4, 8, 4, 14);
-	SetRect(&rollHitRect[a][b++], 8, 2, 8, 10);
-	SetRect(&rollHitRect[a][b++], 6, 2, 6, 14);
-	SetRect(&rollHitRect[a][b++], 6, 0, 6, 14);
-	SetRect(&rollHitRect[a][b++], 8, 2, 10, 10);
-	SetRect(&rollHitRect[a][b], 4, 14, 4, 6);
-	a++;
-	b = 0;
-	SetRect(&rollHitRect[a][b++], 8, 8, 2, 12);
-	SetRect(&rollHitRect[a][b++], 8, 2, 8, 10);
-	SetRect(&rollHitRect[a][b++], 6, 2, 8, 16);
-	SetRect(&rollHitRect[a][b++], 8, -4, 6, 16);
-	SetRect(&rollHitRect[a][b++], 10, 2, 6, 10);
-	SetRect(&rollHitRect[a][b], 4, 14, 4, 6);
-	a++;
-	b = 0;
-	SetRect(&rollHitRect[a][b++], 6, 10, 6, 14);
-	SetRect(&rollHitRect[a][b++], 6, 6, 6, 12);
-	SetRect(&rollHitRect[a][b++], 6, 0, 6, 16);
-	SetRect(&rollHitRect[a][b++], 6, 0, 6, 16);
-	SetRect(&rollHitRect[a][b++], 6, 4, 6, 12);
-	SetRect(&rollHitRect[a][b], 8, 8, 6, 6);
-	a++;
-	b = 0;
-	SetRect(&rollHitRect[a][b++], 6, 12, 6, 14);
-	SetRect(&rollHitRect[a][b++], 6, 6, 6, 12);
-	SetRect(&rollHitRect[a][b++], 6, 0, 6, 16);
-	SetRect(&rollHitRect[a][b++], 6, 0, 6, 16);
-	SetRect(&rollHitRect[a][b++], 6, 4, 6, 10);
-	SetRect(&rollHitRect[a][b], 6, 10, 6, 6);
-	a++;
-	b = 0;
-	SetRect(&rollHitRect[a][b++], 8, 10, 4, 12);
-	SetRect(&rollHitRect[a][b++], 10, 2, 8, 10);
-	SetRect(&rollHitRect[a][b++], 8, -2, 4, 16);
-	SetRect(&rollHitRect[a][b++], 6, 0, 6, 16);
-	SetRect(&rollHitRect[a][b++], 7, -2, 8, 12);
-	SetRect(&rollHitRect[a][b], 6, 14, 4, 8);
-	a++;
-	b = 0;
-	SetRect(&rollHitRect[a][b++], 10, 10, 2, 12);
-	SetRect(&rollHitRect[a][b++], 8, 2, 12, 10);
-	SetRect(&rollHitRect[a][b++], 4, -2, 8, 16);
-	SetRect(&rollHitRect[a][b++], 6, 0, 6, 16);
-	SetRect(&rollHitRect[a][b++], 8, -2, 6, 12);
-	SetRect(&rollHitRect[a][b], 4, 14, 6, 8);
-	a++;
-	b = 0;
-	SetRect(&rollHitRect[a][b++], 6, 10, 6, 12);
-	SetRect(&rollHitRect[a][b++], 10, 4, 4, 10);
-	SetRect(&rollHitRect[a][b++], 8, -2, 4, 16);
-	SetRect(&rollHitRect[a][b++], 6, 0, 6, 16);
-	SetRect(&rollHitRect[a][b++], 2, 2, 8, 14);
-	SetRect(&rollHitRect[a][b], 8, 14, 6, 6);
-	a++;
-	b = 0;
-	SetRect(&rollHitRect[a][b++], 10, 8, 4, 12);
-	SetRect(&rollHitRect[a][b++], 6, 4, 12, 10);
-	SetRect(&rollHitRect[a][b++], 6, -4, 10, 14);
-	SetRect(&rollHitRect[a][b++], 6, 0, 6, 16);
-	SetRect(&rollHitRect[a][b++], 10, 0, 4, 14);
-	SetRect(&rollHitRect[a][b], 8, 14, 8, 6);
-	a++;
-	b = 0;
+	new (this) Player();
 
-	GameObject::Initialize(m_pCurSprite, x, y, currentFrame, frameInterval, skillFrameInterval);
+	mDrawX = x;
+	mDrawY = y;
+	mOldX = x;
+	mOldY = y;
 
-	m_nMoveInterval = moveInterval;
-}
+	GameObject::Initialize(mCurSpritePtr, x, y, currentFrame, frameInterval, skillFrameInterval);
 
-void Player::SetWalkSprite(CSprite8* sprite)
-{
-	m_pWalkSprite = sprite;
-}
-
-void Player::SetRollSprite(CSprite8* sprite)
-{
-	m_pRollSprite = sprite;
-}
-
-void Player::SetDeadSprite(CSprite8* sprite)
-{
-	m_pDeadSprite = sprite;
+	mMoveInterval = moveInterval;
 }
 
 /// <summary>
@@ -160,49 +164,35 @@ void Player::SetDeadSprite(CSprite8* sprite)
 /// </summary>
 void Player::SetSpriteAndHitRect()
 {
-	m_pCurSprite = m_pWalkSprite->GetSprite(DIRECTION::DOWN);
-	m_pOldSprite = m_pWalkSprite->GetSprite(DIRECTION::UP);
-	SetSprite(m_pCurSprite);
+	mCurSpritePtr = mWalkSpritePtr->GetSprite(EDirection::Down);
+	mOldSpritePtr = mWalkSpritePtr->GetSprite(EDirection::Up);
+	SetSprite(mCurSpritePtr);
 	SetHitWallRect();
 }
 
-void Player::SetBowSprite(CSprite8* _walk, CSprite8* _roll, CSprite8* _attack)
+void Player::SetBowSprite(Sprite8* _walk, Sprite8* _roll, Sprite8* _attack)
 {
-	m_pBowWalkSprite = _walk;
-	m_pBow_RollSprite = _roll;
-	m_pBow_AttackSprite = _attack;
-}
-
-void Player::SetSkillSprite(Sprite* _skill)
-{
-	m_pSkillSprite = _skill;
+	mBowWalkSpritePtr = _walk;
+	mBowRollSpritePtr = _roll;
+	mBowAttackSpritePtr = _attack;
+	SetSprite(nullptr, _walk->GetSprite(EDirection::Down));
 }
 
 void Player::SetArrow(Arrow* arrow)
 {
-	curArrow = arrow;
+	mCurArrowPtr = arrow;
 	if (!IsArrowNull())
-		curArrow->SetIsUse(false);
+		mCurArrowPtr->SetIsUse(false);
 }
 
-Arrow* Player::GetCurArrow()
-{
-	return curArrow;
-}
-
-bool Player::IsArrowNull()
+bool Player::IsArrowNull() const
 {
 	for (int i = 0; i < TOTAL_ARROW; i++)
 	{
-		if (curArrow == &arrow[i])
+		if (mCurArrowPtr == &arrow[i])
 			return false;
 	}
 	return true;
-}
-
-bool Player::IsUsingSkill()
-{
-	return m_bIsSkill;
 }
 
 void Player::CheckWallCollision()
@@ -216,151 +206,151 @@ void Player::CheckWallCollision()
 	int oldBlockY = 0;
 	if (map.GetStageNum() == 0) //기본 맵일때
 	{
-		for (int i = 0; i < wallBlock.size(); i++)
+		for (const Vector2& blockPos : wallBlock)
 		{
-			SetRect(&blockRect, wallBlock[i].x * 32, wallBlock[i].y * 32, wallBlock[i].x * 32 + 32,
-			        wallBlock[i].y * 32 + 32); //해당 블록의 영역
+			SetRect(&blockRect, blockPos.x * 32, blockPos.y * 32, blockPos.x * 32 + 32,
+			        blockPos.y * 32 + 32); //해당 블록의 영역
 			if (CheckHitWallRect(blockRect))
 			{
 				collisionCount++;
 				if (collisionCount > 1)
 				{
-					if (oldBlockX != wallBlock[i].x && oldBlockY != wallBlock[i].y)
+					if (oldBlockX != blockPos.x && oldBlockY != blockPos.y)
 					{
 						collisionRect = GetHitRect2(blockRect); //플레이어랑 블럭이랑 충돌된 영역
-						int __left = abs(blockRect.left - collisionRect.left);
-						int __right = abs(blockRect.right - collisionRect.right);
-						int __top = abs(blockRect.top - collisionRect.top);
-						int __bottom = abs(blockRect.bottom - collisionRect.bottom);
+						const int left = abs(blockRect.left - collisionRect.left);
+						const int right = abs(blockRect.right - collisionRect.right);
+						const int top = abs(blockRect.top - collisionRect.top);
+						const int bottom = abs(blockRect.bottom - collisionRect.bottom);
 
-						if (__bottom + __top + __right == 0) //왼쪽 위 모서리
+						if (bottom + top + right == 0) //왼쪽 위 모서리
 						{
-							SetX(GetPos().x + (DEFAULT_BLOCK_SIZE - __left));
+							SetX(GetPos().x + (DEFAULT_BLOCK_SIZE - left));
 						}
-						else if (__left + __bottom + __top == 0) //오른쪽 아래 모서리
+						else if (left + bottom + top == 0) //오른쪽 아래 모서리
 						{
-							SetX(GetPos().x - (DEFAULT_BLOCK_SIZE - __right));
+							SetX(GetPos().x - (DEFAULT_BLOCK_SIZE - right));
 						}
-						else if (__left + __bottom == 0) //왼쪽 위 모서리
+						else if (left + bottom == 0) //왼쪽 위 모서리
 						{
-							SetY(GetPos().y + (DEFAULT_BLOCK_SIZE - __top));
+							SetY(GetPos().y + (DEFAULT_BLOCK_SIZE - top));
 						}
-						else if (__left + __top == 0) //왼쪽 아래 모서리
+						else if (left + top == 0) //왼쪽 아래 모서리
 						{
-							SetY(GetPos().y - (DEFAULT_BLOCK_SIZE - __bottom));
+							SetY(GetPos().y - (DEFAULT_BLOCK_SIZE - bottom));
 						}
-						else if (__right + __top == 0)
+						else if (right + top == 0)
 						{
-							SetX(GetPos().x + (DEFAULT_BLOCK_SIZE - __left));
+							SetX(GetPos().x + (DEFAULT_BLOCK_SIZE - left));
 						}
-						else if (__right + __bottom == 0) //오른쪽 위 모서리
+						else if (right + bottom == 0) //오른쪽 위 모서리
 						{
-							SetY(GetPos().y + (DEFAULT_BLOCK_SIZE - __top));
+							SetY(GetPos().y + (DEFAULT_BLOCK_SIZE - top));
 						}
 						continue;
 					}
 				}
 				collisionRect = GetHitRect2(blockRect); //플레이어랑 블럭이랑 충돌된 영역
-				int _left = abs(blockRect.left - collisionRect.left);
-				int _right = abs(blockRect.right - collisionRect.right);
-				int _top = abs(blockRect.top - collisionRect.top);
-				int _bottom = abs(blockRect.bottom - collisionRect.bottom);
+				int left = abs(blockRect.left - collisionRect.left);
+				int right = abs(blockRect.right - collisionRect.right);
+				int top = abs(blockRect.top - collisionRect.top);
+				int bottom = abs(blockRect.bottom - collisionRect.bottom);
 
-				oldBlockX = wallBlock[i].x;
-				oldBlockY = wallBlock[i].y;
+				oldBlockX = blockPos.x;
+				oldBlockY = blockPos.y;
 
-				SetX(m_nOldX + m_nSpeedX);
-				SetY(m_nOldY);
+				SetX(mOldX + mSpeedX);
+				SetY(mOldY);
 				if (CheckHitWallRect(blockRect)) //x만 이동했을때 충돌하는지 체크
 					isX = true;
 
-				SetX(m_nOldX);
-				SetY(m_nOldY + m_nSpeedY);
+				SetX(mOldX);
+				SetY(mOldY + mSpeedY);
 				if (CheckHitWallRect(blockRect)) //y만 이동했을때 충돌하는지 체크
 					isY = true;
 
 				if (!isX && !isY) //모서리에 부딛쳤을때
 				{
-					if (_left + _top == 0) //왼쪽 위 모서리
+					if (left + top == 0) //왼쪽 위 모서리
 					{
-						if (_right <= _bottom) //x축이 더 길때
+						if (right <= bottom) //x축이 더 길때
 						{
-							SetX(m_nOldX + m_nSpeedX);
-							SetY(m_nOldY + m_nSpeedY - (DEFAULT_BLOCK_SIZE - _bottom));
+							SetX(mOldX + mSpeedX);
+							SetY(mOldY + mSpeedY - (DEFAULT_BLOCK_SIZE - bottom));
 						}
 						else
 						{
-							SetX(m_nOldX + m_nSpeedX - (DEFAULT_BLOCK_SIZE - _right));
-							SetY(m_nOldY + m_nSpeedY);
+							SetX(mOldX + mSpeedX - (DEFAULT_BLOCK_SIZE - right));
+							SetY(mOldY + mSpeedY);
 						}
 					}
-					if (_top + _right == 0) //오른쪽 위 모서리
+					if (top + right == 0) //오른쪽 위 모서리
 					{
-						if (_left <= _bottom) //x축이 더 길때
+						if (left <= bottom) //x축이 더 길때
 						{
-							SetX(m_nOldX + m_nSpeedX);
-							SetY(m_nOldY + m_nSpeedY - (DEFAULT_BLOCK_SIZE - _bottom));
+							SetX(mOldX + mSpeedX);
+							SetY(mOldY + mSpeedY - (DEFAULT_BLOCK_SIZE - bottom));
 						}
 						else
 						{
-							SetX(m_nOldX + m_nSpeedX + (DEFAULT_BLOCK_SIZE - _left));
-							SetY(m_nOldY + m_nSpeedY);
+							SetX(mOldX + mSpeedX + (DEFAULT_BLOCK_SIZE - left));
+							SetY(mOldY + mSpeedY);
 						}
 					}
-					if (_right + _bottom == 0) //오른쪽 아래 모서리
+					if (right + bottom == 0) //오른쪽 아래 모서리
 					{
-						if (_left <= _top) //x축이 더 길때
+						if (left <= top) //x축이 더 길때
 						{
-							SetX(m_nOldX + m_nSpeedX);
-							SetY(m_nOldY + m_nSpeedY + (DEFAULT_BLOCK_SIZE - _top));
+							SetX(mOldX + mSpeedX);
+							SetY(mOldY + mSpeedY + (DEFAULT_BLOCK_SIZE - top));
 						}
 						else
 						{
-							SetX(m_nOldX + m_nSpeedX + (DEFAULT_BLOCK_SIZE - _left));
-							SetY(m_nOldY + m_nSpeedY);
+							SetX(mOldX + mSpeedX + (DEFAULT_BLOCK_SIZE - left));
+							SetY(mOldY + mSpeedY);
 						}
 					}
-					if (_left + _bottom == 0) //왼쪽 아래 모서리
+					if (left + bottom == 0) //왼쪽 아래 모서리
 					{
-						if (_right <= _top) //x축이 더 길때
+						if (right <= top) //x축이 더 길때
 						{
-							SetX(m_nOldX + m_nSpeedX);
-							SetY(m_nOldY + m_nSpeedY + (DEFAULT_BLOCK_SIZE - _top));
+							SetX(mOldX + mSpeedX);
+							SetY(mOldY + mSpeedY + (DEFAULT_BLOCK_SIZE - top));
 						}
 						else
 						{
-							SetX(m_nOldX + m_nSpeedX - (DEFAULT_BLOCK_SIZE - _right));
-							SetY(m_nOldY + m_nSpeedY);
+							SetX(mOldX + mSpeedX - (DEFAULT_BLOCK_SIZE - right));
+							SetY(mOldY + mSpeedY);
 						}
 					}
 				}
 				else if (isX) //x축으로 이동 후 충돌이 발생했을때
 				{
-					SetX(m_nOldX + m_nSpeedX + (DEFAULT_BLOCK_SIZE - (_left == 0 ? _right : _left)) * (
-						_left == 0 ? -1 : 1));
-					SetY(m_nOldY + m_nSpeedY);
+					SetX(mOldX + mSpeedX + (DEFAULT_BLOCK_SIZE - (left == 0 ? right : left)) * (
+						left == 0 ? -1 : 1));
+					SetY(mOldY + mSpeedY);
 				}
 				else if (isY) //y축으로 이동 후 충돌이 발생했을때
 				{
-					SetX(m_nOldX + m_nSpeedX);
-					SetY(m_nOldY + m_nSpeedY + (DEFAULT_BLOCK_SIZE - (_top == 0 ? _bottom : _top)) * (
-						_top == 0 ? -1 : 1));
+					SetX(mOldX + mSpeedX);
+					SetY(mOldY + mSpeedY + (DEFAULT_BLOCK_SIZE - (top == 0 ? bottom : top)) * (
+						top == 0 ? -1 : 1));
 				}
 			}
 		}
 	}
 	else //보스 맵일때
 	{
-		for (int i = 0; i < 139; i++)
+		for (const Block& block : wall)
 		{
-			SetRect(&blockRect, wall[i].GetPos().x * 32, wall[i].GetPos().y * 32, wall[i].GetPos().x * 32 + 32,
-			        wall[i].GetPos().y * 32 + 32); //해당 블록의 영역
+			SetRect(&blockRect, block.GetPos().x * 32, block.GetPos().y * 32, block.GetPos().x * 32 + 32,
+			        block.GetPos().y * 32 + 32); //해당 블록의 영역
 			if (CheckHitWallRect(blockRect))
 			{
 				collisionCount++;
 				if (collisionCount > 1)
 				{
-					if (oldBlockX != wall[i].GetPos().x && oldBlockY != wall[i].GetPos().y) //같은 x축
+					if (oldBlockX != block.GetPos().x && oldBlockY != block.GetPos().y) //같은 x축
 					{
 						collisionRect = GetHitRect2(blockRect); //플레이어랑 블럭이랑 충돌된 영역
 						int __left = abs(blockRect.left - collisionRect.left);
@@ -394,131 +384,125 @@ void Player::CheckWallCollision()
 					}
 				}
 				collisionRect = GetHitRect2(blockRect); //플레이어랑 블럭이랑 충돌된 영역
-				int _left = abs(blockRect.left - collisionRect.left);
-				int _right = abs(blockRect.right - collisionRect.right);
-				int _top = abs(blockRect.top - collisionRect.top);
-				int _bottom = abs(blockRect.bottom - collisionRect.bottom);
+				int left = abs(blockRect.left - collisionRect.left);
+				int right = abs(blockRect.right - collisionRect.right);
+				int top = abs(blockRect.top - collisionRect.top);
+				int bottom = abs(blockRect.bottom - collisionRect.bottom);
 
-				oldBlockX = wall[i].GetPos().x;
-				oldBlockY = wall[i].GetPos().y;
+				oldBlockX = block.GetPos().x;
+				oldBlockY = block.GetPos().y;
 
-				SetX(m_nOldX + m_nSpeedX);
-				SetY(m_nOldY);
+				SetX(mOldX + mSpeedX);
+				SetY(mOldY);
 				if (CheckHitWallRect(blockRect)) //x만 이동했을때 충돌하는지 체크
 					isX = true;
 
-				SetX(m_nOldX);
-				SetY(m_nOldY + m_nSpeedY);
+				SetX(mOldX);
+				SetY(mOldY + mSpeedY);
 				if (CheckHitWallRect(blockRect)) //y만 이동했을때 충돌하는지 체크
 					isY = true;
 
 				if (!isX && !isY) //모서리에 부딛쳤을때
 				{
-					if (_left + _top == 0) //왼쪽 위 모서리
+					if (left + top == 0) //왼쪽 위 모서리
 					{
-						if (_right <= _bottom) //x축이 더 길때
+						if (right <= bottom) //x축이 더 길때
 						{
-							SetX(m_nOldX + m_nSpeedX);
-							SetY(m_nOldY + m_nSpeedY - (DEFAULT_BLOCK_SIZE - _bottom));
+							SetX(mOldX + mSpeedX);
+							SetY(mOldY + mSpeedY - (DEFAULT_BLOCK_SIZE - bottom));
 						}
 						else
 						{
-							SetX(m_nOldX + m_nSpeedX - (DEFAULT_BLOCK_SIZE - _right));
-							SetY(m_nOldY + m_nSpeedY);
+							SetX(mOldX + mSpeedX - (DEFAULT_BLOCK_SIZE - right));
+							SetY(mOldY + mSpeedY);
 						}
 					}
-					if (_top + _right == 0) //오른쪽 위 모서리
+					if (top + right == 0) //오른쪽 위 모서리
 					{
-						if (_left <= _bottom) //x축이 더 길때
+						if (left <= bottom) //x축이 더 길때
 						{
-							SetX(m_nOldX + m_nSpeedX);
-							SetY(m_nOldY + m_nSpeedY - (DEFAULT_BLOCK_SIZE - _bottom));
+							SetX(mOldX + mSpeedX);
+							SetY(mOldY + mSpeedY - (DEFAULT_BLOCK_SIZE - bottom));
 						}
 						else
 						{
-							SetX(m_nOldX + m_nSpeedX + (DEFAULT_BLOCK_SIZE - _left));
-							SetY(m_nOldY + m_nSpeedY);
+							SetX(mOldX + mSpeedX + (DEFAULT_BLOCK_SIZE - left));
+							SetY(mOldY + mSpeedY);
 						}
 					}
-					if (_right + _bottom == 0) //오른쪽 아래 모서리
+					if (right + bottom == 0) //오른쪽 아래 모서리
 					{
-						if (_left <= _top) //x축이 더 길때
+						if (left <= top) //x축이 더 길때
 						{
-							SetX(m_nOldX + m_nSpeedX);
-							SetY(m_nOldY + m_nSpeedY + (DEFAULT_BLOCK_SIZE - _top));
+							SetX(mOldX + mSpeedX);
+							SetY(mOldY + mSpeedY + (DEFAULT_BLOCK_SIZE - top));
 						}
 						else
 						{
-							SetX(m_nOldX + m_nSpeedX + (DEFAULT_BLOCK_SIZE - _left));
-							SetY(m_nOldY + m_nSpeedY);
+							SetX(mOldX + mSpeedX + (DEFAULT_BLOCK_SIZE - left));
+							SetY(mOldY + mSpeedY);
 						}
 					}
-					if (_left + _bottom == 0) //왼쪽 아래 모서리
+					if (left + bottom == 0) //왼쪽 아래 모서리
 					{
-						if (_right <= _top) //x축이 더 길때
+						if (right <= top) //x축이 더 길때
 						{
-							SetX(m_nOldX + m_nSpeedX);
-							SetY(m_nOldY + m_nSpeedY + (DEFAULT_BLOCK_SIZE - _top));
+							SetX(mOldX + mSpeedX);
+							SetY(mOldY + mSpeedY + (DEFAULT_BLOCK_SIZE - top));
 						}
 						else
 						{
-							SetX(m_nOldX + m_nSpeedX - (DEFAULT_BLOCK_SIZE - _right));
-							SetY(m_nOldY + m_nSpeedY);
+							SetX(mOldX + mSpeedX - (DEFAULT_BLOCK_SIZE - right));
+							SetY(mOldY + mSpeedY);
 						}
 					}
 				}
 				else if (isX) //x축으로 이동 후 충돌이 발생했을때
 				{
-					SetX(m_nOldX + m_nSpeedX + (DEFAULT_BLOCK_SIZE - (_left == 0 ? _right : _left)) * (
-						_left == 0 ? -1 : 1));
-					SetY(m_nOldY + m_nSpeedY);
+					SetX(mOldX + mSpeedX + (DEFAULT_BLOCK_SIZE - (left == 0 ? right : left)) * (
+						left == 0 ? -1 : 1));
+					SetY(mOldY + mSpeedY);
 				}
 				else if (isY) //y축으로 이동 후 충돌이 발생했을때
 				{
-					SetX(m_nOldX + m_nSpeedX);
-					SetY(m_nOldY + m_nSpeedY + (DEFAULT_BLOCK_SIZE - (_top == 0 ? _bottom : _top)) * (
-						_top == 0 ? -1 : 1));
+					SetX(mOldX + mSpeedX);
+					SetY(mOldY + mSpeedY + (DEFAULT_BLOCK_SIZE - (top == 0 ? bottom : top)) * (
+						top == 0 ? -1 : 1));
 				}
 			}
 		}
 	}
 }
 
-int Player::GetHp()
-{
-	return m_nHp;
-}
-
 void Player::CreateSkillArrow()
 {
-	curArrow->SetIsUse(true);
-	curArrow->SetCharging(false);
-	curArrow->SetX(GetPos().x - 1);
-	curArrow->SetY(GetPos().y + 6);
+	mCurArrowPtr->SetIsUse(true);
+	mCurArrowPtr->SetCharging(false);
+	mCurArrowPtr->SetX(GetPos().x - 1);
+	mCurArrowPtr->SetY(GetPos().y + 6);
 	int randomX = 8 + (rand() % 5);
 	int randomY = 8 + (rand() % 5);
 	int PosiOrNegaX = rand() % 2; //랜덤한 값을 뽑아 x방향값을 양수 혹은 음수로 변환
 	int PosiOrNegaY = rand() % 2; //랜덤한 값을 뽑아 y방향값을 양수 혹은 음수로 변환
 	randomX = randomX * (PosiOrNegaX == 0 ? 1 : -1);
 	randomY = randomY * (PosiOrNegaY == 0 ? 1 : -1);
-	curArrow->SetSpeedXY(20, Vector2(0.1f * randomX, 0.1f * randomY));
-	curArrow->CheckSprite();
-	curArrow->SetHoming(map.GetStageNum());
-	curArrow = NULL;
+	mCurArrowPtr->SetSpeedXY(20, Vector2(0.1f * randomX, 0.1f * randomY));
+	mCurArrowPtr->CheckSprite();
+	mCurArrowPtr->SetHoming(map.GetStageNum());
+	mCurArrowPtr = nullptr;
 }
 
 void Player::CheckKeyBoard()
 {
-	if (((int)curPlayerAction != ACTION::DEAD) && !camera.GetIsFirstAlpha())
+	if ((curPlayerAction != EAction::Dead) && !camera.GetIsFirstAlpha())
 	{
 		if (!GetIsRoll())
 		{
 			if (DirectInputKeyboardDown(g_lpDirectInputKeyboard, DIK_SPACE))
 			{
 				if (!IsUsingSkill())
-					if (Timer::Elapsed(m_nLastRollTime, 1000))
+					if (Timer::Elapsed(mLastRollTime, RollCoolTime))
 					{
-						m_nLastRollTime = Timer::Now();
 						Roll();
 					}
 			}
@@ -548,23 +532,22 @@ void Player::CheckKeyBoard()
 
 void Player::Draw(LPDIRECTDRAWSURFACE7 surface)
 {
-	if (m_bIsSkill)
-		GameObject::SkillDraw(draw_x, draw_y, surface);
+	if (mIsSkill)
+		GameObject::SkillDraw(mDrawX, mDrawY, surface);
 	else
-		GameObject::Draw(curPlayerAction == ACTION::MOVE || curPlayerAction == ACTION::RUN
-		                 || curPlayerAction == ACTION::ROLL, draw_x, draw_y, surface);
+		GameObject::Draw(curPlayerAction == EAction::Move || curPlayerAction == EAction::Run
+			|| curPlayerAction == EAction::Roll, mDrawX, mDrawY, surface);
 }
 
 void Player::Skill()
 {
-	if (curPlayerAction != ACTION::DEAD)
+	if (curPlayerAction != EAction::Dead)
 	{
-		if (Timer::Elapsed(m_nLastSkillTime, SkillCoolTime))
+		if (Timer::Elapsed(mLastSkillTime, SkillCoolTime))
 		{
-			if (m_bIsSkill == false)
+			if (mIsSkill == false)
 			{
-				m_bIsSkill = true;
-				m_nLastSkillTime = Timer::Now();
+				mIsSkill = true;
 				camera.SetIsSkill(true);
 			}
 		}
@@ -573,51 +556,26 @@ void Player::Skill()
 
 void Player::CheckUseSkill()
 {
-	if (m_bIsSkill)
+	if (mIsSkill)
 	{
-		if (Timer::Elapsed(m_nLastSkillTime, 5000))
+		if (Timer::Elapsed(mLastSkillTime, 5000))
 		{
-			m_bIsSkill = false;
+			mIsSkill = false;
 			camera.SetIsSkill(false);
 			//m_nSkillCoolTime = Timer::Now();
 		}
 	}
 }
 
-bool Player::GetIsRoll()
-{
-	return m_bIsRoll;
-}
-
 void Player::Roll()
 {
-	curPlayerAction = ACTION::ROLL;
+	curPlayerAction = EAction::Roll;
 	mFrameInterval = 70;
-}
-
-void Player::Left()
-{
-	m_nSpeedX -= mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime();
-}
-
-void Player::Right()
-{
-	m_nSpeedX += mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime();
-}
-
-void Player::Up()
-{
-	m_nSpeedY -= mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime();
-}
-
-void Player::Down()
-{
-	m_nSpeedY += mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime();
 }
 
 void Player::Hit()
 {
-	m_nHp -= 1;
+	mHp -= 1;
 	if (playerHp4.GetFrame() != 2)
 	{
 		playerHp4.SetFrame(playerHp4.GetFrame() + 1);
@@ -634,9 +592,9 @@ void Player::Hit()
 	{
 		playerHp1.SetFrame(playerHp1.GetFrame() + 1);
 	}
-	if (m_nHp == 0)
+	if (mHp == 0)
 	{
-		curPlayerAction = ACTION::DEAD;
+		curPlayerAction = EAction::Dead;
 	}
 }
 
@@ -645,225 +603,215 @@ bool Player::CanMove()
 	if (!mIsLive)
 		return false;
 
-	if (Timer::Elapsed(m_nLastMoveTime, m_nMoveInterval))
+	if (Timer::Elapsed(mLastMoveTime, mMoveInterval))
 		return true;
 	return false;
 }
 
-float Player::GetSpeedX()
+float Player::GetSkillCoolTimePercent() const
 {
-	return m_nSpeedX;
-}
-
-float Player::GetSpeedY()
-{
-	return m_nSpeedY;
-}
-
-float Player::GetSkillCoolTimePercent()
-{
-	float percent = (Timer::Now() - m_nLastSkillTime).count() / SkillCoolTime;
-	percent = percent - ((percent > 1) ? percent - 1 : 0);
+	float percent = static_cast<float>(duration_cast<milliseconds>(Timer::Now() - mLastSkillTime).count()) / SkillCoolTime;
+	percent = (percent > 1) ? 1 : percent;
 	return percent;
 }
 
-float Player::GetRollCoolTimePercent()
+float Player::GetRollCoolTimePercent() const
 {
-	float percent = (Timer::Now() - m_nLastRollTime).count() / RollCoolTime;
-	percent = percent - ((percent > 1) ? percent - 1 : 0);
+	float percent = static_cast<float>(duration_cast<milliseconds>(Timer::Now() - mLastRollTime).count()) / RollCoolTime;
+	percent = (percent > 1) ? 1 : percent;
 	return percent;
 }
 
 void Player::MoveANDCheckState()
 {
-	if (curPlayerAction == ACTION::DEAD)
-		m_bIsRoll = false;
-	if (!(curPlayerAction == ACTION::ROLL) && !(curPlayerAction == ACTION::DEAD))
+	if (curPlayerAction == EAction::Dead)
+		mIsRoll = false;
+	if (!(curPlayerAction == EAction::Roll) && !(curPlayerAction == EAction::Dead))
 	{
-		m_bIsRoll = false;
+		mIsRoll = false;
 		if (camera.GetExpansion() == 1) //화면이 확대가 안되어있을경우
 		{
-			if (curPlayerAction != ACTION::FAINT)
+			if (curPlayerAction != EAction::Faint)
 			{
-				curPlayerAction = ACTION::IDLE; //캐릭터의 행동을 기본으로 초기화
+				curPlayerAction = EAction::Idle; //캐릭터의 행동을 기본으로 초기화
 			}
 		}
 		else
-			curPlayerAction = ACTION::ATTACK; //캐릭터의 행동을 공격중으로 초기화
+			curPlayerAction = EAction::Attack; //캐릭터의 행동을 공격중으로 초기화
 
-		if (!(curPlayerAction == ACTION::ATTACK) && (m_nSpeedX != 0 || m_nSpeedY != 0))
-			curPlayerAction = ACTION::MOVE;
+		if (!(curPlayerAction == EAction::Attack) && (mSpeedX != 0 || mSpeedY != 0))
+			curPlayerAction = EAction::Move;
 	}
 
-	if (m_bIsRoll)
+	if (mIsRoll)
 	{
-		m_nMoveSpeedFold = 4;
+		mMoveSpeedFold = 4;
 		switch (curPlayerDirection)
 		{
-		case DIRECTION::LEFT:
-			m_nSpeedX = -(mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime());
-			m_nSpeedY = 0;
+		case EDirection::Left:
+			mSpeedX = -(mMoveSpeed * mMoveSpeedFold * Timer::GetDeltaTime());
+			mSpeedY = 0;
 			break;
-		case DIRECTION::RIGHT:
-			m_nSpeedX = mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime();
-			m_nSpeedY = 0;
+		case EDirection::Right:
+			mSpeedX = mMoveSpeed * mMoveSpeedFold * Timer::GetDeltaTime();
+			mSpeedY = 0;
 			break;
-		case DIRECTION::UP:
-			m_nSpeedX = 0;
-			m_nSpeedY = -(mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime());
+		case EDirection::Up:
+			mSpeedX = 0;
+			mSpeedY = -(mMoveSpeed * mMoveSpeedFold * Timer::GetDeltaTime());
 			break;
-		case DIRECTION::DOWN:
-			m_nSpeedX = 0;
-			m_nSpeedY = mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime();
+		case EDirection::Down:
+			mSpeedX = 0;
+			mSpeedY = mMoveSpeed * mMoveSpeedFold * Timer::GetDeltaTime();
 			break;
-		case DIRECTION::LEFTUP:
-			m_nSpeedX = -(mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime());
-			m_nSpeedY = -(mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime());
+		case EDirection::LeftUp:
+			mSpeedX = -(mMoveSpeed * mMoveSpeedFold * Timer::GetDeltaTime());
+			mSpeedY = -(mMoveSpeed * mMoveSpeedFold * Timer::GetDeltaTime());
 			break;
-		case DIRECTION::RIGHTUP:
-			m_nSpeedX = mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime();
-			m_nSpeedY = -(mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime());
+		case EDirection::RightUp:
+			mSpeedX = mMoveSpeed * mMoveSpeedFold * Timer::GetDeltaTime();
+			mSpeedY = -(mMoveSpeed * mMoveSpeedFold * Timer::GetDeltaTime());
 			break;
-		case DIRECTION::LEFTDOWN:
-			m_nSpeedX = -(mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime());
-			m_nSpeedY = mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime();
+		case EDirection::LeftDown:
+			mSpeedX = -(mMoveSpeed * mMoveSpeedFold * Timer::GetDeltaTime());
+			mSpeedY = mMoveSpeed * mMoveSpeedFold * Timer::GetDeltaTime();
 			break;
-		case DIRECTION::RIGHTDOWN:
-			m_nSpeedX = mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime();
-			m_nSpeedY = mMoveSpeed * m_nMoveSpeedFold * Timer::GetDeltaTime();
+		case EDirection::RightDown:
+			mSpeedX = mMoveSpeed * mMoveSpeedFold * Timer::GetDeltaTime();
+			mSpeedY = mMoveSpeed * mMoveSpeedFold * Timer::GetDeltaTime();
 			break;
 		}
 	}
 
-	if (!(curPlayerAction == ACTION::ATTACK) &&
-		!(curPlayerAction == ACTION::IDLE) && !(curPlayerAction == ACTION::DEAD)) //공격중이거나 기본상태가 아닐경우 캐릭터를 움직여준다
+	if (!(curPlayerAction == EAction::Attack) &&
+		!(curPlayerAction == EAction::Idle) && !(curPlayerAction == EAction::Dead)) //공격중이거나 기본상태가 아닐경우 캐릭터를 움직여준다
 	{
-		m_nOldX = GetPos().x;
-		m_nOldY = GetPos().y;
-		SetX(GetPos().x + m_nSpeedX);
-		SetY(GetPos().y + m_nSpeedY);
+		mOldX = GetPos().x;
+		mOldY = GetPos().y;
+		SetX(GetPos().x + mSpeedX);
+		SetY(GetPos().y + mSpeedY);
 	}
 
 	CheckWallCollision();
 
-	draw_x = (int)(-(camera.GetX() - GetPos().x) + (SCREEN_WIDTH * 0.5f));
-	draw_y = (int)(-(camera.GetY() - GetPos().y) + (SCREEN_HEIGHT * 0.5f));
+	mDrawX = (int)(-(camera.GetX() - GetPos().x) + (SCREEN_WIDTH * 0.5f));
+	mDrawY = (int)(-(camera.GetY() - GetPos().y) + (SCREEN_HEIGHT * 0.5f));
 
-	if (!m_bIsRoll)
+	if (!mIsRoll)
 	{
-		if (m_nSpeedX == 0)
+		if (mSpeedX == 0)
 		{
-			if (m_nSpeedY < 0)
-				curPlayerDirection = DIRECTION::UP;
-			else if (m_nSpeedY > 0)
-				curPlayerDirection = DIRECTION::DOWN;
+			if (mSpeedY < 0)
+				curPlayerDirection = EDirection::Up;
+			else if (mSpeedY > 0)
+				curPlayerDirection = EDirection::Down;
 		}
-		else if (m_nSpeedX < 0)
+		else if (mSpeedX < 0)
 		{
-			if (m_nSpeedY == 0)
-				curPlayerDirection = DIRECTION::LEFT;
-			else if (m_nSpeedY < 0)
-				curPlayerDirection = DIRECTION::LEFTUP;
-			else if (m_nSpeedY > 0)
-				curPlayerDirection = DIRECTION::LEFTDOWN;
+			if (mSpeedY == 0)
+				curPlayerDirection = EDirection::Left;
+			else if (mSpeedY < 0)
+				curPlayerDirection = EDirection::LeftUp;
+			else if (mSpeedY > 0)
+				curPlayerDirection = EDirection::LeftDown;
 		}
-		else if (m_nSpeedX > 0)
+		else if (mSpeedX > 0)
 		{
-			if (m_nSpeedY == 0)
-				curPlayerDirection = DIRECTION::RIGHT;
-			else if (m_nSpeedY < 0)
-				curPlayerDirection = DIRECTION::RIGHTUP;
-			else if (m_nSpeedY > 0)
-				curPlayerDirection = DIRECTION::RIGHTDOWN;
+			if (mSpeedY == 0)
+				curPlayerDirection = EDirection::Right;
+			else if (mSpeedY < 0)
+				curPlayerDirection = EDirection::RightUp;
+			else if (mSpeedY > 0)
+				curPlayerDirection = EDirection::RightDown;
 		}
 
-		if (curPlayerAction == 4)
+		if (curPlayerAction == EAction::Attack)
 		{
 			if (attackDirection.y < 0)
 			{
 				if ((attackDirection.x > -0.3f) && (attackDirection.x < 0.3f))
-					curPlayerDirection = DIRECTION::UP;
+					curPlayerDirection = EDirection::Up;
 				else if (attackDirection.x < -0.3f)
-					curPlayerDirection = DIRECTION::LEFTUP;
+					curPlayerDirection = EDirection::LeftUp;
 				else if (attackDirection.x > 0.3f)
-					curPlayerDirection = DIRECTION::RIGHTUP;
+					curPlayerDirection = EDirection::RightUp;
 			}
 			else
 			{
 				if ((attackDirection.x > -0.3f) && (attackDirection.x < 0.3f))
-					curPlayerDirection = DIRECTION::DOWN;
+					curPlayerDirection = EDirection::Down;
 				else if (attackDirection.x < -0.3f)
-					curPlayerDirection = DIRECTION::LEFTDOWN;
+					curPlayerDirection = EDirection::LeftDown;
 				else if (attackDirection.x > 0.3f)
-					curPlayerDirection = DIRECTION::RIGHTDOWN;
+					curPlayerDirection = EDirection::RightDown;
 			}
 			if (attackDirection.x < 0)
 			{
 				if ((attackDirection.y > -0.3f) && (attackDirection.y < 0.3f))
-					curPlayerDirection = DIRECTION::LEFT;
+					curPlayerDirection = EDirection::Left;
 			}
 			else
 			{
 				if ((attackDirection.y > -0.3f) && (attackDirection.y < 0.3f))
-					curPlayerDirection = DIRECTION::RIGHT;
+					curPlayerDirection = EDirection::Right;
 			}
 		}
 
-		m_pCurSprite = !(curPlayerAction == ACTION::ROLL)
-			               ? m_pWalkSprite->GetSprite(curPlayerDirection)
-			               : m_pRollSprite->GetSprite(curPlayerDirection);
-		m_pCurBowSprite = !(curPlayerAction == ACTION::ROLL)
-			                  ? m_pBowWalkSprite->GetSprite(curPlayerDirection)
-			                  : m_pBow_RollSprite->GetSprite(curPlayerDirection);
+		mCurSpritePtr = !(curPlayerAction == EAction::Roll)
+			? mWalkSpritePtr->GetSprite(curPlayerDirection)
+			: mRollSpritePtr->GetSprite(curPlayerDirection);
+		mCurBowSpritePtr = !(curPlayerAction == EAction::Roll)
+			? mBowWalkSpritePtr->GetSprite(curPlayerDirection)
+			: mBowRollSpritePtr->GetSprite(curPlayerDirection);
 
-		if (curPlayerAction == ACTION::ATTACK)
-			m_pCurBowSprite = m_pBow_AttackSprite->GetSprite(curPlayerDirection);
+		if (curPlayerAction == EAction::Attack)
+			mCurBowSpritePtr = mBowAttackSpritePtr->GetSprite(curPlayerDirection);
 	}
 
-	SetHitRect((curPlayerAction != ACTION::ROLL)
-		           ? walkHitRect[(int)curPlayerDirection - 1]
-		           : rollHitRect[(int)curPlayerDirection - 1][mCurrentFrame]);
+	SetHitRect((curPlayerAction != EAction::Roll)
+		? mWalkHitRect[(int)curPlayerDirection - 1]
+		: mRollHitRect[(int)curPlayerDirection - 1][mCurrentFrame]);
 
-	if (curPlayerAction == ACTION::FAINT)
+	if (curPlayerAction == EAction::Faint)
 	{
-		m_pCurSprite = m_pDeadSprite->GetSprite(DIRECTION::RIGHT);
+		mCurSpritePtr = mDeadSpritePtr->GetSprite(EDirection::Right);
 	}
 
-	if (curPlayerAction == ACTION::DEAD)
+	if (curPlayerAction == EAction::Dead)
 	{
-		m_pCurSprite = m_pDeadSprite->GetSprite(curPlayerDirection);
+		mCurSpritePtr = mDeadSpritePtr->GetSprite(curPlayerDirection);
 	}
 
-	if (m_bIsSkill)
-		m_pCurSprite = m_pSkillSprite;
+	if (mIsSkill)
+		mCurSpritePtr = mSkillSpritePtr;
 
-	if ((m_pOldSprite != m_pCurSprite && !m_bIsRoll) || (m_pOldBowSprite != m_pCurBowSprite))
+	if ((mOldSpritePtr != mCurSpritePtr && !mIsRoll) || (mOldBowSpritePtr != mCurBowSpritePtr))
 	{
-		m_pOldSprite = m_pCurSprite;
-		m_pOldBowSprite = m_pCurBowSprite;
-		GameObject::SetSprite(m_pCurSprite, m_pCurBowSprite);
-		if (curPlayerAction == ACTION::ROLL)
+		mOldSpritePtr = mCurSpritePtr;
+		mOldBowSpritePtr = mCurBowSpritePtr;
+		SetSprite(mCurSpritePtr, mCurBowSpritePtr);
+		if (curPlayerAction == EAction::Roll)
 		{
-			m_bIsRoll = true;
+			mIsRoll = true;
 		}
 	}
 }
 
 void Player::MoveInit()
 {
-	m_nSpeedX = 0;
-	m_nSpeedY = 0;
-	if (curPlayerAction != ACTION::ROLL)
+	mSpeedX = 0;
+	mSpeedY = 0;
+	if (curPlayerAction != EAction::Roll)
 	{
-		m_nMoveSpeedFold = 2;
+		mMoveSpeedFold = 2;
 		mFrameInterval = 140;
 	}
-	m_bIsUseBow = false;
+	mIsUseBow = false;
 }
 
-bool Player::IsArrowReady()
+bool Player::IsArrowReady() const
 {
-	if (curArrow == NULL)
+	if (mCurArrowPtr == nullptr)
 		return false;
 	return true;
 }

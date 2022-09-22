@@ -1,101 +1,85 @@
 ﻿#include "Sprite8.h"
 #include "Sprite.h"
 
-CSprite8::CSprite8()
+void Sprite8::Init()
 {
+	mLeftSpritePtr = std::make_unique<Sprite>();
+	mLeftUpSpritePtr = std::make_unique<Sprite>();
+	mLeftDownSpritePtr = std::make_unique<Sprite>();
+	mRightSpritePtr = std::make_unique<Sprite>();
+	mRightUpSpritePtr = std::make_unique<Sprite>();
+	mRightDownSpritePtr = std::make_unique<Sprite>();
+	mUpSpritePtr = std::make_unique<Sprite>();
+	mDownSpritePtr = std::make_unique<Sprite>();
 }
 
-CSprite8::~CSprite8()
-{
-	delete left;
-	delete leftup;
-	delete leftdown;
-	delete right;
-	delete rightup;
-	delete rightdown;
-	delete up;
-	delete down;
-}
-
-void CSprite8::Init()
-{
-	left = new Sprite();
-	leftup = new Sprite();
-	leftdown = new Sprite();
-	right = new Sprite();
-	rightup = new Sprite();
-	rightdown = new Sprite();
-	up = new Sprite();
-	down = new Sprite();
-}
-
-Sprite* CSprite8::GetSprite(DIRECTION type)
+Sprite* Sprite8::GetSprite(EDirection type) const
 {
 	switch (type)
 	{
-	case LEFT:
-		return left;
-	case RIGHT:
-		return right;
-	case UP:
-		return up;
-	case DOWN:
-		return down;
-	case LEFTUP:
-		return leftup;
-	case RIGHTUP:
-		return rightup;
-	case LEFTDOWN:
-		return leftdown;
-	case RIGHTDOWN:
-		return rightdown;
+	case EDirection::Left:
+		return mLeftSpritePtr.get();
+	case EDirection::Right:
+		return mRightSpritePtr.get();
+	case EDirection::Up:
+		return mUpSpritePtr.get();
+	case EDirection::Down:
+		return mDownSpritePtr.get();
+	case EDirection::LeftUp:
+		return mLeftUpSpritePtr.get();
+	case EDirection::RightUp:
+		return mRightUpSpritePtr.get();
+	case EDirection::LeftDown:
+		return mLeftDownSpritePtr.get();
+	case EDirection::RightDown:
+		return mRightDownSpritePtr.get();
 	default:
-		return left;
+		return mLeftSpritePtr.get();
 	}
 }
 
-void CSprite8::SetSizeAll(float size)
+void Sprite8::SetSizeAll(float size) const
 {
-	left->SetSize(size);
-	leftup->SetSize(size);
-	leftdown->SetSize(size);
-	right->SetSize(size);
-	rightup->SetSize(size);
-	rightdown->SetSize(size);
-	up->SetSize(size);
-	down->SetSize(size);
+	mLeftSpritePtr->SetSize(size);
+	mLeftUpSpritePtr->SetSize(size);
+	mLeftDownSpritePtr->SetSize(size);
+	mRightSpritePtr->SetSize(size);
+	mRightUpSpritePtr->SetSize(size);
+	mRightDownSpritePtr->SetSize(size);
+	mUpSpritePtr->SetSize(size);
+	mDownSpritePtr->SetSize(size);
 }
 
-bool CSprite8::ReleaseAll()
+bool Sprite8::ReleaseAll() const
 {
-	if (!left->ReleaseAll())
+	if (!mLeftSpritePtr->ReleaseAll())
 		return false;
-	if (!leftup->ReleaseAll())
+	if (!mLeftUpSpritePtr->ReleaseAll())
 		return false;
-	if (!leftdown->ReleaseAll())
+	if (!mLeftDownSpritePtr->ReleaseAll())
 		return false;
-	if (!right->ReleaseAll())
+	if (!mRightSpritePtr->ReleaseAll())
 		return false;
-	if (!rightup->ReleaseAll())
+	if (!mRightUpSpritePtr->ReleaseAll())
 		return false;
-	if (!rightdown->ReleaseAll())
+	if (!mRightDownSpritePtr->ReleaseAll())
 		return false;
-	if (!up->ReleaseAll())
+	if (!mUpSpritePtr->ReleaseAll())
 		return false;
-	if (!down->ReleaseAll())
+	if (!mDownSpritePtr->ReleaseAll())
 		return false;
 
 	return true;
 }
 
-void CSprite8::ReStoreAll()
+void Sprite8::ReStoreAll() const
 {
-	left->Restore();
-	leftup->Restore();
-	leftdown->Restore();
-	right->Restore();
-	rightup->Restore();
-	rightdown->Restore();
-	up->Restore();
-	down->Restore();
+	mLeftSpritePtr->Restore();
+	mLeftUpSpritePtr->Restore();
+	mLeftDownSpritePtr->Restore();
+	mRightSpritePtr->Restore();
+	mRightUpSpritePtr->Restore();
+	mRightDownSpritePtr->Restore();
+	mUpSpritePtr->Restore();
+	mDownSpritePtr->Restore();
 }

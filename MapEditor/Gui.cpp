@@ -1,54 +1,42 @@
 ﻿#include "Gui.h"
 #include "Player.h"
 
-extern Player player;
-
 Gui::Gui()
-{
-	m_x = 0;
-	m_y = 0;
-	m_nCurrentFrame = 0;
-	m_nFrameInterval = 0;
-}
-
-Gui::~Gui()
+	: mX(0)
+	, mY(0)
+	, mSpritePtr(nullptr)
+	, mCurrentFrame(0)
+	, mLastFrameTime(Timer::Now())
+	, mFrameInterval(0)
 {
 }
 
-void Gui::Initialize(int x, int y, Sprite* sprite, int frameInterval)
+void Gui::Initialize(int x, int y, Sprite* spritePtr, int frameInterval)
 {
-	m_x = x;
-	m_y = y;
-	m_pSprite = sprite;
-	m_nFrameInterval = frameInterval;
-	m_nCurrentFrame = 0;
+	mX = x;
+	mY = y;
+	mSpritePtr = spritePtr;
+	mFrameInterval = frameInterval;
+	mCurrentFrame = 0;
 }
 
-void Gui::Drawing(LPDIRECTDRAWSURFACE7 lpsurface)
+void Gui::Drawing(LPDIRECTDRAWSURFACE7 lpSurface)
 {
-	if (m_pSprite->GetNumberOfFrame() > 1 && Timer::Elapsed(m_nLastFrameTime, m_nFrameInterval))
-		m_nCurrentFrame = ++m_nCurrentFrame % m_pSprite->GetNumberOfFrame();
-	m_pSprite->Drawing(m_nCurrentFrame, m_x, m_y, lpsurface, true);
+	if (mSpritePtr->GetNumberOfFrame() > 1 && Timer::Elapsed(mLastFrameTime, mFrameInterval))
+		mCurrentFrame = ++mCurrentFrame % mSpritePtr->GetNumberOfFrame();
+
+	mSpritePtr->Drawing(mCurrentFrame, mX, mY, lpSurface, true);
 }
 
-void Gui::DrawingBossHp(LPDIRECTDRAWSURFACE7 lpsurface)
+void Gui::DrawingBossHp(LPDIRECTDRAWSURFACE7 lpSurface)
 {
-	if (Timer::Elapsed(m_nLastFrameTime, m_nFrameInterval))
-		m_nCurrentFrame = ++m_nCurrentFrame % m_pSprite->GetNumberOfFrame();
-	m_pSprite->DrawingBossHp(m_nCurrentFrame, m_x, m_y, lpsurface, true);
+	if (Timer::Elapsed(mLastFrameTime, mFrameInterval))
+		mCurrentFrame = ++mCurrentFrame % mSpritePtr->GetNumberOfFrame();
+
+	mSpritePtr->DrawingBossHp(mCurrentFrame, mX, mY, lpSurface, true);
 }
 
-void Gui::DrawingPlayerHp(LPDIRECTDRAWSURFACE7 lpsurface)
+void Gui::DrawingPlayerHp(LPDIRECTDRAWSURFACE7 lpSurface) const
 {
-	m_pSprite->Drawing(m_nCurrentFrame, m_x, m_y, lpsurface, true);
-}
-
-void Gui::SetFrame(int frame)
-{
-	m_nCurrentFrame = frame;
-}
-
-int Gui::GetFrame()
-{
-	return m_nCurrentFrame;
+	mSpritePtr->Drawing(mCurrentFrame, mX, mY, lpSurface, true);
 }

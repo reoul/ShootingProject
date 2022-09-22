@@ -162,7 +162,6 @@
     <ClCompile Include="ChoiceWindow.cpp" />
     <ClCompile Include="dsutil.cpp" />
     <ClCompile Include="editormain.cpp" />
-    <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Fireblock.cpp" />
     <ClCompile Include="gamemain.cpp" />
     <ClCompile Include="GameObject.cpp" />
@@ -192,7 +191,6 @@
     <ClInclude Include="ChoiceWindow.h" />
     <ClInclude Include="SettingData.h" />
     <ClInclude Include="DSUTIL.h" />
-    <ClInclude Include="Enemy.h" />
     <ClInclude Include="Fireblock.h" />
     <ClInclude Include="GameEnum.h" />
     <ClInclude Include="GameObject.h" />

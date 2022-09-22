@@ -25,7 +25,6 @@
 #include "GameEnum.h"
 #include "Vector2.h"
 #include "Fireblock.h"
-#include "Enemy.h"
 #include "SkillUI.h"
 
 using namespace std;
@@ -56,17 +55,17 @@ extern Sprite enemy_hide_left;
 extern Sprite enemy_hide_right;
 extern Sprite enemy_attack_left;
 extern Sprite enemy_attack_right;
-extern CSprite8 player_walk;
-extern CSprite8 player_roll;
-extern CSprite8 player_dead;
-extern CSprite8 bow_walk;
-extern CSprite8 bow_roll;
-extern CSprite8 bow_attack;
-extern CSprite8 arrowSprite;
-extern CSprite8 boss_idle;
-extern CSprite8 boss_roll;
-extern CSprite8 boss_attack;
-extern CSprite8 boss_dead;
+extern Sprite8 player_walk;
+extern Sprite8 player_roll;
+extern Sprite8 player_dead;
+extern Sprite8 bow_walk;
+extern Sprite8 bow_roll;
+extern Sprite8 bow_attack;
+extern Sprite8 arrowSprite;
+extern Sprite8 boss_idle;
+extern Sprite8 boss_roll;
+extern Sprite8 boss_attack;
+extern Sprite8 boss_dead;
 extern Block g_blocks[BLOCK_Y][BLOCK_X];
 extern Player player;
 extern Boss boss;
@@ -78,15 +77,14 @@ extern Map map;
 extern Sprite fireSprite;
 extern FireBlock fireBlock;
 
-extern DIRECTION curPlayerDirection;
-extern DIRECTION curBossDirection;
+extern EDirection curPlayerDirection;
+extern EDirection curBossDirection;
 
-extern ACTION curPlayerAction;
-extern ACTION curBossAction;
+extern EAction curPlayerAction;
+extern EAction curBossAction;
 
 extern Arrow arrow[TOTAL_ARROW];
 extern SnowBall snowball[TOTAL_SNOWBALL];
-extern Enemy enemy[TOTAL_ENEMY];
 
 extern Vector2 attackDirection;
 
@@ -132,6 +130,18 @@ system_clock::time_point lastFrameTime;
 system_clock::time_point lastSkillShootTime;		// todo : 캐릭터한테 넣기
 system_clock::time_point lastPlayerHitTime;
 
+// todo : 플레이어 한테 넣기
+Arrow* FindNotUseArrow()
+{
+	for (Arrow& arr : arrow)
+	{
+		if (!arr.IsUse())
+			return &arr;
+	}
+
+	return nullptr;
+}
+
 void GameMain(void)
 {
 	if (m_bGameFirst)
@@ -140,11 +150,13 @@ void GameMain(void)
 	if (FrameRate())
 	{
 		int i, j;
-		camera.InitExpantion();
+		camera.InitExpansion();
 
+		// 사용할수 있는 화살이 있을때
 		if (player.IsArrowNull())
-			if (!arrow[0].IsZeroArrow())
-				player.SetArrow(arrow[0].FindNotUseArrow());
+			//if (!arrow[0].IsZeroArrow())
+			if (true)
+				player.SetArrow(FindNotUseArrow());
 
 		if (!IsPlayerNoHit)
 		{
@@ -156,7 +168,7 @@ void GameMain(void)
 
 		if (!player.IsArrowNull())
 		{
-			if (player.GetCurArrow()->GetIsCharging())
+			if (player.GetCurArrow()->IsCharging())
 			{
 				//활을 쐈을 때
 				if (!camera.IsExpansion())
@@ -167,10 +179,10 @@ void GameMain(void)
 					player.GetCurArrow()->SetY(player.GetPos().y + 6);
 					player.GetCurArrow()->SetSpeedXY(2.5f * powf(camera.GetExpansion(), 12), attackDirection);
 					player.GetCurArrow()->CheckSprite();
-					player.SetArrow(NULL);
+					player.SetArrow(nullptr);
 					SndObjPlay(Sound[3], NULL);
 					if (player.IsArrowNull())
-						player.SetArrow(arrow[9].FindNotUseArrow());
+						player.SetArrow(FindNotUseArrow());
 				}
 			}
 		}
@@ -206,7 +218,7 @@ void GameMain(void)
 
 		if (!player.IsArrowNull())
 		{
-			if (player.GetCurArrow()->GetIsCharging())
+			if (player.GetCurArrow()->IsCharging())
 			{
 				if (!isSound)
 				{
@@ -218,7 +230,7 @@ void GameMain(void)
 				player.GetCurArrow()->SetSpeedXY(20 - (30 * (camera.GetExpansion() - 1)), attackDirection);
 				player.GetCurArrow()->CheckMove();
 				player.GetCurArrow()->CheckSprite();
-				if (!(curPlayerAction == ACTION::ROLL) && (curPlayerAction != ACTION::DEAD))
+				if (!(curPlayerAction == EAction::Roll) && (curPlayerAction != EAction::Dead))
 					player.GetCurArrow()->Draw(g_lpSecondarySurface);
 			}
 		}
@@ -237,13 +249,13 @@ void GameMain(void)
 				player.CreateSkillArrow();
 				SndObjPlay(Sound[3], NULL);
 				if (player.IsArrowNull())
-					player.SetArrow(arrow[9].FindNotUseArrow());
+					player.SetArrow(FindNotUseArrow());
 			}
 		}
 
 		for (i = 0; i < TOTAL_ARROW; i++)
 		{
-			if (arrow[i].GetIsUse())
+			if (arrow[i].IsUse())
 			{
 				if (arrow[i].IsHoming())
 				{
@@ -261,14 +273,14 @@ void GameMain(void)
 				{
 					if (map.GetStageNum() == 1)
 					{
-						if (!arrow[i].GetIsHit() && !arrow[i].GetIsCharging())
+						if (!arrow[i].GetIsHit() && !arrow[i].IsCharging())
 						{
 							if (arrow[i].CheckHit(boss.GetHitRect()) && !arrow[i].IsHoming())
 							{
 								arrow[i].IsHit();
 								boss.Hit(arrow[i].GetPower());
 
-								if (curBossAction == ACTION::SLEEP)
+								if (curBossAction == EAction::Sleep)
 								{
 									boss.NextPattern();
 									SndObjStop(Sound[4]);
@@ -276,14 +288,14 @@ void GameMain(void)
 								}
 							}
 						}
-						if (abs((int)(boss.GetPos().x - arrow[i].GetPos().x)) < 50)
+						if (abs(static_cast<int>(boss.GetPos().x - arrow[i].GetPos().x)) < 50)
 						{
-							if (abs((int)(boss.GetPos().y - arrow[i].GetPos().y)) < 50)
+							if (abs(static_cast<int>(boss.GetPos().y - arrow[i].GetPos().y)) < 50)
 							{
 								arrow[i].IsHit();
 								boss.Hit(arrow[i].GetPower());
 
-								if (curBossAction == ACTION::SLEEP)
+								if (curBossAction == EAction::Sleep)
 								{
 									boss.NextPattern();
 									SndObjStop(Sound[4]);
@@ -303,9 +315,9 @@ void GameMain(void)
 		fireBlock.Draw(g_lpSecondarySurface);
 
 		//보스가 구르기 패턴 공격을 할때
-		if (curBossAction == ACTION::ROLL)
+		if (curBossAction == EAction::Roll)
 		{
-			if (curPlayerAction != ACTION::DEAD)
+			if (curPlayerAction != EAction::Dead)
 			{
 				//플레이어가 공격당하지 않았다면
 				if (IsPlayerNoHit)
@@ -361,11 +373,6 @@ void GameMain(void)
 			bossHpBar.DrawingBossHp(g_lpSecondarySurface);
 		}
 
-		for (i = 0; i < TOTAL_ENEMY; i++)
-		{
-			enemy[i].Draw(g_lpSecondarySurface);
-		}
-
 		playerHp1.DrawingPlayerHp(g_lpSecondarySurface);
 		playerHp2.DrawingPlayerHp(g_lpSecondarySurface);
 		playerHp3.DrawingPlayerHp(g_lpSecondarySurface);
@@ -379,7 +386,7 @@ void GameMain(void)
 			tutorial.Drawing(g_lpSecondarySurface);
 		}
 
-		if ((curPlayerAction == ACTION::DEAD) || (curBossAction == ACTION::DEAD) || camera.GetIsFirstAlpha())
+		if ((curPlayerAction == EAction::Dead) || (curBossAction == EAction::Dead) || camera.GetIsFirstAlpha())
 		{
 			camera.AlphaBlending2(g_lpSecondarySurface);
 			if (!camera.GetIsFirstAlpha())
@@ -444,28 +451,28 @@ void InitGame()
 		if (arrow[i].IsLive())
 			arrow[i].Kill();
 		arrow[i].Initialize(player.GetPos().x, player.GetPos().y, 2, &arrowSprite);
-		arrow[i].SetState(OBJECT_TYPE::ARROW);
+		arrow[i].SetState(EObjectType::Arrow);
 	}
 	player.SetArrow(&arrow[0]);
 
 	if (boss.IsLive()) boss.Kill();
 	boss.Initialize(1560, 1590, 0, 20, 4);
 	boss.SetSprite(&boss_sleep, &boss_idle, &boss_roll, &boss_attack, &boss_dead);
-	boss.SetState(OBJECT_TYPE::BOSS);
+	boss.SetState(EObjectType::Boss);
 
 	fireBlock.Initialize(36 * DEFAULT_BLOCK_SIZE + 16, 83 * DEFAULT_BLOCK_SIZE, 130, &fireSprite);
-	fireBlock.SetState(OBJECT_TYPE::BLOCK);
+	fireBlock.SetState(EObjectType::Block);
 
 
 	for (i = 0; i < TOTAL_SNOWBALL; i++)
 	{
 		if (snowball[i].IsUse()) snowball[i].SetUse(false);
 		snowball[i].Initialize(boss.GetPos().x, boss.GetPos().y, 4, &boss_snowball);
-		snowball[i].SetState(OBJECT_TYPE::SNOWBALL);
+		snowball[i].SetState(EObjectType::Snowball);
 	}
 
-	bossHpBarBack.Initialize(1250, SCREEN_HEIGHT >> 1, &boss_hp_window, 0);
-	bossHpBar.Initialize(1250, SCREEN_HEIGHT >> 1, &boss_hp, 300);
+	bossHpBarBack.Initialize(1850, SCREEN_HEIGHT >> 1, &boss_hp_window, 0);
+	bossHpBar.Initialize(1850, SCREEN_HEIGHT >> 1, &boss_hp, 300);
 
 	playerHp1.Initialize(50, 43, &player_hp, 0);
 	playerHp2.Initialize(110, 43, &player_hp, 0);
@@ -474,9 +481,9 @@ void InitGame()
 
 	tutorial.Initialize(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, &tutorialSprite, 0);
 
-	skillRoll.Initialize(640, 730, &skill_roll, 0);
+	skillRoll.Initialize(50, 1040, &skill_roll, 0);
 	skillRoll.SetBackGroundSprite(&skill_background);
-	skillCyclone.Initialize(726, 730, &skill_cyclone, 0);
+	skillCyclone.Initialize(130, 1040, &skill_cyclone, 0);
 	skillCyclone.SetBackGroundSprite(&skill_background);
 
 	player_lastRollTime = 0;

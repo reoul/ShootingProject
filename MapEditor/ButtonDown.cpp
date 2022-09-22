@@ -27,7 +27,7 @@ void ButtonDown::KeyCheckUp()
 		m_bIsDown = false;
 }
 
-bool ButtonDown::KeyCheckClick()
+bool ButtonDown::KeyCheckClick() const
 {
 	return m_bIsDown == true ? false : true;
 }

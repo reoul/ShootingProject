@@ -1,21 +1,11 @@
 ﻿#include "SkillUI.h"
 
-SkillUI::SkillUI()
-{
-	m_pBackGroundSprite = NULL;
-}
-
-SkillUI::~SkillUI()
+SkillUI::SkillUI() : mBackGroundSpritePtr(nullptr)
 {
 }
 
-void SkillUI::SetBackGroundSprite(Sprite* sprite)
+void SkillUI::Drawing(float skillCoolTimePercent, LPDIRECTDRAWSURFACE7 lpSurface) const
 {
-	m_pBackGroundSprite = sprite;
-}
-
-void SkillUI::Drawing(float skillCoolTimePercent, LPDIRECTDRAWSURFACE7 lpsurface)
-{
-	m_pBackGroundSprite->Drawing(0, m_x, m_y, lpsurface, true);
-	m_pSprite->DrawingSkillCoolTime(skillCoolTimePercent, m_x, m_y, lpsurface, true);
+	mBackGroundSpritePtr->Drawing(0, mX, mY, lpSurface, true);
+	mSpritePtr->DrawingSkillCoolTime(skillCoolTimePercent, mX, mY, lpSurface, true);
 }

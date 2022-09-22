@@ -1,4 +1,6 @@
 #include "Camera.h"
+
+#include <cassert>
 #include <vector>
 #include <thread>
 
@@ -8,11 +10,11 @@
 
 using namespace std;
 
-extern MOD curMod;
+extern EMod curMod;
 
-extern DIRECTION curPlayerDirection;
+extern EDirection curPlayerDirection;
 
-extern ACTION curPlayerAction;
+extern EAction curPlayerAction;
 
 extern Player player;
 
@@ -22,411 +24,212 @@ extern HDC hdc;
 extern TCHAR buffer2[40];
 
 Camera::Camera()
+	: mLastFrameTime(Timer::Now())
+	, mExpansionInterval(4)
+	, mX(0)
+	, mY(0)
+	, mAlpha(0)
+	, mIsFirstAlpha(true)
+	, mSpeedX(0)
+	, mSpeedY(0)
+	, mFinishX(0)
+	, mFinishY(0)
+	, mMoveSpeed(0.5f)
+	, mZoomInRange(600)
+	, mExpansion(1)
+	, mExpansionSpeed(0.006f)
+	, mIsExpansion(false)
+	, mIsSkill(false)
 {
-	_rgb = new unsigned char[SCREEN_HEIGHT * SCREEN_WIDTH * 4];
-}
-
-Camera::~Camera()
-{
-}
-
-int Camera::GetX()
-{
-	return m_x;
-}
-
-int Camera::GetY()
-{
-	return m_y;
-}
-
-//int Camera::GetDrawFinishX()
-//{
-//	return m_nFinishX;
-//}
-//
-//int Camera::GetDrawFinishY()
-//{
-//	return m_nFinishY;
-//}
-
-int Camera::GetZoomInRange()
-{
-	return m_nZoomInRange;
-}
-
-void Camera::SetXY(int x, int y)
-{
-	m_x = x;
-	m_y = y;
-}
-
-float Camera::GetExpansion()
-{
-	return m_expansion;
-}
-
-bool Camera::GetIsExpansion()
-{
-	return m_bIsExpansion;
-}
-
-bool Camera::GetIsFirstAlpha()
-{
-	return IsFirstAlpha;
-}
-
-void Camera::SetIsFirstAlpha(bool alpha)
-{
-	IsFirstAlpha = alpha;
-}
-
-void Camera::SetAlpha(int alpha)
-{
-	Alpha = alpha;
-}
-
-int Camera::GetAlpha()
-{
-	return Alpha;
-}
-
-void Camera::SetExpansion(float _expansion)
-{
-	m_expansion = _expansion;
-}
-
-void Camera::SetIsExpansion(bool expantion)
-{
-	m_bIsExpansion = expantion;
-}
-
-void Camera::Expansion()
-{
-	m_bIsExpansion = true;
-}
-
-bool Camera::IsExpansion()
-{
-	return m_bIsExpansion;
+	mX = (curMod == EMod::Game) ? player.GetPos().x : 1600;
+	mY = (curMod == EMod::Game) ? player.GetPos().y : 1600;
 }
 
 void Camera::CheckExpansion()
 {
-	if (Timer::Elapsed(m_nLastFrameTime, m_nExpantionInterval))
+	if (Timer::Elapsed(mLastFrameTime, mExpansionInterval))
 	{
-		if (m_bIsExpansion)
+		if (mIsExpansion)
 		{
-			m_expansion += m_expansionSpeed;
-			if (m_expansion > 1.3f)
-				m_expansion = 1.3f;
+			mExpansion += mExpansionSpeed;
+			if (mExpansion > 1.3f)
+				mExpansion = 1.3f;
 		}
 		else
 		{
-			m_expansion -= 0.08f;
-			if (m_expansion < 1)
-				m_expansion = 1;
+			mExpansion -= 0.08f;
+			if (mExpansion < 1)
+				mExpansion = 1;
 		}
 	}
 }
 
 void Camera::Initialize()
 {
-	m_nExpantionInterval = 4;
-	m_nMoveInterval = 4;
-	m_x = (curMod == MOD::MOD_GAME) ? player.GetPos().x : 1600;
-	m_y = (curMod == MOD::MOD_GAME) ? player.GetPos().y : 1600;
-	m_nSpeedX = 0;
-	m_nSpeedY = 0;
-	m_nFinishX = 0;
-	m_nFinishY = 0;
-	m_nZoomInRange = 600;
-	m_nMoveSpeed = 0.5f;
-	m_expansion = 1;
-	m_expansionSpeed = 0.006f;
-	m_bIsExpansion = false;
-	m_bIsSkill = false;
-	Alpha = 0;
-	IsFirstAlpha = true;
-	m_nLastFrameTime = Timer::Now();
+	new (this) Camera();
+	mX = (curMod == EMod::Game) ? player.GetPos().x : 1600;
+	mY = (curMod == EMod::Game) ? player.GetPos().y : 1600;
 }
 
-void Camera::InitExpantion()
+void Camera::InitExpansion()
 {
-	m_nSpeedX = 0;
-	m_nSpeedY = 0;
-	if (m_bIsSkill)
-		m_expansionSpeed = 0.03f;
+	mSpeedX = 0;
+	mSpeedY = 0;
+	if (mIsSkill)
+		mExpansionSpeed = 0.03f;
 	else
-		m_expansionSpeed = 0.006f;
-	//m_bIsExpansion = false;
-}
-
-void Camera::SetIsSkill(bool skill)
-{
-	m_bIsSkill = skill;
+		mExpansionSpeed = 0.006f;
 }
 
 void Camera::Left()
 {
-	m_x -= 5;
-	if (m_x < SCREEN_WIDTH >> 1)
-		m_x = SCREEN_WIDTH >> 1;
+	mX -= 5;
+	if (mX < SCREEN_WIDTH >> 1)
+		mX = SCREEN_WIDTH >> 1;
 }
 
 void Camera::Right()
 {
-	m_x += 5;
-	if (m_x > WORLDMAP_WIDTH - (SCREEN_WIDTH >> 1))
-		m_x = WORLDMAP_WIDTH - (SCREEN_WIDTH >> 1);
+	mX += 5;
+	if (mX > WORLDMAP_WIDTH - (SCREEN_WIDTH >> 1))
+		mX = WORLDMAP_WIDTH - (SCREEN_WIDTH >> 1);
 }
 
 void Camera::Up()
 {
-	m_y -= 5;
-	if (m_y < SCREEN_HEIGHT >> 1)
-		m_y = SCREEN_HEIGHT >> 1;
+	mY -= 5;
+	if (mY < SCREEN_HEIGHT >> 1)
+		mY = SCREEN_HEIGHT >> 1;
 }
 
 void Camera::Down()
 {
-	m_y += 5;
-	if (m_y > WORLDMAP_HEIGHT - (SCREEN_HEIGHT >> 1))
-		m_y = WORLDMAP_HEIGHT - (SCREEN_HEIGHT >> 1);
-}
-
-void Camera::Left2()
-{
-	m_nSpeedX -= 1;
-}
-
-void Camera::Right2()
-{
-	m_nSpeedX += 1;
-}
-
-void Camera::Up2()
-{
-	m_nSpeedY -= 1;
-}
-
-void Camera::Down2()
-{
-	m_nSpeedY += 1;
+	mY += 5;
+	if (mY > WORLDMAP_HEIGHT - (SCREEN_HEIGHT >> 1))
+		mY = WORLDMAP_HEIGHT - (SCREEN_HEIGHT >> 1);
 }
 
 void Camera::Move()
 {
-	//mX += (m_nFinishX - mX)* !((int)curPlayerActionState == 4) ? 0.5f : 0.1f;
-	//mY += (m_nFinishY - mY)* !((int)curPlayerActionState == 4) ? 0.5f : 0.1f;
-	if ((int)curPlayerAction == ACTION::ATTACK)
-		m_nMoveSpeed = 0.1f;
+	//mX += (mFinishX - mX)* !((int)curPlayerActionState == 4) ? 0.5f : 0.1f;
+	//mY += (mFinishY - mY)* !((int)curPlayerActionState == 4) ? 0.5f : 0.1f;
+	if (curPlayerAction == EAction::Attack)
+		mMoveSpeed = 0.1f;
 	else
-		m_nMoveSpeed = 0.5f;
-	if (curMod == MOD::MOD_EDITOR)
-		m_nMoveSpeed = 1;
-	m_x += (m_nFinishX - m_x) * m_nMoveSpeed;
-	m_y += (m_nFinishY - m_y) * m_nMoveSpeed;
-	if (m_x < SCREEN_WIDTH >> 1)
-		m_x = SCREEN_WIDTH >> 1;
-	else if (m_x > WORLDMAP_WIDTH - (SCREEN_WIDTH >> 1))
-		m_x = WORLDMAP_WIDTH - (SCREEN_WIDTH >> 1);
-	if (m_y < SCREEN_HEIGHT >> 1)
-		m_y = SCREEN_HEIGHT >> 1;
-	else if (m_y > WORLDMAP_HEIGHT - (SCREEN_HEIGHT >> 1))
-		m_y = WORLDMAP_HEIGHT - (SCREEN_HEIGHT >> 1);
+		mMoveSpeed = 0.5f;
+	if (curMod == EMod::Editor)
+		mMoveSpeed = 1;
+	mX += (mFinishX - mX) * mMoveSpeed;
+	mY += (mFinishY - mY) * mMoveSpeed;
+	if (mX < SCREEN_WIDTH >> 1)
+		mX = SCREEN_WIDTH >> 1;
+	else if (mX > WORLDMAP_WIDTH - (SCREEN_WIDTH >> 1))
+		mX = WORLDMAP_WIDTH - (SCREEN_WIDTH >> 1);
+	if (mY < SCREEN_HEIGHT >> 1)
+		mY = SCREEN_HEIGHT >> 1;
+	else if (mY > WORLDMAP_HEIGHT - (SCREEN_HEIGHT >> 1))
+		mY = WORLDMAP_HEIGHT - (SCREEN_HEIGHT >> 1);
 }
 
 void Camera::CheckFinishXY()
 {
-	m_nFinishX = GetFinishX2();
-	m_nFinishY = GetFinishY2();
-}
-
-void Camera::SetFinishXY(int x, int y)
-{
-	m_nFinishX = x;
-	m_nFinishY = y;
-}
-
-float Camera::GetExpansionSpeed()
-{
-	return m_expansionSpeed;
+	mFinishX = GetFinishX2();
+	mFinishY = GetFinishY2();
 }
 
 int Camera::GetFinishX()
 {
-	int _x;
-
-	int a = rand() % 4;
-	switch (a)
+	int r = rand() % 4;
+	switch (r)
 	{
 	case 0:
-		a = 20;
+		r = 20;
 		break;
 	case 1:
-		a = -20;
+		r = -20;
 		break;
 	case 2:
-		a = 40;
+		r = 40;
 		break;
 	case 3:
-		a = -40;
+		r = -40;
 		break;
+	default:
+		assert(false);
 	}
 
-	_x = player.GetPos().x + a;
-
-	return _x;
+	return player.GetPos().x + r;
 }
 
 int Camera::GetFinishY()
 {
-	int _y;
-	int a = rand() % 4;
-	switch (a)
+	int r = rand() % 4;
+	switch (r)
 	{
 	case 0:
-		a = 20;
+		r = 20;
 		break;
 	case 1:
-		a = -20;
+		r = -20;
 		break;
 	case 2:
-		a = 40;
+		r = 40;
 		break;
 	case 3:
-		a = -40;
+		r = -40;
 		break;
+	default:
+		assert(false);
 	}
-	_y = player.GetPos().y + a;
-	return _y;
+	return player.GetPos().y + r;
 }
 
-int Camera::GetFinishX2()
+int Camera::GetFinishX2() const
 {
-	int _x = 0;
-	if ((curPlayerAction != ACTION::ATTACK) && (curPlayerAction != ACTION::ROLL)) //공격중이 아닐때
-	{
-		_x = (int)player.GetPos().x;
-	}
+	int x;
+	if ((curPlayerAction != EAction::Attack) && (curPlayerAction != EAction::Roll)) //공격중이 아닐때
+		x = player.GetPos().x;
 	else
-	{
-		_x = (int)player.GetPos().x + (attackDirection.x * m_nZoomInRange * (m_expansion - 1) * 1.5f);
-	}
-	return _x;
+		x = player.GetPos().x + (attackDirection.x * mZoomInRange * (mExpansion - 1) * 1.5f);
+	return x;
 }
 
 
-int Camera::GetFinishY2()
+int Camera::GetFinishY2() const
 {
-	int _y;
-	if ((curPlayerAction != ACTION::ATTACK) && (curPlayerAction != ACTION::ROLL)) //공격중이 아닐때
-	{
-		_y = (int)player.GetPos().y;
-	}
+	int y;
+	if ((curPlayerAction != EAction::Attack) && (curPlayerAction != EAction::Roll)) //공격중이 아닐때
+		y = player.GetPos().y;
 	else
-	{
-		_y = (int)player.GetPos().y + (attackDirection.y * m_nZoomInRange * (m_expansion - 1) * 1.5f);
-	}
-	return _y;
+		y = player.GetPos().y + (attackDirection.y * mZoomInRange * (mExpansion - 1) * 1.5f);
+	return y;
 }
 
-void Camera::AlphaBlending(LPDIRECTDRAWSURFACE7 lpSurface) //버퍼에서 표면으로 복사하는 함수
+struct ThreadData
 {
-	unsigned char* rgb = new unsigned char[SCREEN_HEIGHT * SCREEN_WIDTH * 4];
-	DDSURFACEDESC2 ddsd; //표면의 정보를 확인할수 있는 변수를 선언
-	ZeroMemory(&ddsd, sizeof(ddsd)); //ddsd주소에서 ddsd크기만큼 메모리영역을 0으로 채워줌
-	ddsd.dwSize = sizeof(ddsd); //dwSize를 ddsd크기만큼 초기화 해준다
-
-	FAILED(lpSurface->Lock(NULL, &ddsd, DDLOCK_WAIT, NULL)); //만약 표면을 잠금하는데 실패할경우 false를 반환해준다
-
-	//unsigned char *pDest, *pSrc;			//표면의주소를 담을수 있는 변수, 버퍼의 주소를 담을수 있는 변수
-	//unsigned char *aaa = new unsigned char[SCREEN_HEIGHT*SCREEN_WIDTH * 4];
-	//CopyMemory(aaa, (unsigned char*)ddsd.lpSurface, SCREEN_HEIGHT*SCREEN_WIDTH * 4);
-	unsigned char* surface = (unsigned char*)ddsd.lpSurface;
-	CopyMemory(rgb, surface, SCREEN_HEIGHT * SCREEN_WIDTH * 4);
-	for (int i = 0; i < SCREEN_HEIGHT; i++)
-	{
-		for (int j = 0; j < SCREEN_WIDTH; j++)
-		{
-			/*CopyMemory(&bgRed, aaa + i*SCREEN_WIDTH * 4 + j * 4+2, 1);
-			CopyMemory(&bgGreen, aaa + i*SCREEN_WIDTH * 4 + j * 4+1, 1);
-			CopyMemory(&bgBlue, aaa + i*SCREEN_WIDTH * 4 + j * 4, 1);*/
-			//CopyMemory(&rgb, aaa + i*SCREEN_WIDTH * 4 + j * 4, 3);
-			/*bgRed = (bgRed * Alpha) >> 8;
-			bgGreen = (bgGreen * Alpha) >> 8;
-			bgBlue = (bgBlue * Alpha) >> 8;*/
-			rgb[(i * SCREEN_WIDTH * 4) + (j * 4)] = (rgb[(i * SCREEN_WIDTH * 4) + (j * 4)] * Alpha) >> 8;
-			rgb[(i * SCREEN_WIDTH * 4) + (j * 4) + 1] = (rgb[(i * SCREEN_WIDTH * 4) + (j * 4) + 1] * Alpha) >> 8;
-			rgb[(i * SCREEN_WIDTH * 4) + (j * 4) + 2] = (rgb[(i * SCREEN_WIDTH * 4) + (j * 4) + 2] * Alpha) >> 8;
-			/*CopyMemory(aaa + i*SCREEN_WIDTH * 4 + j * 4 + 2, &bgRed, 1);
-			CopyMemory(aaa + i*SCREEN_WIDTH * 4 + j * 4 + 1, &bgGreen, 1);
-			CopyMemory(aaa + i*SCREEN_WIDTH * 4 + j * 4, &bgBlue, 1);*/
-			//CopyMemory(aaa + i*SCREEN_WIDTH * 4 + j * 4, &rgb, 3);
-		}
-		//CopyMemory(aaa + i*SCREEN_WIDTH * 4, &rgb, SCREEN_WIDTH * 4);
-	}
-	CopyMemory(surface, rgb, SCREEN_HEIGHT * SCREEN_WIDTH * 4);
-	//ZeroMemory(surface, sizeof(surface));
-
-	/*pDest = (unsigned char*)ddsd.lpSurface;
-	pSrc = aaa;*/ //버퍼의 주소를 불러옴
-
-	//CopyMemory(aaaa, surface, sizeof(surface));
-
-	//CopyMemory(pDest, pSrc, SCREEN_HEIGHT*SCREEN_WIDTH * 4);
-	//delete[] rgb;
-
-	lpSurface->Unlock(NULL);
-
-	if (!IsFirstAlpha)
-	{
-		Alpha -= 1;
-		if (Alpha <= 0)
-		{
-			Alpha = 255;
-			if ((int)curMod == 1)
-				curMod = (MOD)0;
-			else if ((int)curMod == 0)
-				curMod = (MOD)1;
-		}
-	}
-	else
-	{
-		Alpha += 1;
-		if (Alpha >= 255)
-		{
-			Alpha = 255;
-			IsFirstAlpha = false;
-		}
-	}
-}
-
-struct thread_data
-{
-	unsigned char* rgb;
+	unsigned char* rgbArr;
 	int start;
+	int end;
 	int alpha;
 	int threadCnt;
 };
 
-void worker(thread_data* data)
+void Camera::AlphaBlendingThreadWorker(ThreadData* data)
 {
-	int i, j, index;
-	for (i = 0; i < SCREEN_HEIGHT / data->threadCnt; i++)
+	if (data->end >= SCREEN_HEIGHT)
+		data->end = SCREEN_HEIGHT;
+
+	for (int height = data->start; height < data->end; height++)
 	{
-		for (j = 0; j < SCREEN_WIDTH; j++)
+		for (int width = 0; width < SCREEN_WIDTH; width++)
 		{
-			index = (i * SCREEN_WIDTH * 4) + (j * 4) + data->start;
-			*(data->rgb + index) = (*(data->rgb + index) * data->alpha) >> 8;
-			*(data->rgb + index + 1) = (*(data->rgb + index + 1) * data->alpha) >> 8;
-			*(data->rgb + index + 2) = (*(data->rgb + index + 2) * data->alpha) >> 8;
-
-
-			//CopyMemory(surface + SCREEN_HEIGHT * SCREEN_WIDTH * 4 + 1, abc, 5 * SCREEN_WIDTH * 4 + 839 * 4);
+			unsigned char* p = data->rgbArr + (height * SCREEN_WIDTH * 4) + (width * 4);
+			*p = (*p * data->alpha) >> 8;
+			*(p + 1) = (*(p + 1) * data->alpha) >> 8;
+			*(p + 2) = (*(p + 2) * data->alpha) >> 8;
 		}
 	}
+	delete data;
 }
 
 void Camera::AlphaBlending2(LPDIRECTDRAWSURFACE7 lpSurface)
@@ -435,90 +238,65 @@ void Camera::AlphaBlending2(LPDIRECTDRAWSURFACE7 lpSurface)
 	ZeroMemory(&ddsd, sizeof(ddsd)); //ddsd주소에서 ddsd크기만큼 메모리영역을 0으로 채워줌
 	ddsd.dwSize = sizeof(ddsd); //dwSize를 ddsd크기만큼 초기화 해준다
 
-	lpSurface->Lock(NULL, &ddsd, DDLOCK_WAIT, NULL); //만약 표면을 잠금하는데 실패할경우 false를 반환해준다
+	lpSurface->Lock(nullptr, &ddsd, DDLOCK_WAIT, nullptr); //만약 표면을 잠금하는데 실패할경우 false를 반환해준다
 
-	//unsigned char *pDest, *pSrc;			//표면의주소를 담을수 있는 변수, 버퍼의 주소를 담을수 있는 변수
-	//unsigned char *aaa = new unsigned char[SCREEN_HEIGHT*SCREEN_WIDTH * 4];
-	//CopyMemory(aaa, (unsigned char*)ddsd.lpSurface, SCREEN_HEIGHT*SCREEN_WIDTH * 4);
 	unsigned char* surface = (unsigned char*)ddsd.lpSurface;
-	//CopyMemory(_rgb, surface, SCREEN_HEIGHT * SCREEN_WIDTH * 4);
+
+	unique_ptr<unsigned char[]> rgbArr = make_unique<unsigned char[]>(SCREEN_HEIGHT * SCREEN_WIDTH * 4);
 
 	for (int i = 0; i < ddsd.dwHeight; i++)
 	{
-		CopyMemory(_rgb + i * SCREEN_WIDTH * 4, surface + i * ddsd.lPitch, SCREEN_WIDTH * 4);
+		CopyMemory(rgbArr.get() + i * SCREEN_WIDTH * 4, surface + i * ddsd.lPitch, SCREEN_WIDTH * 4);
 	}
 
-	//const int num_pro = std::thread::hardware_concurrency();  //cpu 쓰레드 갯수 파악 함수
-	//vector<std::thread> workers;
-	//workers.resize(num_pro);
+	const int threadCnt = thread::hardware_concurrency();
 
-	const int threadCnt = 2;
+	vector<thread> threads;
 
-	thread t[threadCnt];
-
-	for (int b = 0; b < threadCnt; b++)
+	int height = SCREEN_HEIGHT / threadCnt;
+	for (int i = 0; i < threadCnt; i++)
 	{
-		thread_data* data;
-		data = (thread_data*)malloc(sizeof(thread_data));
-		ZeroMemory(data, sizeof(thread_data));
-		data->rgb = _rgb;
-		data->start = SCREEN_HEIGHT * SCREEN_WIDTH * b * 4 / threadCnt;
-		data->alpha = Alpha;
+		ThreadData* data = new ThreadData;
+		ZeroMemory(data, sizeof(ThreadData));
+		data->rgbArr = rgbArr.get();
+		data->start = height * i;
+		data->end = height * i + height;
+		data->alpha = mAlpha;
 		data->threadCnt = threadCnt;
-		t[b] = thread(worker, data);
+		threads.emplace_back(thread(AlphaBlendingThreadWorker, data));
 	}
-	for (int c = 0; c < threadCnt; c++)
+
+	for (thread& t : threads)
 	{
-		t[c].join();
+		t.join();
 	}
-	//unsigned char* abc = (unsigned char*)malloc(5 * SCREEN_WIDTH * 4 + 839 * 4);
-	//ZeroMemory(abc, 5 * SCREEN_WIDTH * 4 + 839 * 4);
-
-	//for (int i = 0; i < 6; i++)
-	//{
-	//	CopyMemory(surface + SCREEN_HEIGHT * SCREEN_WIDTH * 4 + i*SCREEN_WIDTH * 4, abc, SCREEN_WIDTH * 4);
-	//}
-	//for (int i = 0; i < 1; i++)
-	//{
-	//}
-
-	//CopyMemory(surface, _rgb, (SCREEN_HEIGHT * SCREEN_WIDTH) << 2);
 
 	for (int i = 0; i < ddsd.dwHeight; i++)
 	{
-		CopyMemory(surface + i * ddsd.lPitch, _rgb + i * SCREEN_WIDTH * 4, SCREEN_WIDTH * 4);
+		CopyMemory(surface + i * ddsd.lPitch, rgbArr.get() + i * SCREEN_WIDTH * 4, SCREEN_WIDTH * 4);
 	}
 
+	lpSurface->Unlock(nullptr);
 
-	//memset(surface + SCREEN_HEIGHT * SCREEN_WIDTH * 4, 0, 5 * SCREEN_WIDTH * 4 + 839 * 4);
-
-	//CopyMemory(abc, surface + SCREEN_HEIGHT * SCREEN_WIDTH * 4, 40);
-	//sprintf_s(buffer2, TEXT("%d,, %d"), ddsd.dwWidth, ddsd.dwHeight);
-	//TextOut(hdc, 0, 0, buffer2, 40);
-
-	//delete[] _rgb;
-
-	lpSurface->Unlock(NULL);
-
-	if (!IsFirstAlpha)
+	if (!mIsFirstAlpha)
 	{
-		Alpha -= 5;
-		if (Alpha <= 0)
+		mAlpha -= 5;
+		if (mAlpha <= 0)
 		{
-			Alpha = 255;
-			if ((int)curMod == 1)
-				curMod = (MOD)0;
-			else if ((int)curMod == 0)
-				curMod = (MOD)1;
+			mAlpha = 255;
+			if (curMod == EMod::Game)
+				curMod = EMod::Intro;
+			else if (curMod == EMod::Intro)
+				curMod = EMod::Game;
 		}
 	}
 	else
 	{
-		Alpha += 5;
-		if (Alpha >= 255)
+		mAlpha += 5;
+		if (mAlpha >= 255)
 		{
-			Alpha = 255;
-			IsFirstAlpha = false;
+			mAlpha = 255;
+			mIsFirstAlpha = false;
 		}
 	}
 }

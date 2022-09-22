@@ -6,19 +6,29 @@ class Gui
 {
 public:
 	Gui();
-	~Gui();
-	void Initialize(int x, int y, Sprite* sprite, int frameInterval);
-	virtual void Drawing(LPDIRECTDRAWSURFACE7 lpsurface);
-	void DrawingBossHp(LPDIRECTDRAWSURFACE7 lpsurface);
-	void DrawingPlayerHp(LPDIRECTDRAWSURFACE7 lpsurface);
+	~Gui() = default;
+	void Initialize(int x, int y, Sprite* spritePtr, int frameInterval);
+	virtual void Drawing(LPDIRECTDRAWSURFACE7 lpSurface);
+	void DrawingBossHp(LPDIRECTDRAWSURFACE7 lpSurface);
+	void DrawingPlayerHp(LPDIRECTDRAWSURFACE7 lpSurface) const;
 	void SetFrame(int frame);
-	int GetFrame();
+	int GetFrame() const;
 protected:
-	float m_x;
-	float m_y;
-	Sprite* m_pSprite;
+	float mX;
+	float mY;
+	Sprite* mSpritePtr;
 private:
-	int m_nCurrentFrame;
-	system_clock::time_point m_nLastFrameTime;
-	int m_nFrameInterval;
+	int mCurrentFrame;
+	system_clock::time_point mLastFrameTime;
+	int mFrameInterval;
 };
+
+inline void Gui::SetFrame(int frame)
+{
+	mCurrentFrame = frame;
+}
+
+inline int Gui::GetFrame() const
+{
+	return mCurrentFrame;
+}

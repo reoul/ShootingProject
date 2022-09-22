@@ -26,7 +26,6 @@ extern LPDIRECTINPUTDEVICE8 g_lpDirectInputKeyboard;
 
 extern Camera camera;
 extern HDC hdc;
-extern TCHAR buffer3[40];
 
 extern WorldMap bossMap;
 extern IntroSprite introSprite;
@@ -35,7 +34,7 @@ extern HSNDOBJ Sound[10];
 
 void InitIntro();
 
-extern MOD curMod;
+extern EMod curMod;
 
 enum SELECT { START = 0, OPTION, QUIT };
 
@@ -111,11 +110,11 @@ void IntroMain(void)
 				break;
 			case OPTION:
 				SelectMod = 2;
-				curMod = MOD::MOD_EDITOR;
+				curMod = EMod::Editor;
 				break;
 			case QUIT:
 				SelectMod = 3;
-				curMod = MOD::MOD_QUIT;
+				curMod = EMod::Quit;
 				break;
 			}
 		}
@@ -125,13 +124,13 @@ void IntroMain(void)
 	switch (curSelect)
 	{
 	case START:
-		introButton.Drawing2(0, 605, 392, g_lpSecondarySurface, true);
+		introButton.Drawing2(0, 880, 555, g_lpSecondarySurface, true);
 		break;
 	case OPTION:
-		introButton.Drawing2(1, 605, 417, g_lpSecondarySurface, true);
+		introButton.Drawing2(1, 880, 417, g_lpSecondarySurface, true);
 		break;
 	case QUIT:
-		introButton.Drawing2(2, 605, 439, g_lpSecondarySurface, true);
+		introButton.Drawing2(2, 880, 620, g_lpSecondarySurface, true);
 		break;
 	}
 

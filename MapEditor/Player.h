@@ -3,25 +3,24 @@
 #include "GameObject.h"
 
 class Arrow;
-class CSprite8;
+class Sprite8;
 class CSptire;
 
 class Player : public GameObject
 {
 public:
 	Player();
-	~Player();
-	bool GetIsRoll();
+	~Player() = default;
+	bool GetIsRoll() const;
 	void SetArrow(Arrow* arrow);
-	Arrow* GetCurArrow();
-	void Initialize(int x, int y, int currentFrame, int frameInterval, int moveInterval,
-	                int skillFrameInterval);
-	void SetWalkSprite(CSprite8* sprite);
-	void SetRollSprite(CSprite8* sprite);
-	void SetDeadSprite(CSprite8* sprite);
+	Arrow* GetCurArrow() const;
+	void Initialize(int x, int y, int currentFrame, int frameInterval, int moveInterval, int skillFrameInterval);
+	void SetWalkSprite(Sprite8* spritePtr);
+	void SetRollSprite(Sprite8* spritePtr);
+	void SetDeadSprite(Sprite8* spritePtr);
 	void SetSpriteAndHitRect();
-	void SetBowSprite(CSprite8* _walk, CSprite8* _roll, CSprite8* _attack);
-	void SetSkillSprite(Sprite* _skill);
+	void SetBowSprite(Sprite8* _walk, Sprite8* _roll, Sprite8* _attack);
+	void SetSkillSprite(Sprite* spritePtr);
 	void Draw(LPDIRECTDRAWSURFACE7 surface);
 	void CheckUseSkill();
 	void Skill();
@@ -34,49 +33,119 @@ public:
 	bool CanMove(); //이동 가능 여부 확인
 	void MoveANDCheckState();
 	void MoveInit();
-	bool IsArrowReady();
-	float GetSpeedX();
-	float GetSpeedY();
-	float GetSkillCoolTimePercent();
-	float GetRollCoolTimePercent();
-	bool IsArrowNull();
-	bool IsUsingSkill();
+	bool IsArrowReady() const;
+	float GetSpeedX() const;
+	float GetSpeedY() const;
+	float GetSkillCoolTimePercent() const;
+	float GetRollCoolTimePercent() const;
+	bool IsArrowNull() const;
+	bool IsUsingSkill() const;
 	void CheckWallCollision(); //충돌검사
-	int GetHp();
+	int GetHp() const;
 	void CreateSkillArrow();
 	void CheckKeyBoard();
 private:
 	enum { SkillCoolTime = 10000, RollCoolTime = 1000 };
-	bool m_bIsSkill; //스킬 사용 체크
-	bool m_bIsMove; //이동중 체크
-	bool m_bIsUseBow;
-	bool m_bIsRoll;
-	system_clock::time_point m_nLastMoveTime;
-	int m_nMoveInterval;
-	system_clock::time_point m_nLastSkillTime;
-	system_clock::time_point m_nLastRollTime;
-	float m_nSpeedX;
-	float m_nSpeedY;
-	float m_nOldX;
-	float m_nOldY;
-	float m_nMoveSpeedFold; //움직임 속도의 배율(1이 기본, 2는 2배)
-	int draw_x; //캐릭터를 화면에 그려줄때 그려주는 x좌표
-	int draw_y; //캐릭터를 화면에 그려줄때 그려주는 y좌표
-	int m_nHp;
-	RECT walkHitRect[8];
-	RECT rollHitRect[8][6];
+	bool mIsSkill; //스킬 사용 체크
+	bool mIsMove; //이동중 체크
+	bool mIsUseBow;
+	bool mIsRoll;
+	system_clock::time_point mLastMoveTime;
+	int mMoveInterval;
+	system_clock::time_point mLastSkillTime;
+	system_clock::time_point mLastRollTime;
+	float mSpeedX;
+	float mSpeedY;
+	float mOldX;
+	float mOldY;
+	float mMoveSpeedFold; //움직임 속도의 배율(1이 기본, 2는 2배)
+	int mDrawX; //캐릭터를 화면에 그려줄때 그려주는 x좌표
+	int mDrawY; //캐릭터를 화면에 그려줄때 그려주는 y좌표
+	int mHp;
+	RECT mWalkHitRect[8];
+	RECT mRollHitRect[8][6];
 
-	Arrow* curArrow;
-	Sprite* m_pCurSprite;
-	Sprite* m_pOldSprite;
-	Sprite* m_pCurBowSprite;
-	Sprite* m_pOldBowSprite;
-	Sprite* m_pSkillSprite;
+	Arrow* mCurArrowPtr;
+	Sprite* mCurSpritePtr;
+	Sprite* mOldSpritePtr;
+	Sprite* mCurBowSpritePtr;
+	Sprite* mOldBowSpritePtr;
+	Sprite* mSkillSpritePtr;
 
-	CSprite8* m_pWalkSprite;
-	CSprite8* m_pRollSprite;
-	CSprite8* m_pDeadSprite;
-	CSprite8* m_pBowWalkSprite;
-	CSprite8* m_pBow_RollSprite;
-	CSprite8* m_pBow_AttackSprite;
+	Sprite8* mWalkSpritePtr;
+	Sprite8* mRollSpritePtr;
+	Sprite8* mDeadSpritePtr;
+	Sprite8* mBowWalkSpritePtr;
+	Sprite8* mBowRollSpritePtr;
+	Sprite8* mBowAttackSpritePtr;
 };
+
+inline void Player::SetWalkSprite(Sprite8* spritePtr)
+{
+	mWalkSpritePtr = spritePtr;
+}
+
+inline void Player::SetRollSprite(Sprite8* spritePtr)
+{
+	mRollSpritePtr = spritePtr;
+}
+
+inline void Player::SetDeadSprite(Sprite8* spritePtr)
+{
+	mDeadSpritePtr = spritePtr;
+}
+
+inline void Player::SetSkillSprite(Sprite* spritePtr)
+{
+	mSkillSpritePtr = spritePtr;
+}
+
+inline Arrow* Player::GetCurArrow() const
+{
+	return mCurArrowPtr;
+}
+
+inline bool Player::IsUsingSkill() const
+{
+	return mIsSkill;
+}
+
+inline int Player::GetHp() const
+{
+	return mHp;
+}
+
+inline bool Player::GetIsRoll() const
+{
+	return mIsRoll;
+}
+
+inline void Player::Left()
+{
+	mSpeedX -= mMoveSpeed * mMoveSpeedFold * Timer::GetDeltaTime();
+}
+
+inline void Player::Right()
+{
+	mSpeedX += mMoveSpeed * mMoveSpeedFold * Timer::GetDeltaTime();
+}
+
+inline void Player::Up()
+{
+	mSpeedY -= mMoveSpeed * mMoveSpeedFold * Timer::GetDeltaTime();
+}
+
+inline void Player::Down()
+{
+	mSpeedY += mMoveSpeed * mMoveSpeedFold * Timer::GetDeltaTime();
+}
+
+inline float Player::GetSpeedX() const
+{
+	return mSpeedX;
+}
+
+inline float Player::GetSpeedY() const
+{
+	return mSpeedY;
+}

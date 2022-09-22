@@ -1,7 +1,4 @@
 #include "Vector2.h"
-#include <corecrt_math.h>
-
-#include <cmath>
 
 #define PI 3.141592f
 
@@ -11,9 +8,9 @@ Vector2::Vector2()
 {
 }
 
-Vector2::Vector2(float x_, float y_)
-	: x(x_)
-	, y(y_)
+Vector2::Vector2(float x, float y)
+	: x(x)
+	, y(y)
 {
 }
 
@@ -23,37 +20,19 @@ void Vector2::SetXY(float x_, float y_)
 	y = y_;
 }
 
-Vector2 Vector2::operator-(Vector2 vec)
+Vector2 Vector2::Normalize() const
 {
-	return Vector2(this->x - vec.x, this->y - vec.y);
-}
-
-float Vector2::Length() const
-{
-	return sqrtf(x * x + y * y);
-}
-
-float Vector2::Distance(Vector2 v1, Vector2 v2)
-{
-	return (v2 - v1).Length();
-}
-
-float Vector2::norm() const
-{
-	return std::hypot(x, y);
-}
-
-Vector2 Vector2::normalize() const
-{
-	Vector2 vec = Vector2(x / norm(), y / norm());
+	Vector2 vec = Vector2(x / Norm(), y / Norm());
 	if (vec.x > 1)
 		vec.x = 1;
 	else if (vec.x < -1)
 		vec.x = -1;
+
 	if (vec.y > 1)
 		vec.y = 1;
 	else if (vec.y < -1)
 		vec.y = -1;
+
 	return vec;
 }
 
@@ -62,13 +41,13 @@ void Vector2::Rotate(float degrees)
 	float sin = sinf(degrees * (PI * 2) / 360);
 	float cos = cosf(degrees * (PI * 2) / 360);
 
-	float tx = x;
-	float ty = y;
-	x = (cos * tx) - (sin * ty);
-	y = (sin * tx) + (cos * ty);
+	float tX = x;
+	float tY = y;
+	x = (cos * tX) - (sin * tY);
+	y = (sin * tX) + (cos * tY);
 }
 
-int Vector2::VectorToAngle()
+int Vector2::VectorToAngle() const
 {
 	Vector2 a = Vector2(x, -y);
 	if (a.x > 1)
@@ -79,12 +58,11 @@ int Vector2::VectorToAngle()
 		a.y = 1;
 	else if (a.y < -1)
 		a.y = -1;
-	//Vector2 a = Vector2(-tmp.y,tmp.x);
 
 	float angle = acos(a.x) * 180 / PI;
 
 	Vector2 toDir = Vector2(1, 0) - Vector2(x, y);
-	toDir = toDir.normalize();
+	toDir = toDir.Normalize();
 	float cross = (toDir.x * 0) - (toDir.y * 1); //어느방향으로 돌지 계산
 
 	//float angle = acosf((toDir.x * m_direction.x) + (toDir.y * m_direction.y));		//두 벡터의 내각(0~180 양수)
@@ -107,5 +85,5 @@ int Vector2::VectorToAngle()
 
 	//출처: https://3dmpengines.tistory.com/174 [3DMP]
 
-	return (int)angle;
+	return angle;
 }

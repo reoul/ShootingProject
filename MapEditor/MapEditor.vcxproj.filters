@@ -93,9 +93,6 @@
     <ClCompile Include="Fireblock.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Enemy.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="SkillUI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -168,9 +165,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Fireblock.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Enemy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SkillUI.h">

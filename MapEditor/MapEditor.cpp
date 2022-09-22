@@ -1,5 +1,4 @@
 #include "MapEditor.h"
-#include <stdio.h>
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -18,14 +17,22 @@ extern WorldMap bossMapRoof;
 extern WorldMap* curEditMap;
 
 
-extern EDIT_STATE curEditState;
-extern EDIT_WINDOW curEditWindow;
+extern EEditState curEditState;
+extern EEditWindow curEditWindow;
 extern vector<int> wallBlockData3;
 extern vector<Vector2> wallBlock;
 
 vector<int> split(string input, char delimiter);
 
-MAPEDITOR::MAPEDITOR()
+MapEditor::MapEditor()
+	: mStartX(0)
+	, mStartY(0)
+	, mEndX(0)
+	, mEndY(0)
+	, mIsChoiceWindow(false)
+	, mWindowPtr(nullptr)
+	, mBlockDataArr{}
+	, mBlockDataArr2{}
 {
 	ifstream wallDataFile;
 	wallDataFile.open("data\\wallData3.txt");
@@ -33,16 +40,16 @@ MAPEDITOR::MAPEDITOR()
 	{
 		while (!wallDataFile.eof())
 		{
-			std::getline(wallDataFile, wallData);
+			std::getline(wallDataFile, mWallData);
 		}
 		wallDataFile.close(); //파일 닫아줍니다.
 	}
-	if (wallData.size() > 0)
+	if (!mWallData.empty())
 	{
-		wallBlockData3 = split(wallData, ' ');
+		wallBlockData3 = split(mWallData, ' ');
 		for (int i = 0; i < wallBlockData3.size(); i += 2)
 		{
-			wallBlock.push_back(Vector2(wallBlockData3[i], wallBlockData3[i + 1]));
+			wallBlock.emplace_back(wallBlockData3[i], wallBlockData3[i + 1]);
 		}
 	}
 }
@@ -64,98 +71,67 @@ vector<int> split(string input, char delimiter)
 	return answer;
 }
 
-MAPEDITOR::~MAPEDITOR()
+void MapEditor::Initialize()
 {
+	mWindowPtr = make_shared<ChoiceWindow>();
+	mWindowPtr->Initialize();
 }
 
-void MAPEDITOR::Initialize()
+void MapEditor::CheckChoiceWindow(int x, int y)
 {
-	window = new ChoiceWindow();
-	window->Initialize();
-}
-
-void MAPEDITOR::CheckChoiceWindow(int x, int y)
-{
-	if (window->GetRect().left < x && window->GetRect().top < y && window->GetRect().right > x && window->GetRect().
+	if (mWindowPtr->GetRect().left < x && mWindowPtr->GetRect().top < y && mWindowPtr->GetRect().right > x && mWindowPtr->GetRect().
 		bottom > y)
-		isChoiceWindow = true;
+		mIsChoiceWindow = true;
 	else
-		isChoiceWindow = false;
+		mIsChoiceWindow = false;
 }
 
-bool MAPEDITOR::IsChoiceWindow()
-{
-	return isChoiceWindow;
-}
-
-void MAPEDITOR::SetStartXY(int x, int y)
-{
-	m_startX = x / DEFAULT_BLOCK_SIZE;
-	m_startY = y / DEFAULT_BLOCK_SIZE;
-}
-
-void MAPEDITOR::SetEndXY(int x, int y)
+void MapEditor::SetEndXY(int x, int y)
 {
 	int _x = x / DEFAULT_BLOCK_SIZE;
 	int _y = y / DEFAULT_BLOCK_SIZE;
 
-	if (m_startX > _x)
+	if (mStartX > _x)
 	{
-		m_endX = m_startX;
-		m_startX = _x;
+		mEndX = mStartX;
+		mStartX = _x;
 	}
 	else
-		m_endX = _x;
+		mEndX = _x;
 
-	if (m_startY > _y)
+	if (mStartY > _y)
 	{
-		m_endY = m_startY;
-		m_startY = _y;
+		mEndY = mStartY;
+		mStartY = _y;
 	}
 	else
-		m_endY = _y;
+		mEndY = _y;
 }
 
-void MAPEDITOR::SetBlock(Block blocks[][BLOCK_X], Sprite* curBlock)
+void MapEditor::SetBlock(Block blocks[][BLOCK_X], Sprite* curBlock)
 {
 	int tmp = curBlock->GetNumber();
 	char tmp2[10];
 	sprintf_s(tmp2, "%d", tmp);
-	for (int i = m_startX; i < m_endX + 1; i++)
+	for (int i = mStartX; i < mEndX + 1; i++)
 	{
-		for (int j = m_startY; j < m_endY + 1; j++)
+		for (int j = mStartY; j < mEndY + 1; j++)
 		{
 			blocks[j][i].Initialize(curBlock, (i * DEFAULT_BLOCK_SIZE), (j * DEFAULT_BLOCK_SIZE), 0, 150);
 			blocks[j][i].SetSprite(curBlock);
-			blocks[j][i].SetState(OBJECT_TYPE::EDITOR_BLOCK);
-			memcpy(m_pBlockData + (j * BLOCK_X) + i * 2, &tmp2, 2);
+			blocks[j][i].SetState(EObjectType::EditorBlock);
+			memcpy(mBlockDataArr + (j * BLOCK_X) + i * 2, &tmp2, 2);
 			string aa = "";
 			aa += to_string(i);
 			aa += " ";
 			aa += to_string(j);
 			aa += " ";
-			wallData += aa;
-			//blocks[j][i].GetSprite()->GetBMP()->SaveWorldBMP((i * DEFAULT_BLOCK_SIZE), (j * DEFAULT_BLOCK_SIZE), curEditMap->GetBMPBuffer(), curEditMap->GetBMPBuffer2());
+			mWallData += aa;
 		}
 	}
 }
 
-ChoiceWindow* MAPEDITOR::GetChoiceWindow()
-{
-	return window;
-}
-
-char* MAPEDITOR::GetBlockData()
-{
-	return m_pBlockData;
-}
-
-char* MAPEDITOR::GetBlockData2()
-{
-	return m_pBlockData2;
-}
-
-void MAPEDITOR::SaveWallData()
+void MapEditor::SaveWallData() const
 {
 	string filePath = "data\\wallData3.txt";
 
@@ -163,7 +139,7 @@ void MAPEDITOR::SaveWallData()
 	ofstream writeFile(filePath.data());
 	if (writeFile.is_open())
 	{
-		writeFile << wallData;
+		writeFile << mWallData;
 		writeFile.close();
 	}
 }

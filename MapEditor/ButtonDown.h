@@ -8,7 +8,7 @@ public:
 	void KeyDown();
 	void KeyCheckUp();
 	void KeyInitDown();
-	bool KeyCheckClick();
+	bool KeyCheckClick() const;
 private:
 	int count;
 	bool m_bIsDown;

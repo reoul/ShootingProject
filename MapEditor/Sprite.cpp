@@ -7,7 +7,7 @@
 #include "SettingData.h"
 #include "Boss.h"
 
-#define pi 3.141592
+#define PI 3.141592
 
 static RECT destRect;
 static RECT destRect2;
@@ -15,6 +15,16 @@ extern Camera camera;
 extern Boss boss;
 
 Sprite::Sprite()
+	: mFrame(0)
+	, mWidth(0)
+	, mHeight(0)
+	, mDrawWidth(0)
+	, mDrawHeight(0)
+	, mSize(1)
+	, mNumber(0)
+	, mSurfacePtr(nullptr)
+	, mDrawSurfacePtr(nullptr)
+	, mBMPArray(nullptr)
 {
 	destRect.left = 0;
 	destRect.top = 0;
@@ -25,54 +35,20 @@ Sprite::Sprite()
 	destRect2.top = -1200;
 	destRect2.right = 800;
 	destRect2.bottom = 0;
-
-	m_ppSurface = NULL;
-	m_ppDrawSurface = NULL;
-	m_nFrame = 0;
-	m_pBMPArray = NULL;
 }
 
-Sprite::~Sprite()
+bool Sprite::InitSprite(int frame, int width, int nHeight, int colorKey, LPDIRECTDRAW7 pDirectDraw)
 {
-	if (m_ppSurface)
-		delete[] m_ppSurface;
-
-	if (m_ppDrawSurface)
-		delete[] m_ppDrawSurface;
-
-	if (m_pBMPArray)
-		delete[] m_pBMPArray;
-}
-
-Bmp* Sprite::GetBMP()
-{
-	return m_pBMPArray;
-}
-
-bool Sprite::InitSprite(int nFrame, int nWidth, int nHeight, int nColorKey, LPDIRECTDRAW7 pDirectDraw)
-{
-	if (m_ppSurface)
-		delete[] m_ppSurface;
-
-	if (m_ppDrawSurface)
-		delete[] m_ppDrawSurface;
-
-	if (m_pBMPArray)
-		delete[] m_pBMPArray;
-
-	m_ppSurface = new LPDIRECTDRAWSURFACE7[nFrame];
-
-	if (!m_ppSurface)
+	mSurfacePtr = make_unique<LPDIRECTDRAWSURFACE7[]>(frame);
+	if (!mSurfacePtr)
 		return false;
 
-	m_ppDrawSurface = new LPDIRECTDRAWSURFACE7[nFrame];
-
-	if (!m_ppDrawSurface)
+	mDrawSurfacePtr = make_unique<LPDIRECTDRAWSURFACE7[]>(frame);
+	if (!mDrawSurfacePtr)
 		return false;
 
-	m_pBMPArray = new Bmp[nFrame];
-
-	if (!m_pBMPArray)
+	mBMPArray = make_unique<Bmp[]>(frame);
+	if (!mBMPArray)
 		return false;
 
 	DDSURFACEDESC2 ddsd;
@@ -80,101 +56,98 @@ bool Sprite::InitSprite(int nFrame, int nWidth, int nHeight, int nColorKey, LPDI
 	ZeroMemory(&ddsd, sizeof(ddsd));
 	ddsd.dwSize = sizeof(ddsd);
 	ddsd.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
-
 	ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
-
 	ddsd.dwHeight = nHeight;
-
-	ddsd.dwWidth = nWidth;
+	ddsd.dwWidth = width;
 
 	DDCOLORKEY ddck;
-	ddck.dwColorSpaceLowValue = ddck.dwColorSpaceHighValue = nColorKey;
+	ddck.dwColorSpaceLowValue = ddck.dwColorSpaceHighValue = colorKey;
 
-	for (int i = 0; i < nFrame; i++)
+	for (int i = 0; i < frame; i++)
 	{
-		if (FAILED(pDirectDraw->CreateSurface(&ddsd, &m_ppSurface[i], NULL)))
+		if (FAILED(pDirectDraw->CreateSurface(&ddsd, &mSurfacePtr[i], NULL)))
 		{
-			m_ppSurface[i] = NULL;
+			mSurfacePtr[i] = nullptr;
 			return false;
 		}
 		else
 		{
-			m_ppSurface[i]->SetColorKey(DDCKEY_SRCBLT, &ddck);
+			mSurfacePtr[i]->SetColorKey(DDCKEY_SRCBLT, &ddck);
 		}
 
-		if (FAILED(pDirectDraw->CreateSurface(&ddsd, &m_ppDrawSurface[i], NULL)))
+		if (FAILED(pDirectDraw->CreateSurface(&ddsd, &mDrawSurfacePtr[i], NULL)))
 		{
-			m_ppDrawSurface[i] = NULL;
+			mDrawSurfacePtr[i] = nullptr;
 			return false;
 		}
 		else
 		{
-			m_ppDrawSurface[i]->SetColorKey(DDCKEY_SRCBLT, &ddck);
+			mDrawSurfacePtr[i]->SetColorKey(DDCKEY_SRCBLT, &ddck);
 		}
 	}
 
-	m_nWidth = nWidth;
-	m_nHeight = nHeight;
-	m_nFrame = nFrame;
-	m_nSize = 1;
-	number = 0;
+	mWidth = width;
+	mHeight = nHeight;
+	mFrame = frame;
+	mSize = 1;
+	mNumber = 0;
 
-	draw_Height = m_nHeight * m_nSize;
-	draw_Width = m_nWidth * m_nSize;
+	mDrawHeight = mHeight * mSize;
+	mDrawWidth = mWidth * mSize;
 
 	return true;
 }
 
-bool Sprite::LoadFrame(int nFrame, char* filename)
+bool Sprite::LoadFrame(int frame, const char* filePath) const
 {
-	if (!m_pBMPArray[nFrame].LoadBMPFile(filename))
+	if (!mBMPArray[frame].LoadBMPFile(filePath))
 		return false;
-	if (!m_pBMPArray[nFrame].CopyBufferToSurface(m_ppSurface[nFrame]))
+	if (!mBMPArray[frame].CopyBufferToSurface(mSurfacePtr[frame]))
 		return false;
-	if (!m_pBMPArray[nFrame].CopyBufferToSurface(m_ppDrawSurface[nFrame]))
+	if (!mBMPArray[frame].CopyBufferToSurface(mDrawSurfacePtr[frame]))
 		return false;
 	return true;
 }
 
-bool Sprite::Drawing(int nFrame, int x, int y, LPDIRECTDRAWSURFACE7 pSurface, bool bUsingColorKey)
+bool Sprite::Drawing(int frame, int x, int y, LPDIRECTDRAWSURFACE7 pSurface, bool bUsingColorKey) const
 {
 	RECT destRect; //출력 영역 설정 변수
 	RECT destRect2; //원본 이미지 영역 설정 변수
 
-	destRect.left = x - (draw_Width >> 1);
-	destRect.top = y - (draw_Height >> 1);
-	destRect.right = destRect.left + draw_Width;
-	destRect.bottom = destRect.top + draw_Height;
+	destRect.left = x - (mDrawWidth >> 1);
+	destRect.top = y - (mDrawHeight >> 1);
+	destRect.right = destRect.left + mDrawWidth;
+	destRect.bottom = destRect.top + mDrawHeight;
 
 	destRect2.left = 0;
 	destRect2.top = 0;
-	destRect2.right = m_nWidth;
-	destRect2.bottom = m_nHeight;
+	destRect2.right = mWidth;
+	destRect2.bottom = mHeight;
 
 	if (destRect.top < 0)
 	{
-		destRect2.top = -destRect.top / m_nSize;
+		destRect2.top = -destRect.top / mSize;
 		destRect.top = 0;
-		if (destRect2.top > m_nHeight)
+		if (destRect2.top > mHeight)
 			return true;
 	}
 	if (destRect.left < 0)
 	{
-		destRect2.left = -destRect.left / m_nSize;
+		destRect2.left = -destRect.left / mSize;
 		destRect.left = 0;
-		if (destRect2.left > m_nWidth)
+		if (destRect2.left > mWidth)
 			return true;
 	}
 	if (destRect.right > SCREEN_WIDTH)
 	{
-		destRect2.right = m_nWidth - (destRect.right - SCREEN_WIDTH) / m_nSize;
+		destRect2.right = mWidth - (destRect.right - SCREEN_WIDTH) / mSize;
 		destRect.right = SCREEN_WIDTH;
 		if (destRect2.right < 0)
 			return true;
 	}
 	if (destRect.bottom > SCREEN_HEIGHT)
 	{
-		destRect2.bottom = m_nHeight - (destRect.bottom - SCREEN_HEIGHT) / m_nSize;
+		destRect2.bottom = mHeight - (destRect.bottom - SCREEN_HEIGHT) / mSize;
 		destRect.bottom = SCREEN_HEIGHT;
 		if (destRect2.bottom < 0)
 			return true;
@@ -184,32 +157,35 @@ bool Sprite::Drawing(int nFrame, int x, int y, LPDIRECTDRAWSURFACE7 pSurface, bo
 	if (bUsingColorKey)
 	{
 		if (FAILED(
-			hResult = pSurface->Blt(&destRect, m_ppDrawSurface[nFrame], &destRect2, DDBLT_WAIT | DDBLT_KEYSRC, NULL)))
+			hResult = pSurface->Blt(&destRect, mDrawSurfacePtr[frame], &destRect2, DDBLT_WAIT | DDBLT_KEYSRC, NULL)))
+		{
 			if (hResult == DDERR_SURFACELOST)
 				return (Restore());
-			else
-				return false;
+			return false;
+		}
+			
 	}
 	else
 	{
-		if (FAILED(hResult = pSurface->Blt(&destRect, m_ppDrawSurface[nFrame], &destRect2, DDBLT_WAIT, NULL)))
+		if (FAILED(hResult = pSurface->Blt(&destRect, mDrawSurfacePtr[frame], &destRect2, DDBLT_WAIT, NULL)))
+		{
 			if (hResult == DDERR_SURFACELOST)
 				return (Restore());
-			else
-				return false;
+			return false;
+		}
 	}
 
 	return true;
 }
 
-bool Sprite::Drawing(RECT rect, LPDIRECTDRAWSURFACE7 pSurface, bool bUsingColorKey)
+bool Sprite::Drawing(RECT rect, LPDIRECTDRAWSURFACE7 pSurface, bool bUsingColorKey) const
 {
 	RECT destRect2;
 
 	destRect2.left = 0;
 	destRect2.top = 0;
-	destRect2.right = m_nWidth;
-	destRect2.bottom = m_nHeight;
+	destRect2.right = mWidth;
+	destRect2.bottom = mHeight;
 
 	float size = (rect.right - rect.left) / destRect2.right;
 
@@ -217,26 +193,26 @@ bool Sprite::Drawing(RECT rect, LPDIRECTDRAWSURFACE7 pSurface, bool bUsingColorK
 	{
 		destRect2.top = -rect.top / size;
 		rect.top = 0;
-		if (destRect2.top > m_nHeight)
+		if (destRect2.top > mHeight)
 			return true;
 	}
 	if (rect.left < 0)
 	{
 		destRect2.left = -rect.left / size;
 		rect.left = 0;
-		if (destRect2.left > m_nWidth)
+		if (destRect2.left > mWidth)
 			return true;
 	}
 	if (rect.right > SCREEN_WIDTH)
 	{
-		destRect2.right = m_nWidth - (rect.right - SCREEN_WIDTH) / size;
+		destRect2.right = mWidth - (rect.right - SCREEN_WIDTH) / size;
 		rect.right = SCREEN_WIDTH;
 		if (destRect2.right < 0)
 			return true;
 	}
 	if (rect.bottom > SCREEN_HEIGHT)
 	{
-		destRect2.bottom = m_nHeight - (rect.bottom - SCREEN_HEIGHT) / size;
+		destRect2.bottom = mHeight - (rect.bottom - SCREEN_HEIGHT) / size;
 		rect.bottom = SCREEN_HEIGHT;
 		if (destRect2.bottom < 0)
 			return true;
@@ -245,150 +221,116 @@ bool Sprite::Drawing(RECT rect, LPDIRECTDRAWSURFACE7 pSurface, bool bUsingColorK
 	HRESULT hResult;
 	if (bUsingColorKey)
 	{
-		if (FAILED(hResult = pSurface->Blt(&rect, m_ppDrawSurface[0], &destRect2, DDBLT_WAIT | DDBLT_KEYSRC, NULL)))
+		if (FAILED(hResult = pSurface->Blt(&rect, mDrawSurfacePtr[0], &destRect2, DDBLT_WAIT | DDBLT_KEYSRC, NULL)))
+		{
 			if (hResult == DDERR_SURFACELOST)
 				return (Restore());
-			else
-				return false;
+			return false;
+		}
 	}
 	else
 	{
-		if (FAILED(hResult = pSurface->Blt(&rect, m_ppDrawSurface[0], &destRect2, DDBLT_WAIT, NULL)))
+		if (FAILED(hResult = pSurface->Blt(&rect, mDrawSurfacePtr[0], &destRect2, DDBLT_WAIT, NULL)))
+		{
 			if (hResult == DDERR_SURFACELOST)
 				return (Restore());
-			else
-				return false;
+			return false;
+		}
 	}
 
 	return true;
 }
 
-bool Sprite::DrawingBossHp(int nFrame, int x, int y, LPDIRECTDRAWSURFACE7 pSurface, bool bUsingColorKey)
+bool Sprite::DrawingBossHp(int frame, int x, int y, LPDIRECTDRAWSURFACE7 pSurface, bool bUsingColorKey) const
 {
 	RECT destRect; //출력 영역 설정 변수
 	RECT destRect2; //원본 이미지 영역 설정 변수
 
-	destRect.left = x - (draw_Width >> 1);
-	destRect.top = y - (draw_Height >> 1) + (draw_Height * ((1000 - boss.m_nHp) * 0.001f)); // 보스 체력 깍인 만큼 체력 부분 줄여줌
-	destRect.right = destRect.left + draw_Width;
-	destRect.bottom = y - (draw_Height >> 1) + draw_Height;
+	destRect.left = x - (mDrawWidth >> 1);
+	destRect.top = y - (mDrawHeight >> 1) + (mDrawHeight * ((1000 - boss.GetHp()) * 0.001f)); // 보스 체력 깍인 만큼 체력 부분 줄여줌
+	destRect.right = destRect.left + mDrawWidth;
+	destRect.bottom = y - (mDrawHeight >> 1) + mDrawHeight;
 
 	destRect2.left = 0;
-	destRect2.top = m_nHeight * ((1000 - boss.m_nHp) * 0.001f);
-	destRect2.right = m_nWidth;
-	destRect2.bottom = m_nHeight;
+	destRect2.top = mHeight * ((1000 - boss.GetHp()) * 0.001f);
+	destRect2.right = mWidth;
+	destRect2.bottom = mHeight;
 
 	HRESULT hResult;
 	if (bUsingColorKey)
 	{
 		if (FAILED(
-			hResult = pSurface->Blt(&destRect, m_ppDrawSurface[nFrame], &destRect2, DDBLT_WAIT | DDBLT_KEYSRC, NULL)))
+			hResult = pSurface->Blt(&destRect, mDrawSurfacePtr[frame], &destRect2, DDBLT_WAIT | DDBLT_KEYSRC, NULL)))
+		{
 			if (hResult == DDERR_SURFACELOST)
 				return (Restore());
-			else
-				return false;
+			return false;
+		}
 	}
 	else
 	{
-		if (FAILED(hResult = pSurface->Blt(&destRect, m_ppDrawSurface[nFrame], &destRect2, DDBLT_WAIT, NULL)))
+		if (FAILED(hResult = pSurface->Blt(&destRect, mDrawSurfacePtr[frame], &destRect2, DDBLT_WAIT, NULL)))
+		{
 			if (hResult == DDERR_SURFACELOST)
 				return (Restore());
-			else
-				return false;
+			return false;
+		}
 	}
 
 	return true;
 }
 
-bool Sprite::Restore()
+bool Sprite::Restore() const
 {
-	if (!m_ppSurface)
+	if (!mSurfacePtr)
 		return false;
-	if (!m_ppDrawSurface)
+	if (!mDrawSurfacePtr)
 		return false;
 
-	for (int i = 0; i < m_nFrame; i++)
+	for (int i = 0; i < mFrame; i++)
 	{
-		if (!m_ppSurface[i])
+		if (!mSurfacePtr[i])
 			return false;
 
-		if (!m_ppDrawSurface[i])
+		if (!mDrawSurfacePtr[i])
 			return false;
 
-		if (FAILED(m_ppSurface[i]->Restore()))
+		if (FAILED(mSurfacePtr[i]->Restore()))
 			return false;
 
-		if (FAILED(m_ppDrawSurface[i]->Restore()))
+		if (FAILED(mDrawSurfacePtr[i]->Restore()))
 			return false;
 
-		if (!m_pBMPArray[i].CopyBufferToSurface(m_ppSurface[i]))
+		if (!mBMPArray[i].CopyBufferToSurface(mSurfacePtr[i]))
 			return false;
 
-		if (!m_pBMPArray[i].CopyBufferToSurface(m_ppDrawSurface[i]))
+		if (!mBMPArray[i].CopyBufferToSurface(mDrawSurfacePtr[i]))
 			return false;
 	}
 	return true;
 }
 
-int Sprite::GetNumberOfFrame()
+bool Sprite::ReleaseAll() const
 {
-	return m_nFrame;
-}
-
-void Sprite::SetSize(float _size)
-{
-	m_nSize = _size;
-
-	draw_Height = m_nHeight * m_nSize;
-	draw_Width = m_nWidth * m_nSize;
-}
-
-void Sprite::SetNumber(int _number)
-{
-	number = _number;
-}
-
-float Sprite::GetSize()
-{
-	return m_nSize;
-}
-
-int Sprite::GetNumber()
-{
-	return number;
-}
-
-int Sprite::GetWidth()
-{
-	return m_nWidth;
-}
-
-int Sprite::GetHeight()
-{
-	return m_nHeight;
-}
-
-bool Sprite::ReleaseAll()
-{
-	if (!m_ppSurface)
+	if (!mSurfacePtr)
 		return false;
 
-	if (!m_ppDrawSurface)
+	if (!mDrawSurfacePtr)
 		return false;
 
-	for (int i = 0; i < m_nFrame; i++)
+	for (int i = 0; i < mFrame; i++)
 	{
-		if (m_ppSurface[i])
-			m_ppSurface[i]->Release();
+		if (mSurfacePtr[i])
+			mSurfacePtr[i]->Release();
 
-		if (m_ppDrawSurface[i])
-			m_ppDrawSurface[i]->Release();
+		if (mDrawSurfacePtr[i])
+			mDrawSurfacePtr[i]->Release();
 	}
 
 	return true;
 }
 
-bool Sprite::Drawing2(int nFrame, int x, int y, LPDIRECTDRAWSURFACE7 pSurface, bool bUsingColorKey)
+bool Sprite::Drawing2(int frame, LPDIRECTDRAWSURFACE7 pSurface, bool bUsingColorKey) const
 {
 	if (destRect.top == 1200)
 	{
@@ -401,113 +343,116 @@ bool Sprite::Drawing2(int nFrame, int x, int y, LPDIRECTDRAWSURFACE7 pSurface, b
 
 	destRect.top++;
 	destRect.bottom++;
-
 	destRect2.top++;
 	destRect2.bottom++;
 
 	HRESULT hResult;
 	if (bUsingColorKey)
 	{
-		if (FAILED(hResult = pSurface->Blt(&destRect, m_ppDrawSurface[nFrame], NULL, DDBLT_WAIT | DDBLT_KEYSRC, NULL)))
+		if (FAILED(hResult = pSurface->Blt(&destRect, mDrawSurfacePtr[frame], NULL, DDBLT_WAIT | DDBLT_KEYSRC, NULL)))
+		{
 			if (hResult == DDERR_SURFACELOST)
 				return (Restore());
-			else
-				return false;
+			return false;
+		}
 	}
 	else
 	{
-		if (FAILED(hResult = pSurface->Blt(&destRect2, m_ppDrawSurface[nFrame], NULL, DDBLT_WAIT, NULL)))
+		if (FAILED(hResult = pSurface->Blt(&destRect2, mDrawSurfacePtr[frame], NULL, DDBLT_WAIT, NULL)))
+		{
 			if (hResult == DDERR_SURFACELOST)
 				return (Restore());
-			else
-				return false;
+			return false;
+		}
 
-		if (FAILED(hResult = pSurface->Blt(&destRect, m_ppDrawSurface[nFrame], NULL, DDBLT_WAIT, NULL)))
+		if (FAILED(hResult = pSurface->Blt(&destRect, mDrawSurfacePtr[frame], NULL, DDBLT_WAIT, NULL)))
+		{
 			if (hResult == DDERR_SURFACELOST)
 				return (Restore());
-			else
-				return false;
+			return false;
+		}
 	}
 	return true;
 }
 
 bool Sprite::DrawingSkillCoolTime(float coolTimePercent, int x, int y, LPDIRECTDRAWSURFACE7 pSurface,
-                                  bool bUsingColorKey)
+	bool bUsingColorKey) const
 {
 	RECT destRect; //출력 영역 설정 변수
 	RECT destRect2; //원본 이미지 영역 설정 변수
 
-	destRect.left = x - (draw_Width >> 1);
-	destRect.top = y - (draw_Height >> 1);
-	destRect.right = destRect.left + draw_Width;
-	destRect.bottom = destRect.top + draw_Height;
-	destRect.top = y - (draw_Height >> 1) + m_nHeight - (int)(m_nHeight * coolTimePercent);
+	destRect.left = x - (mDrawWidth >> 1);
+	destRect.top = y - (mDrawHeight >> 1);
+	destRect.right = destRect.left + mDrawWidth;
+	destRect.bottom = destRect.top + mDrawHeight;
+	destRect.top = y - (mDrawHeight >> 1) + mHeight - static_cast<int>(mHeight * coolTimePercent);
 
 	destRect2.left = 0;
-	destRect2.top = m_nHeight - (int)(m_nHeight * coolTimePercent);
-	destRect2.right = m_nWidth;
-	destRect2.bottom = m_nHeight;
+	destRect2.top = mHeight - static_cast<int>(mHeight * coolTimePercent);
+	destRect2.right = mWidth;
+	destRect2.bottom = mHeight;
 
 	HRESULT hResult;
 	if (bUsingColorKey)
 	{
-		if (FAILED(hResult = pSurface->Blt(&destRect, m_ppDrawSurface[0], &destRect2, DDBLT_WAIT | DDBLT_KEYSRC, NULL)))
+		if (FAILED(hResult = pSurface->Blt(&destRect, mDrawSurfacePtr[0], &destRect2, DDBLT_WAIT | DDBLT_KEYSRC, NULL)))
+		{
 			if (hResult == DDERR_SURFACELOST)
 				return (Restore());
-			else
-				return false;
+			return false;
+		}
 	}
 	else
 	{
-		if (FAILED(hResult = pSurface->Blt(&destRect, m_ppDrawSurface[0], &destRect2, DDBLT_WAIT, NULL)))
+		if (FAILED(hResult = pSurface->Blt(&destRect, mDrawSurfacePtr[0], &destRect2, DDBLT_WAIT, NULL)))
+		{
 			if (hResult == DDERR_SURFACELOST)
 				return (Restore());
-			else
-				return false;
+			return false;
+		}
 	}
-
 	return true;
 }
 
-bool Sprite::BlockDrawing(int x, int y, LPDIRECTDRAWSURFACE7 pSurface, bool bUsingColorKey)
+bool Sprite::BlockDrawing(int x, int y, LPDIRECTDRAWSURFACE7 pSurface, bool bUsingColorKey) const
 {
 	RECT destRect; //출력 영역 설정 변수
 	RECT destRect2; //원본 이미지 영역 설정 변수
 
 	destRect.left = x;
 	destRect.top = y;
-	destRect.right = destRect.left + draw_Width;
-	destRect.bottom = destRect.top + draw_Height;
+	destRect.right = destRect.left + mDrawWidth;
+	destRect.bottom = destRect.top + mDrawHeight;
 
 	destRect2.left = 0;
 	destRect2.top = 0;
-	destRect2.right = m_nWidth;
-	destRect2.bottom = m_nHeight;
+	destRect2.right = mWidth;
+	destRect2.bottom = mHeight;
 
 	if (destRect.top < 0)
 	{
-		destRect2.top = -destRect.top / m_nSize;
+		destRect2.top = -destRect.top / mSize;
 		destRect.top = 0;
-		if (destRect2.top > m_nHeight)
+		if (destRect2.top > mHeight)
 			return true;
 	}
 	if (destRect.left < 0)
 	{
-		destRect2.left = -destRect.left / m_nSize;
+		destRect2.left = -destRect.left / mSize;
 		destRect.left = 0;
-		if (destRect2.left > m_nWidth)
+		if (destRect2.left > mWidth)
 			return true;
 	}
 	if (destRect.right > SCREEN_WIDTH)
 	{
-		destRect2.right = m_nWidth - (destRect.right - SCREEN_WIDTH) / m_nSize;
+		destRect2.right = mWidth - (destRect.right - SCREEN_WIDTH) / mSize;
 		destRect.right = SCREEN_WIDTH;
 		if (destRect2.right < 0)
 			return true;
 	}
 	if (destRect.bottom > SCREEN_HEIGHT)
 	{
-		destRect2.bottom = m_nHeight - (destRect.bottom - SCREEN_HEIGHT) / m_nSize;
+		destRect2.bottom = mHeight - (destRect.bottom - SCREEN_HEIGHT) / mSize;
 		destRect.bottom = SCREEN_HEIGHT;
 		if (destRect2.bottom < 0)
 			return true;
@@ -516,59 +461,58 @@ bool Sprite::BlockDrawing(int x, int y, LPDIRECTDRAWSURFACE7 pSurface, bool bUsi
 	HRESULT hResult;
 	if (bUsingColorKey)
 	{
-		if (FAILED(hResult = pSurface->Blt(&destRect, m_ppDrawSurface[0], &destRect2, DDBLT_WAIT | DDBLT_KEYSRC, NULL)))
+		if (FAILED(hResult = pSurface->Blt(&destRect, mDrawSurfacePtr[0], &destRect2, DDBLT_WAIT | DDBLT_KEYSRC, NULL)))
+		{
 			if (hResult == DDERR_SURFACELOST)
 				return (Restore());
-			else
-				return false;
+			return false;
+		}
 	}
 	else
 	{
-		if (FAILED(hResult = pSurface->Blt(&destRect, m_ppDrawSurface[0], &destRect2, DDBLT_WAIT, NULL)))
+		if (FAILED(hResult = pSurface->Blt(&destRect, mDrawSurfacePtr[0], &destRect2, DDBLT_WAIT, NULL)))
+		{
 			if (hResult == DDERR_SURFACELOST)
 				return (Restore());
-			else
-				return false;
+			return false;
+		}
 	}
-
 	return true;
 }
 
-void Sprite::Rotate(double Degree, int _curFrame)
+void Sprite::Rotate(double degree, int curFrame) const
 {
 	int x, y;
 
-	int orig_x, orig_y;
+	int origX, origY;
 
-	unsigned char* pixel = new unsigned char[3];
+	unique_ptr<unsigned char[]> pixel = make_unique<unsigned char[]>(3);
 
-	double radian = Degree * pi / 180.0; // (1)		
+	double radian = degree * PI / 180.0;
 
-	double cc = cos(radian), ss = sin(-radian);
+	const double cc = cos(radian);
+	const double ss = sin(-radian);
 
-	double xcenter = (double)m_nWidth / 2.0, ycenter = (double)m_nHeight / 2.0; // (2)
+	const double xCenter = static_cast<double>(mWidth) / 2.0;
+	const double yCenter = static_cast<double>(mHeight) / 2.0;
 
+	unique_ptr<unsigned char[]> buffer = make_unique<unsigned char[]>(mHeight * mWidth * 4);
+	ZeroMemory(buffer.get(), mHeight * mWidth * 4);
 
-	unsigned char* buffer = new unsigned char[m_nHeight * m_nWidth * 4];
-	ZeroMemory(buffer, m_nHeight * m_nWidth * 4);
-
-	for (y = 0; y < m_nHeight; y++)
+	for (y = 0; y < mHeight; y++)
 	{
-		for (x = 0; x < m_nWidth; x++)
+		for (x = 0; x < mWidth; x++)
 		{
-			orig_x = (int)(xcenter + ((double)y - ycenter) * ss + ((double)x - xcenter) * cc);
-			orig_y = (int)(ycenter + ((double)y - ycenter) * cc - ((double)x - xcenter) * ss);
-			ZeroMemory(pixel, 3);
-			if ((orig_y >= 0 && orig_y < m_nHeight) && (orig_x >= 0 && orig_x < m_nWidth))
-				CopyMemory(pixel, m_pBMPArray->GetBMPBuffer() + (orig_x << 2) + orig_y * (m_nWidth << 2), 3); //원본 픽셀 값 추출
+			origX = static_cast<int>(xCenter + (static_cast<double>(y) - yCenter) * ss + (static_cast<double>(x) - xCenter) * cc);
+			origY = static_cast<int>(yCenter + (static_cast<double>(y) - yCenter) * cc - (static_cast<double>(x) - xCenter) * ss);
+			ZeroMemory(pixel.get(), 3);
+			if ((origY >= 0 && origY < mHeight) && (origX >= 0 && origX < mWidth))
+				CopyMemory(pixel.get(), mBMPArray.get()->GetBMPBuffer() + (origX << 2) + origY * (mWidth << 2), 3); //원본 픽셀 값 추출
 
-			if ((orig_y >= 0 && orig_y < m_nHeight) && (orig_x >= 0 && orig_x < m_nWidth)) // (4)
-				CopyMemory(buffer + (x << 2) + y * (m_nWidth << 2), pixel, 3);
+			if ((origY >= 0 && origY < mHeight) && (origX >= 0 && origX < mWidth)) // (4)
+				CopyMemory(buffer.get() + (x << 2) + y * (mWidth << 2), pixel.get(), 3);
 		}
 	}
 
-	m_pBMPArray->CopyBufferToSurface(m_ppDrawSurface[_curFrame], buffer);
-
-	delete[] pixel;
-	delete[] buffer;
+	mBMPArray.get()->CopyBufferToSurface(mDrawSurfacePtr[curFrame], buffer.get());
 }

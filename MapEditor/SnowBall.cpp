@@ -7,34 +7,29 @@ extern Camera camera;
 extern Block wall[139];
 
 SnowBall::SnowBall()
+	: mDrawX(0)
+	, mDrawY(0)
+	, mLastMoveTime(0)
+	, mMoveInterval(0)
+	, mIsUse(false)
+	, mSnowHitRect({ 24,24,24,24 })
 {
 }
 
-SnowBall::~SnowBall()
+void SnowBall::Initialize(int x, int y, int moveFrame, Sprite* spritePtr)
 {
+	mDrawX = 0;
+	mDrawY = 0;
+	mLastMoveTime = 0;
+	mMoveInterval = moveFrame;
+	GameObject::Initialize(spritePtr, x, y, 0, 0, 0);
 }
 
-void SnowBall::Initialize(int x, int y, int moveFrame, Sprite* sprite)
+void SnowBall::Draw(LPDIRECTDRAWSURFACE7 lpSurface)
 {
-	draw_x = 0;
-	draw_y = 0;
-	m_nLastMoveTime = 0;
-	m_nMoveInterval = moveFrame;
-	SetRect(&snowHitRect, 24, 24, 24, 24);
-	GameObject::Initialize(sprite, x, y, 0, 0, 0);
-}
-
-void SnowBall::SetDirection(Vector2 _direction)
-{
-	GameObject::SetDirection(_direction);
-	m_bIsUse = true;
-}
-
-void SnowBall::Draw(LPDIRECTDRAWSURFACE7 surface)
-{
-	draw_x = (int)(-(camera.GetX() - GetPos().x) + (SCREEN_WIDTH * 0.5f));
-	draw_y = (int)(-(camera.GetY() - GetPos().y) + (SCREEN_HEIGHT * 0.5f));
-	GameObject::Draw(false, draw_x, draw_y, surface);
+	mDrawX = -(camera.GetX() - GetPos().x) + (SCREEN_WIDTH * 0.5f);
+	mDrawY = -(camera.GetY() - GetPos().y) + (SCREEN_HEIGHT * 0.5f);
+	GameObject::Draw(false, mDrawX, mDrawY, lpSurface);
 }
 
 void SnowBall::CheckMove()
@@ -42,7 +37,7 @@ void SnowBall::CheckMove()
 	if (!mIsLive)
 		return;
 
-	if (Timer::Elapsed(mLastFrameTime, m_nMoveInterval))
+	if (Timer::Elapsed(mLastFrameTime, mMoveInterval))
 	{
 		SetX(GetPos().x + mDirection.x * 20);
 		SetY(GetPos().y + mDirection.y * 20);
@@ -51,37 +46,16 @@ void SnowBall::CheckMove()
 	RECT rect;
 	if (!((GetPos().x > 1200) && (GetPos().x < 2000) && (GetPos().y > 1300) && (GetPos().y < 2000)))
 	{
-		for (int i = 0; i < 139; i++)
+		for (const Block& block : wall)
 		{
-			SetRect(&rect, wall[i].GetPos().x * 32, wall[i].GetPos().y * 32, wall[i].GetPos().x * 32 + 32,
-			        wall[i].GetPos().y * 32 + 32);
+			SetRect(&rect, block.GetPos().x * 32, block.GetPos().y * 32, block.GetPos().x * 32 + 32,
+			        block.GetPos().y * 32 + 32);
 			if (CheckHit(rect))
 			{
-				/*SetX(GetX() - direction.x * 20);
-				SetY(GetY() - direction.y * 20);*/
-				m_bIsUse = false;
+				mIsUse = false;
 			}
 		}
 	}
 
-	SetHitRect(snowHitRect);
-
-	/*if (GetX() < 1100 || GetX() > 2100 || GetY() < 1100 || GetY() > 2100)
-	{
-		m_bIsUse = false;
-	}*/
-}
-
-void SnowBall::IsHit()
-{
-}
-
-void SnowBall::SetUse(bool use)
-{
-	m_bIsUse = use;
-}
-
-bool SnowBall::IsUse()
-{
-	return m_bIsUse;
+	SetHitRect(mSnowHitRect);
 }

@@ -102,7 +102,7 @@ bool InitDirectInput(void)
 
 BOOL _InitDirectSound(void)
 {
-	if (DirectSoundCreate(NULL, &SoundOBJ, NULL) == DS_OK)
+	if (DirectSoundCreate(nullptr, &SoundOBJ, nullptr) == DS_OK)
 	{
 		if (SoundOBJ->SetCooperativeLevel(g_hwnd, DSSCL_PRIORITY) != DS_OK) return FALSE;
 
@@ -110,7 +110,7 @@ BOOL _InitDirectSound(void)
 		DSB_desc.dwSize = sizeof(DSBUFFERDESC);
 		DSB_desc.dwFlags = DSBCAPS_PRIMARYBUFFER;
 
-		if (SoundOBJ->CreateSoundBuffer(&DSB_desc, &SoundDSB, NULL) != DS_OK) return FALSE;
+		if (SoundOBJ->CreateSoundBuffer(&DSB_desc, &SoundDSB, nullptr) != DS_OK) return FALSE;
 		SoundDSB->SetVolume(0);
 		SoundDSB->SetPan(0);
 

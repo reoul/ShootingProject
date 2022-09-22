@@ -23,7 +23,7 @@ system_clock::time_point Timer::Now()
 
 bool Timer::Elapsed(system_clock::time_point& time, int interval)
 {
-	const system_clock::time_point curTime = system_clock::now();
+	const system_clock::time_point curTime = Now();
 	const milliseconds intervalTime(interval);
 	if (curTime >= time + intervalTime)
 	{

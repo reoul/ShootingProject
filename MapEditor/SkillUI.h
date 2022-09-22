@@ -7,9 +7,14 @@ class SkillUI : public Gui
 {
 public:
 	SkillUI();
-	~SkillUI();
-	void SetBackGroundSprite(Sprite* sprite);
-	void Drawing(float skillCoolTimePercent, LPDIRECTDRAWSURFACE7 lpsurface);
+	~SkillUI() = default;
+	void SetBackGroundSprite(Sprite* spritePtr);
+	void Drawing(float skillCoolTimePercent, LPDIRECTDRAWSURFACE7 lpSurface) const;
 private:
-	Sprite* m_pBackGroundSprite;
+	Sprite* mBackGroundSpritePtr;
 };
+
+inline void SkillUI::SetBackGroundSprite(Sprite* spritePtr)
+{
+	mBackGroundSpritePtr = spritePtr;
+}
