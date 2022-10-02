@@ -40,7 +40,7 @@ public:
 	void SetFinishXY(int x, int y);
 	float GetExpansionSpeed() const;
 	static void AlphaBlendingThreadWorker(ThreadData* data);
-	void AlphaBlending2(LPDIRECTDRAWSURFACE7 lpSurface);
+	void AlphaBlending(LPDIRECTDRAWSURFACE7 lpSurface);
 private:
 	system_clock::time_point mLastFrameTime;
 	int mExpansionInterval;

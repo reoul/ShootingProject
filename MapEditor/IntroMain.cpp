@@ -136,7 +136,7 @@ void IntroMain(void)
 
 	if (isStart)
 	{
-		camera.AlphaBlending2(g_lpSecondarySurface);
+		camera.AlphaBlending(g_lpSecondarySurface);
 		SetVolume(Sound[1]->Buffers[0], (255 - camera.GetAlpha()) * -20);
 		if (camera.GetAlpha() <= 10)
 		{

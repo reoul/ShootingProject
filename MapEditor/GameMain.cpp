@@ -388,7 +388,7 @@ void GameMain(void)
 
 		if ((curPlayerAction == EAction::Dead) || (curBossAction == EAction::Dead) || camera.GetIsFirstAlpha())
 		{
-			camera.AlphaBlending2(g_lpSecondarySurface);
+			camera.AlphaBlending(g_lpSecondarySurface);
 			if (!camera.GetIsFirstAlpha())
 			{
 				if (camera.GetAlpha() <= 10)

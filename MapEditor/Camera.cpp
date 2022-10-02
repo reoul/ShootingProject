@@ -211,7 +211,6 @@ struct ThreadData
 	int start;
 	int end;
 	int alpha;
-	int threadCnt;
 };
 
 void Camera::AlphaBlendingThreadWorker(ThreadData* data)
@@ -232,7 +231,7 @@ void Camera::AlphaBlendingThreadWorker(ThreadData* data)
 	delete data;
 }
 
-void Camera::AlphaBlending2(LPDIRECTDRAWSURFACE7 lpSurface)
+void Camera::AlphaBlending(LPDIRECTDRAWSURFACE7 lpSurface)
 {
 	DDSURFACEDESC2 ddsd; //표면의 정보를 확인할수 있는 변수를 선언
 	ZeroMemory(&ddsd, sizeof(ddsd)); //ddsd주소에서 ddsd크기만큼 메모리영역을 0으로 채워줌
@@ -240,7 +239,7 @@ void Camera::AlphaBlending2(LPDIRECTDRAWSURFACE7 lpSurface)
 
 	lpSurface->Lock(nullptr, &ddsd, DDLOCK_WAIT, nullptr); //만약 표면을 잠금하는데 실패할경우 false를 반환해준다
 
-	unsigned char* surface = (unsigned char*)ddsd.lpSurface;
+	unsigned char* surface = static_cast<unsigned char*>(ddsd.lpSurface);
 
 	unique_ptr<unsigned char[]> rgbArr = make_unique<unsigned char[]>(SCREEN_HEIGHT * SCREEN_WIDTH * 4);
 
@@ -262,7 +261,6 @@ void Camera::AlphaBlending2(LPDIRECTDRAWSURFACE7 lpSurface)
 		data->start = height * i;
 		data->end = height * i + height;
 		data->alpha = mAlpha;
-		data->threadCnt = threadCnt;
 		threads.emplace_back(thread(AlphaBlendingThreadWorker, data));
 	}
 
