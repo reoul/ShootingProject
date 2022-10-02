@@ -11,13 +11,9 @@
 - 2021.12 ~ 2021.12 코드 리팩토링 및 확장
 - 2022.09 ~ 2022.09 전체적인 구조 변경 및 코드 리팩토링
 
-## 깃허브 링크
-
-[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=reoul&repo=ShootingProject)](https://github.com/reoul/ShootingProject)
-
 ## 플레이 영상
 
-<iframe width="720" height="405" src="https://www.youtube.com/embed/WfoJj2R4Fv0" title="타이탄 소울 모작 플레이 영상" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+- https://www.youtube.com/watch?v=WfoJj2R4Fv0
 
 ## 다양한 시도 및 구현
 
