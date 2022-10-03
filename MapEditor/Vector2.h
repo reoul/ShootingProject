@@ -11,20 +11,32 @@ public:
 	~Vector2() = default;
 	void SetXY(float x_, float y_);
 	Vector2 operator-(Vector2 vec) const;
+	Vector2 operator*(Vector2 vec) const;
 	float Length() const;
 	static float Distance(Vector2 v1, Vector2 v2);
 	float Norm() const; //벡터의 길이 반환
 	Vector2 Normalize() const;
 	void Rotate(float degrees);
-	int VectorToAngle() const;
+	int ToAngle() const;
 public:
 	float x;
 	float y;
 };
 
+inline void Vector2::SetXY(float x_, float y_)
+{
+	x = x_;
+	y = y_;
+}
+
 inline Vector2 Vector2::operator-(Vector2 vec) const
 {
-	return Vector2(this->x - vec.x, this->y - vec.y);
+	return { x - vec.x, y - vec.y };
+}
+
+inline Vector2 Vector2::operator*(Vector2 vec) const
+{
+	return { x * vec.x, y * vec.y };
 }
 
 inline float Vector2::Length() const

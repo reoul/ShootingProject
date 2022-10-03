@@ -452,11 +452,11 @@ BOOL DirectInputKeyboardDown(LPDIRECTINPUTDEVICE8 lpKeyboard, int dikcode)
 	char KeyBuffer[256];
 	HRESULT hResult;
 
-	if (lpKeyboard->GetDeviceState(256, (LPVOID)KeyBuffer) == DIERR_INPUTLOST)
+	if (lpKeyboard->GetDeviceState(256, KeyBuffer) == DIERR_INPUTLOST)
 	{
 		while (hResult = lpKeyboard->Acquire() == DIERR_INPUTLOST)
 			hResult = lpKeyboard->Acquire();
-		lpKeyboard->GetDeviceState(256, (LPVOID)KeyBuffer);
+		lpKeyboard->GetDeviceState(256, KeyBuffer);
 	}
 
 	return (KeyBuffer[dikcode] & 0x80);
@@ -467,9 +467,9 @@ bool LoadWorldMapBlock()
 	HANDLE hfile;
 	DWORD actualRead;
 
-	hfile = CreateFile(TEXT("data\\blockData.txt"), GENERIC_READ, FILE_SHARE_READ, (LPSECURITY_ATTRIBUTES)nullptr,
+	hfile = CreateFile(TEXT("data\\blockData.txt"), GENERIC_READ, FILE_SHARE_READ, nullptr,
 		OPEN_EXISTING,
-		FILE_ATTRIBUTE_NORMAL, (HANDLE)nullptr);
+		FILE_ATTRIBUTE_NORMAL, nullptr);
 
 	if (hfile == INVALID_HANDLE_VALUE)
 	{
@@ -504,9 +504,9 @@ bool LoadWorldMapBlock()
 
 	CloseHandle(hfile);
 
-	hfile = CreateFile(TEXT("data\\blockData2.txt"), GENERIC_READ, FILE_SHARE_READ, (LPSECURITY_ATTRIBUTES)nullptr,
+	hfile = CreateFile(TEXT("data\\blockData2.txt"), GENERIC_READ, FILE_SHARE_READ, nullptr,
 		OPEN_EXISTING,
-		FILE_ATTRIBUTE_NORMAL, (HANDLE)nullptr);
+		FILE_ATTRIBUTE_NORMAL, nullptr);
 
 	if (hfile == INVALID_HANDLE_VALUE)
 	{

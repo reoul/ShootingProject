@@ -121,12 +121,7 @@ void MapEditor::SetBlock(Block blocks[][BLOCK_X], Sprite* curBlock)
 			blocks[j][i].SetSprite(curBlock);
 			blocks[j][i].SetState(EObjectType::EditorBlock);
 			memcpy(mBlockDataArr + (j * BLOCK_X) + i * 2, &tmp2, 2);
-			string aa = "";
-			aa += to_string(i);
-			aa += " ";
-			aa += to_string(j);
-			aa += " ";
-			mWallData += aa;
+			mWallData += to_string(i) + " " + to_string(j) + " ";
 		}
 	}
 }

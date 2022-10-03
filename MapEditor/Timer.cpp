@@ -16,11 +16,21 @@ void Timer::Start()
 	g_timer.mStartTime = system_clock::now();
 }
 
+/**
+ * 게임이 켜져있는 시간
+ * \return 게임 시간
+ */
 system_clock::time_point Timer::Now()
 {
 	return system_clock::time_point(system_clock::now() - g_timer.mStartTime);
 }
 
+/**
+ * 현재 시간을 기준으로 해당 시간이 지났는지 확인
+ * \param time 비교 시간
+ * \param interval 시간 간격
+ * \return 시간이 지났으면 true, 아니면 false
+ */
 bool Timer::Elapsed(system_clock::time_point& time, int interval)
 {
 	const system_clock::time_point curTime = Now();

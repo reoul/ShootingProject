@@ -19,8 +19,8 @@ Bmp::Bmp()
 bool Bmp::LoadBMPFile(const char* filePath)
 {
 	DWORD actualRead;
-	HANDLE hFile = CreateFile(TEXT(filePath), GENERIC_READ, FILE_SHARE_READ, (LPSECURITY_ATTRIBUTES)nullptr,
-		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, (HANDLE)nullptr);
+	HANDLE hFile = CreateFile(TEXT(filePath), GENERIC_READ, FILE_SHARE_READ, nullptr,
+		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 
 	if (hFile == INVALID_HANDLE_VALUE)
 	{
@@ -34,6 +34,7 @@ bool Bmp::LoadBMPFile(const char* filePath)
 		CloseHandle(hFile); //핸들을 반납해주고
 		return false; //false를 반환해준다
 	}
+
 	if (bmpFileHead.bfType != 0x4D42) //비트맵파일이 아닐경우
 	{
 		CloseHandle(hFile); //핸들을 반납해주고
@@ -70,13 +71,12 @@ bool Bmp::LoadBMPFile(const char* filePath)
 	mWidth = bmpInfoHead.biWidth;
 
 	mBufferPtr = std::make_unique<unsigned char[]>(mHeight * mWidth * 4);
-	memset(mBufferPtr.get(), 0, sizeof(mHeight * mWidth * 4));
 
 	struct RBGstruct //비트맵은 RGB의 순서가 아닌 BGR순서로 저장됨
 	{
-		unsigned char B;
-		unsigned char G;
-		unsigned char R;
+		unsigned char b;
+		unsigned char g;
+		unsigned char r;
 	};
 
 	std::unique_ptr<RBGstruct[]> rgb24 = std::make_unique<RBGstruct[]>(mWidth);
@@ -201,8 +201,8 @@ bool Bmp::SaveWorldBMP(int _x, int _y, unsigned char* buffer, unsigned char* buf
 	const char* filename = "image\\map\\bossmap.bmp";
 	HANDLE hfile;
 	DWORD actualRead;
-	hfile = CreateFile(TEXT(filename), GENERIC_READ, FILE_SHARE_READ, (LPSECURITY_ATTRIBUTES)nullptr, OPEN_EXISTING,
-		FILE_ATTRIBUTE_NORMAL, (HANDLE)nullptr);
+	hfile = CreateFile(TEXT(filename), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL, nullptr);
 
 	if (hfile == INVALID_HANDLE_VALUE)
 	{

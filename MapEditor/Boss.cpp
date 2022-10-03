@@ -165,11 +165,14 @@ void Boss::CheckPlayerDirection()
 {
 	float x = player.GetPos().x - GetPos().x;
 	float y = player.GetPos().y - GetPos().y;
-	int direction = (int)sqrtf(pow(x, 2) + pow(y, 2));
+	const int direction = static_cast<int>(sqrtf(pow(x, 2) + pow(y, 2)));
 
 	mPlayerDirection.SetXY(x / direction, y / direction);
 }
 
+/**
+ * 플레이어 좌표를 기준으로 보스의 방향을 결정
+ */
 void Boss::CheckDirectionState()
 {
 	CheckPlayerDirection();
@@ -333,7 +336,7 @@ void Boss::MoveInit()
 
 void Boss::NextPattern()
 {
-	if ((EAction)mPattern[mCurPatternIndex] == EAction::Roll)
+	if (mPattern[mCurPatternIndex] == EAction::Roll)
 		mIdleFrameInterval = 1500;
 	else
 		mIdleFrameInterval = 300;

@@ -76,14 +76,14 @@ void GameObject::Draw(bool isMove, int x, int y, LPDIRECTDRAWSURFACE7 lpSurface)
 				mCurrentFrame = 0;
 		}
 
-		if (curPlayerAction != EAction::Dead)
+		if (curPlayerAction != EAction::Dead)	// 캐릭터가 살아있는 경우
 		{
 			if (mBowSprite != nullptr)
-				mBowSprite->Drawing(mCurrentFrame, x, y, lpSurface);
+				mBowSprite->Drawing(mCurrentFrame, x, y, lpSurface);	// 활도 그려준다
 		}
 		break;
 	case EObjectType::Arrow: //화살
-		mSprite->Rotate(mDirection.VectorToAngle(), mCurrentFrame);
+		mSprite->Rotate(mDirection.ToAngle(), mCurrentFrame);
 		break;
 	case EObjectType::Boss: //보스
 		if (Timer::Elapsed(mLastFrameTime, mFrameInterval))

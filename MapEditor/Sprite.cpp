@@ -109,6 +109,15 @@ bool Sprite::LoadFrame(int frame, const char* filePath) const
 	return true;
 }
 
+/**
+ * 이미지를 표면에 그려준다
+ * \param frame 그려줄 이미지 프레임
+ * \param x x좌표
+ * \param y y좌표
+ * \param pSurface 그려줄 표면
+ * \param bUsingColorKey 컬러키 사용 여부
+ * \return Draw 성공 여부
+ */
 bool Sprite::Drawing(int frame, int x, int y, LPDIRECTDRAWSURFACE7 pSurface, bool bUsingColorKey) const
 {
 	RECT destRect; //출력 영역 설정 변수
@@ -480,15 +489,16 @@ bool Sprite::BlockDrawing(int x, int y, LPDIRECTDRAWSURFACE7 pSurface, bool bUsi
 	return true;
 }
 
+/**
+ * 이미지를 회전시킨다
+ * \param degree 각도
+ * \param curFrame 현재 그려줄 프레임
+ */
 void Sprite::Rotate(double degree, int curFrame) const
 {
-	int x, y;
-
-	int origX, origY;
-
 	unique_ptr<unsigned char[]> pixel = make_unique<unsigned char[]>(3);
 
-	double radian = degree * PI / 180.0;
+	const double radian = degree * PI / 180.0;
 
 	const double cc = cos(radian);
 	const double ss = sin(-radian);
@@ -497,19 +507,20 @@ void Sprite::Rotate(double degree, int curFrame) const
 	const double yCenter = static_cast<double>(mHeight) / 2.0;
 
 	unique_ptr<unsigned char[]> buffer = make_unique<unsigned char[]>(mHeight * mWidth * 4);
-	ZeroMemory(buffer.get(), mHeight * mWidth * 4);
 
-	for (y = 0; y < mHeight; y++)
+	for (size_t y = 0; y < mHeight; y++)
 	{
-		for (x = 0; x < mWidth; x++)
+		for (size_t x = 0; x < mWidth; x++)
 		{
-			origX = static_cast<int>(xCenter + (static_cast<double>(y) - yCenter) * ss + (static_cast<double>(x) - xCenter) * cc);
-			origY = static_cast<int>(yCenter + (static_cast<double>(y) - yCenter) * cc - (static_cast<double>(x) - xCenter) * ss);
+			const int origX = static_cast<int>(xCenter + (static_cast<double>(y) - yCenter) 
+					* ss + (static_cast<double>(x) - xCenter) * cc);
+			const int origY = static_cast<int>(yCenter + (static_cast<double>(y) - yCenter) 
+					* cc - (static_cast<double>(x) - xCenter) * ss);
 			ZeroMemory(pixel.get(), 3);
 			if ((origY >= 0 && origY < mHeight) && (origX >= 0 && origX < mWidth))
 				CopyMemory(pixel.get(), mBMPArray.get()->GetBMPBuffer() + (origX << 2) + origY * (mWidth << 2), 3); //원본 픽셀 값 추출
 
-			if ((origY >= 0 && origY < mHeight) && (origX >= 0 && origX < mWidth)) // (4)
+			if ((origY >= 0 && origY < mHeight) && (origX >= 0 && origX < mWidth))
 				CopyMemory(buffer.get() + (x << 2) + y * (mWidth << 2), pixel.get(), 3);
 		}
 	}

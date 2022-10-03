@@ -110,8 +110,8 @@ bool IntroSprite::LoadBMPFile(const char* filePath) //비트맵의 정보를 불
 {
 	mFrame = 1;
 	DWORD actualRead;
-	HANDLE hFile = CreateFile(TEXT(filePath), GENERIC_READ, FILE_SHARE_READ, (LPSECURITY_ATTRIBUTES)nullptr,
-		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, (HANDLE)nullptr);
+	HANDLE hFile = CreateFile(TEXT(filePath), GENERIC_READ, FILE_SHARE_READ, nullptr,
+		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 
 	if (hFile == INVALID_HANDLE_VALUE)
 	{

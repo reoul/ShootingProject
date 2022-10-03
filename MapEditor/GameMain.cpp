@@ -142,23 +142,24 @@ Arrow* FindNotUseArrow()
 	return nullptr;
 }
 
+/**
+ * 게임 플레이 로직
+ */
 void GameMain(void)
 {
-	if (m_bGameFirst)
-		InitGame();
+	if (m_bGameFirst)	// 처음 시작했을 때
+		InitGame();		// 초기화
 
 	if (FrameRate())
 	{
 		int i, j;
-		camera.InitExpansion();
+		camera.InitExpansion();	// 카메라 확대 초기화
 
 		// 사용할수 있는 화살이 있을때
 		if (player.IsArrowNull())
-			//if (!arrow[0].IsZeroArrow())
-			if (true)
 				player.SetArrow(FindNotUseArrow());
 
-		if (!IsPlayerNoHit)
+		if (!IsPlayerNoHit)		// 플레이어 피격시 일정시간 무적
 		{
 			if (Timer::Elapsed(lastPlayerHitTime, 400))
 			{
@@ -168,10 +169,9 @@ void GameMain(void)
 
 		if (!player.IsArrowNull())
 		{
-			if (player.GetCurArrow()->IsCharging())
+			if (player.GetCurArrow()->IsCharging())	// 차징중 일때
 			{
-				//활을 쐈을 때
-				if (!camera.IsExpansion())
+				if (!camera.IsExpansion())	//활을 쐈으면
 				{
 					player.GetCurArrow()->SetIsUse(true);
 					player.GetCurArrow()->SetCharging(false);
@@ -180,27 +180,27 @@ void GameMain(void)
 					player.GetCurArrow()->SetSpeedXY(2.5f * powf(camera.GetExpansion(), 12), attackDirection);
 					player.GetCurArrow()->CheckSprite();
 					player.SetArrow(nullptr);
-					SndObjPlay(Sound[3], NULL);
+					SndObjPlay(Sound[3], NULL);		// 활 효과음 재생
 					if (player.IsArrowNull())
-						player.SetArrow(FindNotUseArrow());
+						player.SetArrow(FindNotUseArrow());		// 사용되지 않은 화살 장착
 				}
 			}
 		}
 
-		camera.CheckExpansion();
+		camera.CheckExpansion();	// 카메라 확대 체크
 
-		camera.CheckFinishXY();
+		camera.CheckFinishXY();		// 카메라 위치 체크
 
-		if (boss_HitWall && (cntVibes < 4))
+		if (boss_HitWall && (cntVibes < 4))		// 보스가 벽에 부딪쳤을 때 화면 흔들림 효과
 		{
 			camera.SetFinishXY(camera.GetFinishX(), camera.GetFinishY());
 			cntVibes++;
 		}
 
-		camera.Move();
+		camera.Move();	// 카메라 이동
 
-		map.SetPos(camera.GetX(), camera.GetY());
-		map.Drawing(g_lpSecondarySurface, g_lpDirectDrawObject);
+		map.SetPos(camera.GetX(), camera.GetY());	// 카메라 위치에 따른 맵 위치 이동
+		map.Drawing(g_lpSecondarySurface, g_lpDirectDrawObject);	// 맵 바닥 화면에 그리기
 
 		if (player.CanMove()) //이동
 		{
@@ -209,7 +209,7 @@ void GameMain(void)
 			player.MoveANDCheckState();
 			Vector2 curPlayerPos = player.GetPos();
 			if (map.GetStageNum() == 0 && curPlayerPos.x > 1540 && curPlayerPos.x < 1630 && curPlayerPos.y > 680 &&
-				curPlayerPos.y < 712)
+				curPlayerPos.y < 712)	// 다음 스테이지 입구에 도착했을 때
 			{
 				map.NextStage();
 				player.SetXY(1600, 2500);
@@ -218,9 +218,9 @@ void GameMain(void)
 
 		if (!player.IsArrowNull())
 		{
-			if (player.GetCurArrow()->IsCharging())
+			if (player.GetCurArrow()->IsCharging())	// 활 차징중일때
 			{
-				if (!isSound)
+				if (!isSound)	// 활 처음에 차징했을 때만 소리 나오게
 				{
 					SndObjPlay(Sound[2], NULL);
 					isSound = true;
@@ -235,16 +235,11 @@ void GameMain(void)
 			}
 		}
 
-		if (DirectInputKeyboardDown(g_lpDirectInputKeyboard, DIK_U))
-		{
-			IsPlayerNoHit = true;
-		}
+		player.CheckUseSkill();		// 스킬 지속 시간 체크
 
-		player.CheckUseSkill();
-
-		if (player.IsUsingSkill())
+		if (player.IsUsingSkill())	// 스킬 사용 했으면
 		{
-			if (Timer::Elapsed(lastSkillShootTime, 100))
+			if (Timer::Elapsed(lastSkillShootTime, 100))		// 0.1초마다 랜덤한 방향으로 화살 발사
 			{
 				player.CreateSkillArrow();
 				SndObjPlay(Sound[3], NULL);
@@ -257,9 +252,9 @@ void GameMain(void)
 		{
 			if (arrow[i].IsUse())
 			{
-				if (arrow[i].IsHoming())
+				if (arrow[i].IsHoming())	// 유도 화살의 경우
 				{
-					if (map.GetStageNum() == 1)
+					if (map.GetStageNum() == 1)		// 보스방일때 화살과 보스 충돌 체크
 					{
 						if (abs(arrow[i].GetPos().x - boss.GetPos().x) < 45)
 							if (abs(arrow[i].GetPos().y - boss.GetPos().y) < 45)
@@ -269,22 +264,22 @@ void GameMain(void)
 							}
 					}
 				}
-				if (!arrow[i].IsSpeedZero())
+				if (!arrow[i].IsSpeedZero())	// 화살이 움직일 수 있다면
 				{
-					if (map.GetStageNum() == 1)
+					if (map.GetStageNum() == 1)		// 보스방일때
 					{
-						if (!arrow[i].GetIsHit() && !arrow[i].IsCharging())
+						if (!arrow[i].GetIsHit() && !arrow[i].IsCharging())		// 화살과 보스 충돌 체크
 						{
 							if (arrow[i].CheckHit(boss.GetHitRect()) && !arrow[i].IsHoming())
 							{
 								arrow[i].IsHit();
 								boss.Hit(arrow[i].GetPower());
 
-								if (curBossAction == EAction::Sleep)
+								if (curBossAction == EAction::Sleep)	// 보스가 자는 상태일때 깨운다
 								{
 									boss.NextPattern();
 									SndObjStop(Sound[4]);
-									SndObjPlay(Sound[0], DSBPLAY_LOOPING);
+									SndObjPlay(Sound[0], DSBPLAY_LOOPING);		// 전투 브금 재생
 								}
 							}
 						}
@@ -305,24 +300,23 @@ void GameMain(void)
 						}
 					}
 				}
-				arrow[i].CheckMove();
-				arrow[i].Draw(g_lpSecondarySurface);
+				arrow[i].CheckMove();					// 화살 이동
+				arrow[i].Draw(g_lpSecondarySurface);	// 화살 화면에 그려줌
 			}
 		}
 
-		player.Draw(g_lpSecondarySurface);
+		player.Draw(g_lpSecondarySurface);		// 플레이어 그려줌
 
-		fireBlock.Draw(g_lpSecondarySurface);
+		fireBlock.Draw(g_lpSecondarySurface);	// 처음 장소에 있는 불블럭 그려줌
 
 		//보스가 구르기 패턴 공격을 할때
 		if (curBossAction == EAction::Roll)
 		{
 			if (curPlayerAction != EAction::Dead)
 			{
-				//플레이어가 공격당하지 않았다면
-				if (IsPlayerNoHit)
+				if (IsPlayerNoHit)	// 플레이어가 무적상태가 아닐때
 				{
-					if (player.CheckHit(boss.GetHitRect()))
+					if (player.CheckHit(boss.GetHitRect()))		// 플레이어가 보스가 충돌했다면
 					{
 						player.Hit();
 						IsPlayerNoHit = false;
@@ -336,68 +330,68 @@ void GameMain(void)
 		{
 			if (snowball[i].IsUse())
 			{
-				snowball[i].CheckMove();
+				snowball[i].CheckMove();	// 눈덩이 이동
 				if (IsPlayerNoHit)
 				{
-					if (player.CheckHit(snowball[i].GetHitRect()))
+					if (player.CheckHit(snowball[i].GetHitRect()))		// 눈덩이랑 플레이어랑 충돌 체크
 					{
 						player.Hit();
 						IsPlayerNoHit = false;
 						snowball[i].SetUse(false);
 					}
 				}
-				snowball[i].Draw(g_lpSecondarySurface);
+				snowball[i].Draw(g_lpSecondarySurface);		// 눈덩이 그려줌
 			}
 		}
 
-		if (map.GetStageNum() == 1)
+		if (map.GetStageNum() == 1)				// 보스방일때
 		{
-			if (boss.CanMove())
-				boss.MoveANDCheckState();
+			if (boss.CanMove())					// 보스가 이동이 가능하면
+				boss.MoveANDCheckState();		// 이동과 상태를 업데이트 시켜준다
 
-			boss.CheckSprite();
-			boss.Draw(g_lpSecondarySurface);
+			boss.CheckSprite();					// 보스 상태에 맞는 이미지를 바꿔준다
+			boss.Draw(g_lpSecondarySurface);	// 보스를 그려줌
+		}
+		else   // 처음 모작불 장소일때
+		{
+			float distanceFromFireBlock = Vector2::Distance(player.GetPos(), Vector2(1152, 2656));	// 모닥불과 플레이어 거리 계산
+			SetVolume(Sound[8]->Buffers[0], -2000 - static_cast<int>(distanceFromFireBlock) * 4); // 거리가 멀어질수록 소리가 작아짐
 		}
 
-		if (map.GetStageNum() == 0)
-		{
-			float distanceFromFireBlock = Vector2::Distance(player.GetPos(), Vector2(1152, 2656));
-			SetVolume(Sound[8]->Buffers[0], -2000 - (int)distanceFromFireBlock * 4); //모닥불에서 플레이어가 멀어질수록 소리가 작아짐
-		}
+		map.DrawingRoof(g_lpSecondarySurface, g_lpDirectDrawObject);	// 맵 지붕 그리기
 
-		map.DrawingRoof(g_lpSecondarySurface, g_lpDirectDrawObject);
-
-		if (map.GetStageNum() == 1)
+		if (map.GetStageNum() == 1)		// 보스방일때
 		{
-			bossHpBarBack.Drawing(g_lpSecondarySurface);
+			bossHpBarBack.Drawing(g_lpSecondarySurface);		// 보스 체력바 그리기
 			bossHpBar.DrawingBossHp(g_lpSecondarySurface);
 		}
 
-		playerHp1.DrawingPlayerHp(g_lpSecondarySurface);
+		playerHp1.DrawingPlayerHp(g_lpSecondarySurface);		// 플레이어 체력 그리기
 		playerHp2.DrawingPlayerHp(g_lpSecondarySurface);
 		playerHp3.DrawingPlayerHp(g_lpSecondarySurface);
 		playerHp4.DrawingPlayerHp(g_lpSecondarySurface);
 
-		skillRoll.Drawing(player.GetRollCoolTimePercent(), g_lpSecondarySurface);
-		skillCyclone.Drawing(player.GetSkillCoolTimePercent(), g_lpSecondarySurface);
+		skillRoll.Drawing(player.GetRollCoolTimePercent(), g_lpSecondarySurface);		// 구르기 쿨타임 그리기
+		skillCyclone.Drawing(player.GetSkillCoolTimePercent(), g_lpSecondarySurface);	// 스킬 쿨타임 그리기
 
-		if (!IsSkipTutorial)
+		if (!IsSkipTutorial)	// 튜토리얼 스킵을 안했으면
 		{
-			tutorial.Drawing(g_lpSecondarySurface);
+			tutorial.Drawing(g_lpSecondarySurface);	// 튜토리얼 계속 그리기
 		}
 
+		// 플레이어 죽거나 보스가 죽거나 게임 시작했을 때
 		if ((curPlayerAction == EAction::Dead) || (curBossAction == EAction::Dead) || camera.GetIsFirstAlpha())
 		{
-			camera.AlphaBlending(g_lpSecondarySurface);
+			camera.AlphaBlending(g_lpSecondarySurface);		// 전체화면 알파 블렌딩
 			if (!camera.GetIsFirstAlpha())
 			{
-				if (camera.GetAlpha() <= 10)
+				if (camera.GetAlpha() <= 10)	// 인트로 화면에서 알파가 10이하가 된면
 				{
-					SndObjStop(Sound[0]);
+					SndObjStop(Sound[0]);		// 배경음악 끝기
 					SndObjStop(Sound[6]);
 					SndObjStop(Sound[7]);
 				}
-				SetVolume(Sound[0]->Buffers[0], (255 - camera.GetAlpha()) * -20);
+				SetVolume(Sound[0]->Buffers[0], (255 - camera.GetAlpha()) * -20);		// 배경음악 점점 줄이기
 				SetVolume(Sound[6]->Buffers[0], (255 - camera.GetAlpha()) * -20);
 				SetVolume(Sound[7]->Buffers[0], (255 - camera.GetAlpha()) * -20);
 			}

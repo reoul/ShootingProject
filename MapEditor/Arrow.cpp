@@ -173,28 +173,28 @@ void Arrow::IsHit()
 	mSpeedY = 0;
 }
 
+/**
+ * 타겟에게 향하는 방향과 속도를 계산
+ */
 void Arrow::HomingArrow()
 {
 	if (!mIsLive && !mIsHoming)
 		return;
-	Vector2 curPos;
-	curPos.SetXY(GetPos().x, GetPos().y);
-	Vector2 toDir = mTarget->GetPos() - curPos;
-	toDir = toDir.Normalize();
-	float cross = (toDir.x * mDirection.y) - (toDir.y * mDirection.x); //어느방향으로 돌지 계산
 
-	float tmp = (toDir.x * mDirection.x) + (toDir.y * mDirection.y);
-	if (tmp < -1)
-		tmp = -1;
-	if (tmp > 1)
-		tmp = 1;
-	float angle = acosf(tmp); //두 벡터의 내각(0~180 양수)
-	if (cross > 0) //외적 값이 음수면 시계방향으로 회전
+	const Vector2 toDir = (mTarget->GetPos() - GetPos()).Normalize();
+	const float cross = toDir.x * mDirection.y - toDir.y * mDirection.x; //어느방향으로 돌지 계산
+
+	float angle = toDir.x * mDirection.x + toDir.y * mDirection.y;
+	if (angle < -1)
+		angle = -1;
+	if (angle > 1)
+		angle = 1;
+
+	angle = acosf(angle);	//두 벡터의 내각(0~180 양수)
+	if (cross > 0)			//외적 값이 음수면 시계방향으로 회전
 		angle *= -1;
 
-	mDirection.Rotate(angle * mTurnRadian); // 회전
-
-	mTurnRadian += 1;
+	mDirection.Rotate(angle * mTurnRadian++);
 
 	mSpeedX = mDirection.x * 5 * mMoveSpeed * Timer::GetDeltaTime();
 	mSpeedY = mDirection.y * 5 * mMoveSpeed * Timer::GetDeltaTime();

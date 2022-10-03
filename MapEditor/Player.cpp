@@ -70,78 +70,78 @@ Player::Player()
 	mCurState = EObjectType::Player;
 	mMoveSpeed = 60;
 
-	int a = 0, b = 0;
-	SetRect(&mWalkHitRect[a++], 4, 12, 6, 10);
-	SetRect(&mWalkHitRect[a++], 6, 12, 4, 12);
-	SetRect(&mWalkHitRect[a++], 6, 12, 6, 12);
-	SetRect(&mWalkHitRect[a++], 6, 12, 6, 12);
-	SetRect(&mWalkHitRect[a++], 4, 12, 7, 12);
-	SetRect(&mWalkHitRect[a++], 7, 12, 5, 12);
-	SetRect(&mWalkHitRect[a++], 6, 12, 7, 12);
-	SetRect(&mWalkHitRect[a], 7, 12, 6, 12);
-	a = 0;
-	SetRect(&mRollHitRect[a][b++], 4, 8, 4, 14);
-	SetRect(&mRollHitRect[a][b++], 8, 2, 8, 10);
-	SetRect(&mRollHitRect[a][b++], 6, 2, 6, 14);
-	SetRect(&mRollHitRect[a][b++], 6, 0, 6, 14);
-	SetRect(&mRollHitRect[a][b++], 8, 2, 10, 10);
-	SetRect(&mRollHitRect[a][b], 4, 14, 4, 6);
-	a++;
-	b = 0;
-	SetRect(&mRollHitRect[a][b++], 8, 8, 2, 12);
-	SetRect(&mRollHitRect[a][b++], 8, 2, 8, 10);
-	SetRect(&mRollHitRect[a][b++], 6, 2, 8, 16);
-	SetRect(&mRollHitRect[a][b++], 8, -4, 6, 16);
-	SetRect(&mRollHitRect[a][b++], 10, 2, 6, 10);
-	SetRect(&mRollHitRect[a][b], 4, 14, 4, 6);
-	a++;
-	b = 0;
-	SetRect(&mRollHitRect[a][b++], 6, 10, 6, 14);
-	SetRect(&mRollHitRect[a][b++], 6, 6, 6, 12);
-	SetRect(&mRollHitRect[a][b++], 6, 0, 6, 16);
-	SetRect(&mRollHitRect[a][b++], 6, 0, 6, 16);
-	SetRect(&mRollHitRect[a][b++], 6, 4, 6, 12);
-	SetRect(&mRollHitRect[a][b], 8, 8, 6, 6);
-	a++;
-	b = 0;
-	SetRect(&mRollHitRect[a][b++], 6, 12, 6, 14);
-	SetRect(&mRollHitRect[a][b++], 6, 6, 6, 12);
-	SetRect(&mRollHitRect[a][b++], 6, 0, 6, 16);
-	SetRect(&mRollHitRect[a][b++], 6, 0, 6, 16);
-	SetRect(&mRollHitRect[a][b++], 6, 4, 6, 10);
-	SetRect(&mRollHitRect[a][b], 6, 10, 6, 6);
-	a++;
-	b = 0;
-	SetRect(&mRollHitRect[a][b++], 8, 10, 4, 12);
-	SetRect(&mRollHitRect[a][b++], 10, 2, 8, 10);
-	SetRect(&mRollHitRect[a][b++], 8, -2, 4, 16);
-	SetRect(&mRollHitRect[a][b++], 6, 0, 6, 16);
-	SetRect(&mRollHitRect[a][b++], 7, -2, 8, 12);
-	SetRect(&mRollHitRect[a][b], 6, 14, 4, 8);
-	a++;
-	b = 0;
-	SetRect(&mRollHitRect[a][b++], 10, 10, 2, 12);
-	SetRect(&mRollHitRect[a][b++], 8, 2, 12, 10);
-	SetRect(&mRollHitRect[a][b++], 4, -2, 8, 16);
-	SetRect(&mRollHitRect[a][b++], 6, 0, 6, 16);
-	SetRect(&mRollHitRect[a][b++], 8, -2, 6, 12);
-	SetRect(&mRollHitRect[a][b], 4, 14, 6, 8);
-	a++;
-	b = 0;
-	SetRect(&mRollHitRect[a][b++], 6, 10, 6, 12);
-	SetRect(&mRollHitRect[a][b++], 10, 4, 4, 10);
-	SetRect(&mRollHitRect[a][b++], 8, -2, 4, 16);
-	SetRect(&mRollHitRect[a][b++], 6, 0, 6, 16);
-	SetRect(&mRollHitRect[a][b++], 2, 2, 8, 14);
-	SetRect(&mRollHitRect[a][b], 8, 14, 6, 6);
-	a++;
-	b = 0;
-	SetRect(&mRollHitRect[a][b++], 10, 8, 4, 12);
-	SetRect(&mRollHitRect[a][b++], 6, 4, 12, 10);
-	SetRect(&mRollHitRect[a][b++], 6, -4, 10, 14);
-	SetRect(&mRollHitRect[a][b++], 6, 0, 6, 16);
-	SetRect(&mRollHitRect[a][b++], 10, 0, 4, 14);
-	SetRect(&mRollHitRect[a][b], 8, 14, 8, 6);
+	int i = 0, j = 0;
+	SetRect(&mWalkHitRect[i++], 4, 12, 6, 10);
+	SetRect(&mWalkHitRect[i++], 6, 12, 4, 12);
+	SetRect(&mWalkHitRect[i++], 6, 12, 6, 12);
+	SetRect(&mWalkHitRect[i++], 6, 12, 6, 12);
+	SetRect(&mWalkHitRect[i++], 4, 12, 7, 12);
+	SetRect(&mWalkHitRect[i++], 7, 12, 5, 12);
+	SetRect(&mWalkHitRect[i++], 6, 12, 7, 12);
+	SetRect(&mWalkHitRect[i], 7, 12, 6, 12);
+	i = 0;
+	SetRect(&mRollHitRect[i][j++], 4, 8, 4, 14);
+	SetRect(&mRollHitRect[i][j++], 8, 2, 8, 10);
+	SetRect(&mRollHitRect[i][j++], 6, 2, 6, 14);
+	SetRect(&mRollHitRect[i][j++], 6, 0, 6, 14);
+	SetRect(&mRollHitRect[i][j++], 8, 2, 10, 10);
+	SetRect(&mRollHitRect[i][j], 4, 14, 4, 6);
+	i++;
+	j = 0;
+	SetRect(&mRollHitRect[i][j++], 8, 8, 2, 12);
+	SetRect(&mRollHitRect[i][j++], 8, 2, 8, 10);
+	SetRect(&mRollHitRect[i][j++], 6, 2, 8, 16);
+	SetRect(&mRollHitRect[i][j++], 8, -4, 6, 16);
+	SetRect(&mRollHitRect[i][j++], 10, 2, 6, 10);
+	SetRect(&mRollHitRect[i][j], 4, 14, 4, 6);
+	i++;
+	j = 0;
+	SetRect(&mRollHitRect[i][j++], 6, 10, 6, 14);
+	SetRect(&mRollHitRect[i][j++], 6, 6, 6, 12);
+	SetRect(&mRollHitRect[i][j++], 6, 0, 6, 16);
+	SetRect(&mRollHitRect[i][j++], 6, 0, 6, 16);
+	SetRect(&mRollHitRect[i][j++], 6, 4, 6, 12);
+	SetRect(&mRollHitRect[i][j], 8, 8, 6, 6);
+	i++;
+	j = 0;
+	SetRect(&mRollHitRect[i][j++], 6, 12, 6, 14);
+	SetRect(&mRollHitRect[i][j++], 6, 6, 6, 12);
+	SetRect(&mRollHitRect[i][j++], 6, 0, 6, 16);
+	SetRect(&mRollHitRect[i][j++], 6, 0, 6, 16);
+	SetRect(&mRollHitRect[i][j++], 6, 4, 6, 10);
+	SetRect(&mRollHitRect[i][j], 6, 10, 6, 6);
+	i++;
+	j = 0;
+	SetRect(&mRollHitRect[i][j++], 8, 10, 4, 12);
+	SetRect(&mRollHitRect[i][j++], 10, 2, 8, 10);
+	SetRect(&mRollHitRect[i][j++], 8, -2, 4, 16);
+	SetRect(&mRollHitRect[i][j++], 6, 0, 6, 16);
+	SetRect(&mRollHitRect[i][j++], 7, -2, 8, 12);
+	SetRect(&mRollHitRect[i][j], 6, 14, 4, 8);
+	i++;
+	j = 0;
+	SetRect(&mRollHitRect[i][j++], 10, 10, 2, 12);
+	SetRect(&mRollHitRect[i][j++], 8, 2, 12, 10);
+	SetRect(&mRollHitRect[i][j++], 4, -2, 8, 16);
+	SetRect(&mRollHitRect[i][j++], 6, 0, 6, 16);
+	SetRect(&mRollHitRect[i][j++], 8, -2, 6, 12);
+	SetRect(&mRollHitRect[i][j], 4, 14, 6, 8);
+	i++;
+	j = 0;
+	SetRect(&mRollHitRect[i][j++], 6, 10, 6, 12);
+	SetRect(&mRollHitRect[i][j++], 10, 4, 4, 10);
+	SetRect(&mRollHitRect[i][j++], 8, -2, 4, 16);
+	SetRect(&mRollHitRect[i][j++], 6, 0, 6, 16);
+	SetRect(&mRollHitRect[i][j++], 2, 2, 8, 14);
+	SetRect(&mRollHitRect[i][j], 8, 14, 6, 6);
+	i++;
+	j = 0;
+	SetRect(&mRollHitRect[i][j++], 10, 8, 4, 12);
+	SetRect(&mRollHitRect[i][j++], 6, 4, 12, 10);
+	SetRect(&mRollHitRect[i][j++], 6, -4, 10, 14);
+	SetRect(&mRollHitRect[i][j++], 6, 0, 6, 16);
+	SetRect(&mRollHitRect[i][j++], 10, 0, 4, 14);
+	SetRect(&mRollHitRect[i][j], 8, 14, 8, 6);
 }
 
 void Player::Initialize(int x, int y, int currentFrame, int frameInterval, int moveInterval,
@@ -195,6 +195,9 @@ bool Player::IsArrowNull() const
 	return true;
 }
 
+/**
+ * 플레이어 벽 충돌 확인
+ */
 void Player::CheckWallCollision()
 {
 	RECT blockRect;
@@ -353,41 +356,39 @@ void Player::CheckWallCollision()
 					if (oldBlockX != block.GetPos().x && oldBlockY != block.GetPos().y) //같은 x축
 					{
 						collisionRect = GetHitRect2(blockRect); //플레이어랑 블럭이랑 충돌된 영역
-						int __left = abs(blockRect.left - collisionRect.left);
-						int __right = abs(blockRect.right - collisionRect.right);
-						int __top = abs(blockRect.top - collisionRect.top);
-						int __bottom = abs(blockRect.bottom - collisionRect.bottom);
+						const int left = abs(blockRect.left - collisionRect.left);
+						const int right = abs(blockRect.right - collisionRect.right);
+						const int top = abs(blockRect.top - collisionRect.top);
+						const int bottom = abs(blockRect.bottom - collisionRect.bottom);
 
-						if (__bottom + __top + __right == 0) //왼쪽 위 모서리
+						if (bottom + top + right == 0) //왼쪽 위 모서리
 						{
-							//SetY(GetPos().y - (DEFAULT_BLOCK_SIZE - __bottom));
-							SetX(GetPos().x + (DEFAULT_BLOCK_SIZE - __left));
+							SetX(GetPos().x + (DEFAULT_BLOCK_SIZE - left));
 						}
-						else if (__left + __bottom + __top == 0) //오른쪽 아래 모서리
+						else if (left + bottom + top == 0) //오른쪽 아래 모서리
 						{
-							//SetY(GetPos().y - (DEFAULT_BLOCK_SIZE - __bottom));
-							SetX(GetPos().x - (DEFAULT_BLOCK_SIZE - __right));
+							SetX(GetPos().x - (DEFAULT_BLOCK_SIZE - right));
 						}
-						else if (__left + __bottom == 0) //왼쪽 위 모서리
+						else if (left + bottom == 0) //왼쪽 위 모서리
 						{
-							SetY(GetPos().y + (DEFAULT_BLOCK_SIZE - __top));
+							SetY(GetPos().y + (DEFAULT_BLOCK_SIZE - top));
 						}
-						else if (__left + __top == 0) //왼쪽 아래 모서리
+						else if (left + top == 0) //왼쪽 아래 모서리
 						{
-							SetY(GetPos().y - (DEFAULT_BLOCK_SIZE - __bottom));
+							SetY(GetPos().y - (DEFAULT_BLOCK_SIZE - bottom));
 						}
-						else if (__right + __bottom == 0) //오른쪽 위 모서리
+						else if (right + bottom == 0) //오른쪽 위 모서리
 						{
-							SetY(GetPos().y + (DEFAULT_BLOCK_SIZE - __top));
+							SetY(GetPos().y + (DEFAULT_BLOCK_SIZE - top));
 						}
 						continue;
 					}
 				}
 				collisionRect = GetHitRect2(blockRect); //플레이어랑 블럭이랑 충돌된 영역
-				int left = abs(blockRect.left - collisionRect.left);
-				int right = abs(blockRect.right - collisionRect.right);
-				int top = abs(blockRect.top - collisionRect.top);
-				int bottom = abs(blockRect.bottom - collisionRect.bottom);
+				const int left = abs(blockRect.left - collisionRect.left);
+				const int right = abs(blockRect.right - collisionRect.right);
+				const int top = abs(blockRect.top - collisionRect.top);
+				const int bottom = abs(blockRect.bottom - collisionRect.bottom);
 
 				oldBlockX = block.GetPos().x;
 				oldBlockY = block.GetPos().y;
@@ -492,6 +493,9 @@ void Player::CreateSkillArrow()
 	mCurArrowPtr = nullptr;
 }
 
+/**
+ * 플레이어 키입력 감지
+ */
 void Player::CheckKeyBoard()
 {
 	if ((curPlayerAction != EAction::Dead) && !camera.GetIsFirstAlpha())
@@ -622,6 +626,9 @@ float Player::GetRollCoolTimePercent() const
 	return percent;
 }
 
+/**
+ * 플레이어 이동과 상태 업데이트
+ */
 void Player::MoveANDCheckState()
 {
 	if (curPlayerAction == EAction::Dead)
@@ -646,39 +653,40 @@ void Player::MoveANDCheckState()
 	if (mIsRoll)
 	{
 		mMoveSpeedFold = 4;
+		const float deltaTime = Timer::GetDeltaTime();
 		switch (curPlayerDirection)
 		{
 		case EDirection::Left:
-			mSpeedX = -(mMoveSpeed * mMoveSpeedFold * Timer::GetDeltaTime());
+			mSpeedX = -(mMoveSpeed * mMoveSpeedFold * deltaTime);
 			mSpeedY = 0;
 			break;
 		case EDirection::Right:
-			mSpeedX = mMoveSpeed * mMoveSpeedFold * Timer::GetDeltaTime();
+			mSpeedX = mMoveSpeed * mMoveSpeedFold * deltaTime;
 			mSpeedY = 0;
 			break;
 		case EDirection::Up:
 			mSpeedX = 0;
-			mSpeedY = -(mMoveSpeed * mMoveSpeedFold * Timer::GetDeltaTime());
+			mSpeedY = -(mMoveSpeed * mMoveSpeedFold * deltaTime);
 			break;
 		case EDirection::Down:
 			mSpeedX = 0;
-			mSpeedY = mMoveSpeed * mMoveSpeedFold * Timer::GetDeltaTime();
+			mSpeedY = mMoveSpeed * mMoveSpeedFold * deltaTime;
 			break;
 		case EDirection::LeftUp:
-			mSpeedX = -(mMoveSpeed * mMoveSpeedFold * Timer::GetDeltaTime());
-			mSpeedY = -(mMoveSpeed * mMoveSpeedFold * Timer::GetDeltaTime());
+			mSpeedX = -(mMoveSpeed * mMoveSpeedFold * deltaTime);
+			mSpeedY = -(mMoveSpeed * mMoveSpeedFold * deltaTime);
 			break;
 		case EDirection::RightUp:
-			mSpeedX = mMoveSpeed * mMoveSpeedFold * Timer::GetDeltaTime();
-			mSpeedY = -(mMoveSpeed * mMoveSpeedFold * Timer::GetDeltaTime());
+			mSpeedX = mMoveSpeed * mMoveSpeedFold * deltaTime;
+			mSpeedY = -(mMoveSpeed * mMoveSpeedFold * deltaTime);
 			break;
 		case EDirection::LeftDown:
-			mSpeedX = -(mMoveSpeed * mMoveSpeedFold * Timer::GetDeltaTime());
-			mSpeedY = mMoveSpeed * mMoveSpeedFold * Timer::GetDeltaTime();
+			mSpeedX = -(mMoveSpeed * mMoveSpeedFold * deltaTime);
+			mSpeedY = mMoveSpeed * mMoveSpeedFold * deltaTime;
 			break;
 		case EDirection::RightDown:
-			mSpeedX = mMoveSpeed * mMoveSpeedFold * Timer::GetDeltaTime();
-			mSpeedY = mMoveSpeed * mMoveSpeedFold * Timer::GetDeltaTime();
+			mSpeedX = mMoveSpeed * mMoveSpeedFold * deltaTime;
+			mSpeedY = mMoveSpeed * mMoveSpeedFold * deltaTime;
 			break;
 		}
 	}
@@ -694,8 +702,8 @@ void Player::MoveANDCheckState()
 
 	CheckWallCollision();
 
-	mDrawX = (int)(-(camera.GetX() - GetPos().x) + (SCREEN_WIDTH * 0.5f));
-	mDrawY = (int)(-(camera.GetY() - GetPos().y) + (SCREEN_HEIGHT * 0.5f));
+	mDrawX = -(camera.GetX() - GetPos().x) + (SCREEN_WIDTH * 0.5f);
+	mDrawY = -(camera.GetY() - GetPos().y) + (SCREEN_HEIGHT * 0.5f);
 
 	if (!mIsRoll)
 	{
@@ -769,8 +777,8 @@ void Player::MoveANDCheckState()
 	}
 
 	SetHitRect((curPlayerAction != EAction::Roll)
-		? mWalkHitRect[(int)curPlayerDirection - 1]
-		: mRollHitRect[(int)curPlayerDirection - 1][mCurrentFrame]);
+		? mWalkHitRect[static_cast<int>(curPlayerDirection) - 1]
+		: mRollHitRect[static_cast<int>(curPlayerDirection) - 1][mCurrentFrame]);
 
 	if (curPlayerAction == EAction::Faint)
 	{

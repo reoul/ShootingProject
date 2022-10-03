@@ -25,8 +25,8 @@ WorldMap::WorldMap()
 bool WorldMap::LoadBMPFile(const char* filePath) //비트맵의 정보를 불러와 버퍼에 색상정보를 담아주고 24bit이미지를 32bit이미지로 바꿔줌
 {
 	DWORD actualRead;
-	HANDLE hFile = CreateFile(TEXT(filePath), GENERIC_READ, FILE_SHARE_READ, (LPSECURITY_ATTRIBUTES)nullptr,
-		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, (HANDLE)nullptr);
+	HANDLE hFile = CreateFile(TEXT(filePath), GENERIC_READ, FILE_SHARE_READ, nullptr,
+		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 
 	if (hFile == INVALID_HANDLE_VALUE)
 	{
@@ -351,8 +351,8 @@ bool WorldMap::CopyBufferToSurface2(LPDIRECTDRAW7 pDirectDraw)
 	const char* filePath = "image\\map\\bossmap.bmp";
 	HANDLE hFile;
 	DWORD actualRead;
-	hFile = CreateFile(TEXT(filePath), GENERIC_READ, FILE_SHARE_READ, (LPSECURITY_ATTRIBUTES)nullptr, OPEN_EXISTING,
-		FILE_ATTRIBUTE_NORMAL, (HANDLE)nullptr);
+	hFile = CreateFile(TEXT(filePath), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL, nullptr);
 
 	if (hFile == INVALID_HANDLE_VALUE)
 	{
@@ -470,8 +470,8 @@ bool WorldMap::CopyBufferToSurface3(LPDIRECTDRAW7 pDirectDraw)
 	const char* filePath = "image\\map\\bossmapRoof.bmp";
 	HANDLE hfile;
 	DWORD actualRead;
-	hfile = CreateFile(TEXT(filePath), GENERIC_READ, FILE_SHARE_READ, (LPSECURITY_ATTRIBUTES)nullptr, OPEN_EXISTING,
-		FILE_ATTRIBUTE_NORMAL, (HANDLE)nullptr);
+	hfile = CreateFile(TEXT(filePath), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL, nullptr);
 
 	if (hfile == INVALID_HANDLE_VALUE)
 	{
@@ -576,8 +576,8 @@ bool WorldMap::CopyBufferToSurface4(LPDIRECTDRAW7 pDirectDraw)
 	const char* filePath = "image\\map\\basemap.bmp";
 	HANDLE hFile;
 	DWORD actualRead;
-	hFile = CreateFile(TEXT(filePath), GENERIC_READ, FILE_SHARE_READ, (LPSECURITY_ATTRIBUTES)nullptr, OPEN_EXISTING,
-		FILE_ATTRIBUTE_NORMAL, (HANDLE)nullptr);
+	hFile = CreateFile(TEXT(filePath), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL, nullptr);
 
 	if (hFile == INVALID_HANDLE_VALUE)
 	{
